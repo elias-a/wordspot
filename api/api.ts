@@ -11,15 +11,8 @@ export class Api {
         });
         this.controller = controller;
 
-        this.router.get('/get-data', async (ctx) => {
-            const { status, result } = await this.controller.sendData();
-            ctx.status = status;
-            ctx.body = result;
-        });
-
-        this.router.post('/add-data', async (ctx) => {
-            const { data } = ctx.request.body;
-            const { status, result } = await this.controller.addData(data);
+        this.router.get('/get-tiles', async (ctx) => {
+            const { status, result } = await this.controller.getTiles();
             ctx.status = status;
             ctx.body = result;
         });

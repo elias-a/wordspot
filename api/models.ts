@@ -2,7 +2,8 @@ import { Sequelize, DataTypes } from 'sequelize';
 
 export class Models {
     sequelize: Sequelize;
-    Data: any;
+    Game: any;
+    Tile: any;
 
     constructor(sequelize: Sequelize) {
         this.sequelize = sequelize;
@@ -11,32 +12,51 @@ export class Models {
             console.log("Failed to connect to database");
         }
 
-        this.initData();
+        this.initGame();
+        this.initTile();
     }
 
-    async initData() {
-        this.Data = this.sequelize.define('Data', {
+    async initGame() {
+        this.Game = this.sequelize.define('Game', {
             id: {
                 type: DataTypes.INTEGER,
                 primaryKey: true,
                 autoIncrement: true
             },
-            data: {
+            name: {
                 type: DataTypes.STRING
             }
         });
 
-        await this.Data.sync();
+        await this.Game.sync();
 
-        if (!(await this.Data.findAll()).length) {
-            await this.Data.create({
-                data: "data from database"
+        if (!(await this.Game.findAll()).length) {
+            await this.Game.create({
+                name: "game1"
             });
-            await this.Data.create({
-                data: "more data from database"
-            });
-            await this.Data.create({
-                data: "even more data from database"
+        }
+    }
+
+    async initTile() {
+        this.Tile = this.sequelize.define('Tile', {
+            id: {
+                type: DataTypes.INTEGER,
+                primaryKey: true,
+                autoIncrement: true
+            },
+            letters: {
+                type: DataTypes.STRING
+            },
+            location: {
+                type: DataTypes.INTEGER
+            }
+        });
+
+        await this.Tile.sync();
+
+        if (!(await this.Tile.findAll()).length) {
+            await this.Tile.create({
+                letters: Math.random().toString(36).slice(4)
             });
         }
     }
@@ -44,5 +64,5 @@ export class Models {
 
 export const models = new Models(new Sequelize({
     dialect: 'sqlite',
-    storage: 'data.db'
+    storage: 'wordspot.db'
 }));

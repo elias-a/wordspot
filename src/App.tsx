@@ -1,12 +1,11 @@
 import React from 'react';
-import ViewData from './ViewData';
-import AddData from './AddData';
+import Game from './Game';
 
 function App() {
     return (
       <div>
-          <AddData />
-          <ViewData />
+        <h1>Wordspot</h1>
+        <Game />
       </div>  
     );
 }

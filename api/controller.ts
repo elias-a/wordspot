@@ -7,20 +7,10 @@ export class Controller {
         this.models = models;
     }
 
-    async sendData() {
-        const data = await this.models.Data.findAll({
-            attributes: ['id', 'data']
-        });
+    async getTiles() {
+        const tiles = await this.models.Tile.findAll({});
 
-        return { status: 200, result: data };
-    }
-
-    async addData(data: string) {
-        await this.models.Data.create({
-            data: data
-        });
-        
-        return { status: 200, result: "Data added" }
+        return { status: 200, result: tiles };
     }
 }
 
