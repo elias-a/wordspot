@@ -8,9 +8,13 @@ export class Controller {
     }
 
     async getTiles() {
-        const tiles = await this.models.Tile.findAll({});
+        const tiles = await this.models.Tile.findAll();
 
         return { status: 200, result: tiles };
+    }
+
+    async getGameDetails() {
+        return { status: 200, result: "" };
     }
 }
 

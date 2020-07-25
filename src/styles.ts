@@ -1,6 +1,22 @@
 import { makeStyles } from '@material-ui/core/styles';
 
 export const useStyles = makeStyles({
+    board: {
+        width: '800px',
+        height: '800px'
+    },
+    tile: {
+        width: '24%',
+        height: '24%',
+        display: 'inline-block',
+        verticalAlign: 'top',
+        border: '1px solid #000'
+    },
+    letter: {
+        width: '49%',
+        height: '49%',
+        display: 'inline-block'
+    },
     container: {
         backgroundColor: '#fff',
         border: '4px solid #e6eeff',

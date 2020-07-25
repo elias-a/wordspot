@@ -1,5 +1,19 @@
 import { Sequelize, DataTypes } from 'sequelize';
 
+const tiles = [
+    'SGPU', 'HEAS', 'XAIY',
+    'LIEL', 'RNAD', 'OPPE',
+    'CAKI', 'TSOS', 'MIAP',
+    'PLAE', 'ZEYA', 'ENRI',
+    'ILFL', 'OSOT', 'WOAT',
+    'GNSA', 'STHA', 'IRTE',
+    'CEKA', 'VEIH', 'NTOA',
+    'EDER', 'THEC', 'DLEY',
+    'ATIR', 'VNSA', 'ETND',
+    'AJNO', 'LRIG', 'MORG',
+    'RAIB', 'BOUT'
+];
+
 export class Models {
     sequelize: Sequelize;
     Game: any;
@@ -26,6 +40,9 @@ export class Models {
             name: {
                 type: DataTypes.STRING
             }
+        }, {
+            tableName: "Game",
+            timestamps: false
         });
 
         await this.Game.sync();
@@ -50,19 +67,29 @@ export class Models {
             location: {
                 type: DataTypes.INTEGER
             }
+        }, {
+            tableName: "Tile",
+            timestamps: false
         });
 
         await this.Tile.sync();
 
         if (!(await this.Tile.findAll()).length) {
-            await this.Tile.create({
-                letters: Math.random().toString(36).slice(4)
-            });
+            const perms = [...Array(16).keys()].sort(() => Math.random() - 0.5);
+            await Promise.all(perms.map(async (num, idx) => {
+                await this.Tile.create({
+                    letters: tiles[Math.floor(Math.random() * tiles.length)],
+                    location: idx
+                });
+            }));
         }
     }
 }
 
 export const models = new Models(new Sequelize({
     dialect: 'sqlite',
-    storage: 'wordspot.db'
+    storage: 'wordspot.db',
+    query: {
+        raw: true
+    }
 }));

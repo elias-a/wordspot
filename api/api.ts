@@ -11,6 +11,12 @@ export class Api {
         });
         this.controller = controller;
 
+        this.router.get('/get-game-details', async (ctx) => {
+            const { status, result } = await this.controller.getGameDetails();
+            ctx.status = status;
+            ctx.body = result;
+        });
+        
         this.router.get('/get-tiles', async (ctx) => {
             const { status, result } = await this.controller.getTiles();
             ctx.status = status;
