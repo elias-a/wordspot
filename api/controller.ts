@@ -8,13 +8,34 @@ export class Controller {
     }
 
     async getTiles() {
-        const tiles = await this.models.Tile.findAll();
+        const { game } = await this.models.Game.findOne({
+            attributes: [['id', 'game']]
+        });
+        const tiles = await this.models.Tile.findAll({
+            where: {
+                game: game
+            }
+        });
 
         return { status: 200, result: tiles };
     }
 
     async getGameDetails() {
-        return { status: 200, result: "" };
+        const { game } = await this.models.Game.findOne({
+            attributes: [['id', 'game']]
+        });
+        const tiles = await this.models.Tile.findAll({
+            where: {
+                game: game
+            }
+        });
+        const players = await this.models.Player.findAll({
+            where: {
+                game: game
+            }
+        });
+        
+        return { status: 200, result: { tiles: tiles, players: players } };
     }
 }
 

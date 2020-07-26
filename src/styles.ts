@@ -17,6 +17,9 @@ export const useStyles = makeStyles({
         height: '49%',
         display: 'inline-block'
     },
+    turn: {
+        textAlign: "center"
+    },
     container: {
         backgroundColor: '#fff',
         border: '4px solid #e6eeff',
