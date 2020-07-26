@@ -34,6 +34,10 @@ function Game() {
         });
     }, []);
 
+    function placeToken() {
+
+    }
+    
     function endTurn() {
         //setLoading(true);
         setTurn(!turn);
@@ -51,7 +55,10 @@ function Game() {
             {!loading ? 
                 <Grid container>
                     <Grid item xs={6}>
-                        <Board tiles={tiles} />
+                        <Board 
+                            tiles={tiles} 
+                            placeToken={placeToken} 
+                        />
                     </Grid>
                     <Grid item xs={6}>
                         <ScoreBoard players={players} turn={turn} endTurn={endTurn} />

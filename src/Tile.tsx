@@ -1,13 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useStyles } from './styles';
 import Letter from './Letter';
 
-function Tile({ letters }) {
+function Tile({ letters, clicked, placeToken }) {
     const styles = useStyles();
+    const clickedArr = clicked.split('').map(letter => parseInt(letter));
 
     return (
         <div className={styles.tile}>
-            {letters.split('').map(letter => <Letter letter={letter} />)}
+            {letters.split('').map((letter, index) => 
+                <Letter 
+                    letter={letter} 
+                    clicked={clickedArr[index]} 
+                    placeToken={placeToken} 
+                />
+            )}
         </div>
     );
 }

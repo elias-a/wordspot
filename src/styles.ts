@@ -17,8 +17,17 @@ export const useStyles = makeStyles({
         height: '49%',
         display: 'inline-block'
     },
+    letterClicked: {
+        width: '49%',
+        height: '49%',
+        display: 'inline-block',
+        background: 'linear-gradient(45deg, #80aaff 30%, #4d88ff 90%)'
+    },
     turn: {
-        textAlign: "center"
+        textAlign: 'center'
+    },
+    clicked: {
+        backgroundColor: '#80aaff'
     },
     container: {
         backgroundColor: '#fff',
@@ -46,15 +55,5 @@ export const useStyles = makeStyles({
         padding: '0 30px',
         margin: '20px auto',
         display: 'block',
-    },
-    form: {
-        display: 'block', 
-        width: '40%',
-        margin: '20px auto',
-    },
-    input: {
-        display: 'block',
-        width: '100%',
-        margin: '20px auto',
-    },
+    }
 });

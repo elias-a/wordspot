@@ -116,6 +116,9 @@ export class Models {
             letters: {
                 type: DataTypes.STRING
             },
+            clicked: {
+                type: DataTypes.STRING
+            },
             location: {
                 type: DataTypes.INTEGER
             },
@@ -141,6 +144,7 @@ export class Models {
             await Promise.all(perms.map(async (num, index) => {
                 await this.Tile.create({
                     letters: tiles[Math.floor(Math.random() * tiles.length)],
+                    clicked: "0000",
                     location: index,
                     game: game
                 });
