@@ -16,9 +16,9 @@ export class Api {
             ctx.status = status;
             ctx.body = result;
         });
-        
-        this.router.get('/get-tiles', async (ctx) => {
-            const { status, result } = await this.controller.getTiles();
+
+        this.router.post('/end-turn', async (ctx) => {
+            const { status, result } = await this.controller.endTurn();
             ctx.status = status;
             ctx.body = result;
         });

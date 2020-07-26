@@ -6,20 +6,7 @@ export class Controller {
     constructor(models: Models) {
         this.models = models;
     }
-
-    async getTiles() {
-        const { game } = await this.models.Game.findOne({
-            attributes: [['id', 'game']]
-        });
-        const tiles = await this.models.Tile.findAll({
-            where: {
-                game: game
-            }
-        });
-
-        return { status: 200, result: tiles };
-    }
-
+    
     async getGameDetails() {
         const { game } = await this.models.Game.findOne({
             attributes: [['id', 'game']]
@@ -36,6 +23,22 @@ export class Controller {
         });
         
         return { status: 200, result: { tiles: tiles, players: players } };
+    }
+
+    async endTurn() {
+        await Promise.all((await this.models.Player.findAll()).map(async (player: any) => {
+            const turn = player.turn ? 0 : 1;
+
+            await this.models.Player.update({
+                turn: turn
+            }, {
+                where: {
+                    id: player.id
+                }
+            });
+        }));
+
+        return { status: 200, result: "" };
     }
 }
 

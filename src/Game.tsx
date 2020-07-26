@@ -35,9 +35,15 @@ function Game() {
     }, []);
 
     function endTurn() {
-        setLoading(true);
+        //setLoading(true);
         setTurn(!turn);
-        setLoading(false);
+        axios.post('/api/end-turn', {}).then(res => {
+            setError("");
+        }).catch(err => {
+            setError(err);
+        }).then(() => {
+            setLoading(false);
+        });
     }
 
     return (
