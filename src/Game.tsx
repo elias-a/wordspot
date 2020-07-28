@@ -39,11 +39,10 @@ function Game() {
     function placeToken(id: number) {
         const tile = Math.floor(id / 4);
         const letter = id % 4;
-        let clickedArr = tiles[tile].clicked.split('');
-        let clicked = parseInt(clickedArr[letter]);
-        clicked = clicked ? 0 : 1;
-        clickedArr[letter] = clicked.toString();
-        tiles[tile].clicked = clickedArr.join('');
+
+        const l = [...letters];
+        l[tile][letter].clicked = !l[tile][letter].clicked;
+        setLetters(l);
     }
     
     function endTurn() {
@@ -65,6 +64,7 @@ function Game() {
                     <Grid item xs={6}>
                         <Board 
                             tiles={tiles} 
+                            letters={letters}
                             placeToken={placeToken} 
                         />
                     </Grid>

@@ -22,7 +22,7 @@ export class Controller {
             }
         });
         const letters = await Promise.all(tiles.map(async (tile: any) => {
-            await this.models.Letter.findAll({
+            return await this.models.Letter.findAll({
                 where: {
                     tile: tile.id
                 }

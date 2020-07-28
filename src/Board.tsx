@@ -2,7 +2,7 @@ import React from 'react';
 import { useStyles } from './styles';
 import Tile from './Tile';
 
-function Board({ tiles, placeToken }) {
+function Board({ tiles, letters, placeToken }) {
     const styles = useStyles();
 
     return (
@@ -11,8 +11,7 @@ function Board({ tiles, placeToken }) {
                 return (
                     <Tile 
                         id={index}
-                        letters={tile.letters} 
-                        clicked={tile.clicked}
+                        letters={letters[index]} 
                         placeToken={placeToken} 
                     />
                 );
