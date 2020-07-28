@@ -7,9 +7,10 @@ function Board({ tiles, placeToken }) {
 
     return (
         <div className={styles.board}>
-            {tiles.map(tile => {
+            {tiles.map((tile, index) => {
                 return (
                     <Tile 
+                        id={index}
                         letters={tile.letters} 
                         clicked={tile.clicked}
                         placeToken={placeToken} 

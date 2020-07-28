@@ -11,18 +11,25 @@ export class Controller {
         const { game } = await this.models.Game.findOne({
             attributes: [['id', 'game']]
         });
-        const tiles = await this.models.Tile.findAll({
-            where: {
-                game: game
-            }
-        });
         const players = await this.models.Player.findAll({
             where: {
                 game: game
             }
         });
+        const tiles = await this.models.Tile.findAll({
+            where: {
+                game: game
+            }
+        });
+        const letters = await Promise.all(tiles.map(async (tile: any) => {
+            await this.models.Letter.findAll({
+                where: {
+                    tile: tile.id
+                }
+            });
+        }));
         
-        return { status: 200, result: { tiles: tiles, players: players } };
+        return { status: 200, result: { players: players, tiles: tiles, letters: letters } };
     }
 
     async endTurn() {

@@ -6,6 +6,7 @@ import { Grid } from '@material-ui/core';
 
 function Game() {
     const [tiles, setTiles] = useState([]);
+    const [letters, setLetters] = useState([]);
     const [players, setPlayers] = useState([]);
     const [turn, setTurn] = useState(true);
     const [tokens, setTokens] = useState([]);
@@ -16,6 +17,7 @@ function Game() {
     useEffect(() => {
         axios.get('/api/get-game-details').then(res => {
             setTiles(res.data.tiles);
+            setLetters(res.data.letters);
 
             const players = res.data.players;
             setPlayers(players);
@@ -34,8 +36,14 @@ function Game() {
         });
     }, []);
 
-    function placeToken() {
-
+    function placeToken(id: number) {
+        const tile = Math.floor(id / 4);
+        const letter = id % 4;
+        let clickedArr = tiles[tile].clicked.split('');
+        let clicked = parseInt(clickedArr[letter]);
+        clicked = clicked ? 0 : 1;
+        clickedArr[letter] = clicked.toString();
+        tiles[tile].clicked = clickedArr.join('');
     }
     
     function endTurn() {

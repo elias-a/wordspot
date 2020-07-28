@@ -1,24 +1,28 @@
 import { Sequelize, DataTypes } from 'sequelize';
 
-const tiles = [
-    'SGPU', 'HEAS', 'XAIY',
-    'LIEL', 'RNAD', 'OPPE',
-    'CAKI', 'TSOS', 'MIAP',
-    'PLAE', 'ZEYA', 'ENRI',
-    'ILFL', 'OSOT', 'WOAT',
-    'GNSA', 'STHA', 'IRTE',
-    'CEKA', 'VEIH', 'NTOA',
-    'EDER', 'THEC', 'DLEY',
-    'ATIR', 'VNSA', 'ETND',
-    'AJNO', 'LRIG', 'MORG',
-    'RAIB', 'BOUT'
+const tilesSet = [
+    "SGPU", "HEAS", "XAIY",
+    "LIEL", "RNAD", "OPPE",
+    "CAKI", "TSOS", "MIAP",
+    "PLAE", "ZEYA", "ENRI",
+    "ILFL", "OSOT", "WOAT",
+    "GNSA", "STHA", "IRTE",
+    "CEKA", "VEIH", "NTOA",
+    "EDER", "THEC", "DLEY",
+    "ATIR", "VNSA", "ETND",
+    "AJNO", "LRIG", "MORG",
+    "RAIB", "BOUT"
 ];
+
+const shuffledTiles = tilesSet.sort(() => Math.random() - 0.5);
+const tiles = shuffledTiles.slice(0, 16);
 
 export class Models {
     sequelize: Sequelize;
     Game: any;
     Player: any;
     Tile: any;
+    Letter: any;
 
     constructor(sequelize: Sequelize) {
         this.sequelize = sequelize;
@@ -27,11 +31,16 @@ export class Models {
             console.log("Failed to connect to database");
         }
 
-        this.initGame();
-        this.initPlayer();
-        this.initTile();
+        this.init();
     }
 
+    async init() {
+        await this.initGame();
+        await this.initPlayer();
+        await this.initTile();
+        await this.initLetter();
+    }
+    
     async initGame() {
         this.Game = this.sequelize.define('Game', {
             id: {
@@ -43,7 +52,7 @@ export class Models {
                 type: DataTypes.STRING
             }
         }, {
-            tableName: "Game",
+            tableName: 'Game',
             timestamps: false
         });
 
@@ -74,7 +83,7 @@ export class Models {
                 }
             },
             turn: {
-                type: DataTypes.INTEGER
+                type: DataTypes.BOOLEAN
             },
             tokens: {
                 type: DataTypes.INTEGER
@@ -94,13 +103,13 @@ export class Models {
             await this.Player.create({
                 name: "Player 1",
                 game: game,
-                turn: 1,
+                turn: true,
                 tokens: 26
             });
             await this.Player.create({
                 name: "Player 2",
                 game: game,
-                turn: 0,
+                turn: false,
                 tokens: 25
             })
         }
@@ -113,12 +122,6 @@ export class Models {
                 primaryKey: true,
                 autoIncrement: true
             },
-            letters: {
-                type: DataTypes.STRING
-            },
-            clicked: {
-                type: DataTypes.STRING
-            },
             location: {
                 type: DataTypes.INTEGER
             },
@@ -130,7 +133,7 @@ export class Models {
                 }
             }
         }, {
-            tableName: "Tile",
+            tableName: 'Tile',
             timestamps: false
         });
 
@@ -140,14 +143,56 @@ export class Models {
             const { game } = await this.Game.findOne({
                 attributes: [['id', 'game']]
             });
-            const perms = [...Array(16).keys()].sort(() => Math.random() - 0.5);
-            await Promise.all(perms.map(async (num, index) => {
+            await Promise.all(tiles.map(async (tile, index) => {
                 await this.Tile.create({
-                    letters: tiles[Math.floor(Math.random() * tiles.length)],
-                    clicked: "0000",
                     location: index,
                     game: game
                 });
+            }));
+        }
+    }
+
+    async initLetter() {
+        this.Letter = this.sequelize.define('Letter', {
+            id: {
+                type: DataTypes.INTEGER,
+                primaryKey: true,
+                autoIncrement: true
+            },
+            letter: {
+                type: DataTypes.STRING
+            },
+            tile: {
+                type: DataTypes.INTEGER,
+                references: {
+                    model: 'Tile',
+                    key: 'id'
+                }
+            },
+            index: {
+                type: DataTypes.INTEGER
+            },
+            clicked: {
+                type: DataTypes.BOOLEAN
+            }
+        }, {
+            tableName: 'Letter', 
+            timestamps: false
+        });
+
+        await this.Letter.sync();
+
+        if (!(await this.Letter.findAll()).length) {
+            await Promise.all(tiles.map(async (tile, i) => {
+                const letters = tile.split('');
+                await Promise.all(letters.map(async (letter, j) => {
+                    await this.Letter.create({
+                        letter: letter,
+                        tile: i + 1,
+                        index: j,
+                        clicked: false
+                    });
+                }));
             }));
         }
     }
