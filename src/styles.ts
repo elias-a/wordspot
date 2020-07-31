@@ -6,8 +6,6 @@ export const useStyles = makeStyles({
         height: '800px'
     },
     tile: {
-        width: '24%',
-        height: '24%',
         display: 'inline-block',
         verticalAlign: 'top',
         border: '1px solid #000'

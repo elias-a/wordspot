@@ -5,7 +5,9 @@ import axios from 'axios';
 import { Grid } from '@material-ui/core';
 
 function Game() {
-    const [tiles, setTiles] = useState([]);
+    const [layout, setLayout] = useState([]);
+    const [numRows, setNumRows] = useState(0);
+    const [numCols, setNumCols] = useState(0);
     const [letters, setLetters] = useState([]);
     const [players, setPlayers] = useState([]);
     const [turn, setTurn] = useState(true);
@@ -16,7 +18,9 @@ function Game() {
 
     useEffect(() => {
         axios.get('/api/get-game-details').then(res => {
-            setTiles(res.data.tiles);
+            setLayout(res.data.layout);
+            setNumRows(res.data.numRows);
+            setNumCols(res.data.numCols);
             setLetters(res.data.letters);
 
             const players = res.data.players;
@@ -63,7 +67,9 @@ function Game() {
                 <Grid container>
                     <Grid item xs={6}>
                         <Board 
-                            tiles={tiles} 
+                            layout={layout}
+                            numRows={numRows}
+                            numCols={numCols}
                             letters={letters}
                             placeToken={placeToken} 
                         />

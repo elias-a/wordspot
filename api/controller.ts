@@ -29,7 +29,32 @@ export class Controller {
             });
         }));
         
-        return { status: 200, result: { players: players, tiles: tiles, letters: letters } };
+        const maxRow = await this.models.Tile.max('row');
+        const maxCol = await this.models.Tile.max('column');
+        
+        let layout: boolean[] = [];
+        for (let row = 0; row <= maxRow; ++row) {
+            for (let col = 0; col <= maxCol; ++col) {
+                const tile = await this.models.Tile.findOne({
+                    where: {
+                        row: row,
+                        column: col
+                    }
+                });
+
+                if (tile) layout.push(true);
+                else layout.push(false);
+            }
+        }
+
+        return { status: 200, result: { 
+                players: players, 
+                letters: letters,
+                layout: layout,
+                numRows: maxRow + 1,
+                numCols: maxCol + 1
+            } 
+        };
     }
 
     async endTurn() {

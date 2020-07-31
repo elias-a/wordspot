@@ -122,7 +122,10 @@ export class Models {
                 primaryKey: true,
                 autoIncrement: true
             },
-            location: {
+            row: {
+                type: DataTypes.INTEGER
+            },
+            column: {
                 type: DataTypes.INTEGER
             },
             game: {
@@ -145,7 +148,8 @@ export class Models {
             });
             await Promise.all(tiles.map(async (tile, index) => {
                 await this.Tile.create({
-                    location: index,
+                    row: Math.floor(index / 4),
+                    column: index % 4,
                     game: game
                 });
             }));
