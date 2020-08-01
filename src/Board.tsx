@@ -12,25 +12,22 @@ function Board({ layout, numRows, numCols, letters, placeToken }) {
     useEffect(() => {
         let counter = 0;
         setBoard(layout.map((spot: boolean, index: number) => {
-            const tile = 
-                <Tile 
+            if (spot) {
+                return <Tile 
                     id={counter}
-                    letters={letters[counter]} 
+                    letters={letters[counter++]} 
                     placeToken={placeToken} 
                     width={width}
                     height={height}
                 />;
-
-            const blankTile = 
-                <BlankTile 
+            } else {
+                return <BlankTile 
                     width={width} 
                     height={height} 
                 />;
-
-            if (spot) return tile;
-            else return blankTile;
+            }
         }));
-    }, []);
+    }, [letters]);
 
     return (
         <div className={styles.board}>

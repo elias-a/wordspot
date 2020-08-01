@@ -31,7 +31,7 @@ export class Controller {
         
         const maxRow = await this.models.Tile.max('row');
         const maxCol = await this.models.Tile.max('column');
-        
+
         let layout: boolean[] = [];
         for (let row = 0; row <= maxRow; ++row) {
             for (let col = 0; col <= maxCol; ++col) {
