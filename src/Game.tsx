@@ -49,6 +49,10 @@ function Game() {
         setLetters(l);
     }
     
+    function addTile() {
+
+    }
+
     function endTurn() {
         //setLoading(true);
         setTurn(!turn);
@@ -75,7 +79,12 @@ function Game() {
                         />
                     </Grid>
                     <Grid item xs={6}>
-                        <ScoreBoard players={players} turn={turn} endTurn={endTurn} />
+                        <ScoreBoard 
+                            players={players} 
+                            turn={turn} 
+                            addTile={addTile}
+                            endTurn={endTurn} 
+                        />
                     </Grid>
                 </Grid> : 
                 <p>Loading...</p>

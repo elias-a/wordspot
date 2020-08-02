@@ -23,6 +23,7 @@ export class Models {
     Player: any;
     Tile: any;
     Letter: any;
+    ExtraTile: any;
 
     constructor(sequelize: Sequelize) {
         this.sequelize = sequelize;
@@ -39,6 +40,7 @@ export class Models {
         await this.initPlayer();
         await this.initTile();
         await this.initLetter();
+        await this.initExtraTile();
     }
     
     async initGame() {
@@ -199,6 +201,37 @@ export class Models {
                 }));
             }));
         }
+    }
+
+    async initExtraTile() {
+        this.ExtraTile = this.sequelize.define('ExtraTile', {
+            id: {
+                type: DataTypes.INTEGER,
+                primaryKey: true,
+                autoIncrement: true 
+            },
+            player: {
+                type: DataTypes.INTEGER,
+                references: {
+                    model: 'player',
+                    key: 'id'
+                }
+            },
+            tile: {
+                type: DataTypes.INTEGER
+            },
+            letter: {
+                type: DataTypes.STRING
+            },
+            index: {
+                type: DataTypes.INTEGER 
+            }
+        }, {
+            tableName: 'ExtraTile',
+            timestamps: false
+        });
+
+        await this.ExtraTile.sync();
     }
 }
 
