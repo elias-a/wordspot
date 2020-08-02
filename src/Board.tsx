@@ -3,7 +3,7 @@ import { useStyles } from './styles';
 import Tile from './Tile';
 import BlankTile from './BlankTile';
 
-function Board({ layout, numRows, numCols, letters, placeToken }) {
+function Board({ layout, numRows, numCols, addTileFlag, letters, placeToken }) {
     const [board, setBoard] = useState([]);
     const styles = useStyles();
     const width = (100 / numCols - 1).toString() + '%';
@@ -22,12 +22,13 @@ function Board({ layout, numRows, numCols, letters, placeToken }) {
                 />;
             } else {
                 return <BlankTile 
+                    addTileFlag={addTileFlag}
                     width={width} 
                     height={height} 
                 />;
             }
         }));
-    }, [letters]);
+    }, [letters, addTileFlag]);
 
     return (
         <div className={styles.board}>

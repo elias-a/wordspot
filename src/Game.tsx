@@ -13,6 +13,7 @@ function Game() {
     const [turn, setTurn] = useState(true);
     const [tokens, setTokens] = useState([]);
     const [extraTiles, setExtraTiles] = useState([]);
+    const [addTileFlag, setAddTileFlag] = useState(false);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(true);
 
@@ -22,6 +23,7 @@ function Game() {
             setNumRows(res.data.numRows);
             setNumCols(res.data.numCols);
             setLetters(res.data.letters);
+            setExtraTiles(res.data.extraTiles);
 
             const players = res.data.players;
             setPlayers(players);
@@ -50,7 +52,7 @@ function Game() {
     }
     
     function addTile() {
-
+        setAddTileFlag(!addTileFlag);
     }
 
     function endTurn() {
@@ -74,6 +76,7 @@ function Game() {
                             layout={layout}
                             numRows={numRows}
                             numCols={numCols}
+                            addTileFlag={addTileFlag}
                             letters={letters}
                             placeToken={placeToken} 
                         />
@@ -82,6 +85,7 @@ function Game() {
                         <ScoreBoard 
                             players={players} 
                             turn={turn} 
+                            extraTiles={extraTiles}
                             addTile={addTile}
                             endTurn={endTurn} 
                         />

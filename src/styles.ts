@@ -2,13 +2,25 @@ import { makeStyles } from '@material-ui/core/styles';
 
 export const useStyles = makeStyles({
     board: {
-        width: '800px',
-        height: '800px'
+        width: '820px',
+        height: '820px'
     },
     tile: {
         display: 'inline-block',
         verticalAlign: 'top',
         border: '1px solid #000'
+    },
+    blankTile: {
+        display: 'inline-block',
+        verticalAlign: 'top',
+        border: '1px solid #fff'
+    },
+    extraTile: {
+        display: 'inline-block',
+        verticalAlign: 'top',
+        border: '1px solid #000',
+        width: '200px',
+        height: '200px'
     },
     letter: {
         width: '49%',

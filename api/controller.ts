@@ -28,13 +28,22 @@ export class Controller {
                 }
             });
         }));
+        const extraTiles = await Promise.all(players.map(async (player: any) => {
+            return await this.models.ExtraTile.findAll({
+                where: {
+                    player: player.id
+                }
+            })
+        }));
         
         const maxRow = await this.models.Tile.max('row');
         const maxCol = await this.models.Tile.max('column');
+        const minRow = await this.models.Tile.min('row');
+        const minCol = await this.models.Tile.min('column');
 
         let layout: boolean[] = [];
-        for (let row = 0; row <= maxRow; ++row) {
-            for (let col = 0; col <= maxCol; ++col) {
+        for (let row = minRow - 1; row <= maxRow + 1; ++row) {
+            for (let col = minCol - 1; col <= maxCol + 1; ++col) {
                 const tile = await this.models.Tile.findOne({
                     where: {
                         row: row,
@@ -51,8 +60,9 @@ export class Controller {
                 players: players, 
                 letters: letters,
                 layout: layout,
-                numRows: maxRow + 1,
-                numCols: maxCol + 1
+                numRows: maxRow - minRow + 3,
+                numCols: maxCol - minCol + 3,
+                extraTiles: extraTiles
             } 
         };
     }
