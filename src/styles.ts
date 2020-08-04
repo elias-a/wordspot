@@ -13,7 +13,11 @@ export const useStyles = makeStyles({
     blankTile: {
         display: 'inline-block',
         verticalAlign: 'top',
-        border: '1px solid #fff'
+        //margin: '2px'
+    },
+    emptyTile: {
+        display: 'inline-block',
+        margin: '2px'
     },
     extraTile: {
         display: 'inline-block',

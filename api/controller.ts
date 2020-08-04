@@ -7,6 +7,41 @@ export class Controller {
         this.models = models;
     }
     
+    // Helper function to check if location is a valid 
+    // spot to add a tile. 
+    async checkNeighbors(row: number, col: number): Promise<boolean> {
+        const right = await this.models.Tile.findOne({
+            where: {
+                row: row,
+                column: col + 1
+            }
+        });
+
+        const left = await this.models.Tile.findOne({
+            where: {
+                row: row,
+                column: col - 1
+            }
+        });
+
+        const above = await this.models.Tile.findOne({
+            where: {
+                row: row + 1,
+                column: col
+            }
+        });
+
+        const below = await this.models.Tile.findOne({
+            where: {
+                row: row - 1,
+                column: col
+            }
+        });
+
+        if (right || left || above || below) return true;
+        else return false;
+    }
+
     async getGameDetails() {
         const { game } = await this.models.Game.findOne({
             attributes: [['id', 'game']]
@@ -41,7 +76,7 @@ export class Controller {
         const minRow = await this.models.Tile.min('row');
         const minCol = await this.models.Tile.min('column');
 
-        let layout: boolean[] = [];
+        let layout: number[] = [];
         for (let row = minRow - 1; row <= maxRow + 1; ++row) {
             for (let col = minCol - 1; col <= maxCol + 1; ++col) {
                 const tile = await this.models.Tile.findOne({
@@ -51,8 +86,13 @@ export class Controller {
                     }
                 });
 
-                if (tile) layout.push(true);
-                else layout.push(false);
+                // 2: tile
+                // 1: valid spot to add tile
+                // 0: placeholder spot
+
+                if (tile) layout.push(2);
+                else if (await this.checkNeighbors(row, col)) layout.push(1);
+                else layout.push(0);
             }
         }
 

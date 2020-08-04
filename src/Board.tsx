@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useStyles } from './styles';
 import Tile from './Tile';
 import BlankTile from './BlankTile';
+import EmptyTile from './EmptyTile';
 
 function Board({ layout, numRows, numCols, addTileFlag, letters, placeToken }) {
     const [board, setBoard] = useState([]);
@@ -11,8 +12,8 @@ function Board({ layout, numRows, numCols, addTileFlag, letters, placeToken }) {
 
     useEffect(() => {
         let counter = 0;
-        setBoard(layout.map((spot: boolean, index: number) => {
-            if (spot) {
+        setBoard(layout.map((spot: number, index: number) => {
+            if (spot === 2) {
                 return <Tile 
                     id={counter}
                     letters={letters[counter++]} 
@@ -20,11 +21,16 @@ function Board({ layout, numRows, numCols, addTileFlag, letters, placeToken }) {
                     width={width}
                     height={height}
                 />;
-            } else {
+            } else if (spot === 1) {
                 return <BlankTile 
                     addTileFlag={addTileFlag}
                     width={width} 
                     height={height} 
+                />;
+            } else {
+                return <EmptyTile
+                    width={width}
+                    height={height}
                 />;
             }
         }));

@@ -6,7 +6,10 @@ function Tile({ id, letters, placeToken, width, height }) {
     const styles = useStyles();
 
     return (
-        <div className={styles.tile} style={{ width: width, height: height }}>
+        <div 
+            className={styles.tile} 
+            style={{ width: width, height: height }}
+        >
             {letters.map((letter, index) => 
                 <Letter 
                     id={id*4+index}
