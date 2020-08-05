@@ -3,6 +3,8 @@ import Board from './Board';
 import ScoreBoard from './ScoreBoard';
 import axios from 'axios';
 import { Grid } from '@material-ui/core';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { DndProvider } from 'react-dnd';
 
 function Game() {
     const [layout, setLayout] = useState([]);
@@ -68,32 +70,34 @@ function Game() {
     }
 
     return (
-        <div>
-            {!loading ? 
-                <Grid container>
-                    <Grid item xs={6}>
-                        <Board 
-                            layout={layout}
-                            numRows={numRows}
-                            numCols={numCols}
-                            addTileFlag={addTileFlag}
-                            letters={letters}
-                            placeToken={placeToken} 
-                        />
-                    </Grid>
-                    <Grid item xs={6}>
-                        <ScoreBoard 
-                            players={players} 
-                            turn={turn} 
-                            extraTiles={extraTiles}
-                            addTile={addTile}
-                            endTurn={endTurn} 
-                        />
-                    </Grid>
-                </Grid> : 
-                <p>Loading...</p>
-            }
-        </div>
+        <DndProvider backend={HTML5Backend}>
+            <div>
+                {!loading ? 
+                    <Grid container>
+                        <Grid item xs={6}>
+                            <Board 
+                                layout={layout}
+                                numRows={numRows}
+                                numCols={numCols}
+                                addTileFlag={addTileFlag}
+                                letters={letters}
+                                placeToken={placeToken} 
+                            />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <ScoreBoard 
+                                players={players} 
+                                turn={turn} 
+                                extraTiles={extraTiles}
+                                addTile={addTile}
+                                endTurn={endTurn} 
+                            />
+                        </Grid>
+                    </Grid> : 
+                    <p>Loading...</p>
+                }
+            </div>
+        </DndProvider>
     );
 }
 

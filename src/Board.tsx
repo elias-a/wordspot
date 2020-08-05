@@ -23,6 +23,7 @@ function Board({ layout, numRows, numCols, addTileFlag, letters, placeToken }) {
                 />;
             } else if (spot === 1) {
                 return <BlankTile 
+                    id={index}
                     addTileFlag={addTileFlag}
                     width={width} 
                     height={height} 
