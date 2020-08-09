@@ -1,27 +1,52 @@
-import React, { createRef, RefObject } from 'react';
+import React, { useRef } from 'react';
 import { useStyles } from './styles';
-import { useDrag, useDrop } from 'react-dnd';
+import { useDrop } from 'react-dnd';
 
-function BlankTile({ id, addTileFlag, width, height }) {
-    const ref = createRef();
+function BlankTile({ 
+    id, 
+    row, 
+    col, 
+    moveTile,
+    addTileFlag, 
+    width, 
+    height
+}) {
+    const ref = useRef(null);
     const styles = useStyles();
 
-    const [, connectDrag] = useDrag({
-        item: { id, type: 'BlankTile' }
-    });
-    const [, connectDrop] = useDrop({
-        accept: 'BlankTile'
+    const [, drop] = useDrop({
+        accept: 'ExtraTile',
+        hover(item) {
+            if (!ref.current) {
+                return;
+            }
+
+            const hoverRow = row;
+            const hoverCol = col;
+            if (id === item.id) {
+                return;
+            }
+
+            const extraLetters = item.letters;
+
+            moveTile({
+                extraLetters,
+                hoverRow, 
+                hoverCol
+            });
+
+            item.id = id;
+        }
     });
 
-    connectDrag(ref);
-    connectDrop(ref);
+    drop(ref);
 
     return (
         <div 
             className={addTileFlag ? styles.tile : styles.blankTile } 
             style={{ width: width, height: height }}
-            ref={ref as RefObject<HTMLDivElement>}
-        ></div>
+            ref={ref}
+        >{"row: "}{row}{", col: "}{col}</div>
     );
 }
 

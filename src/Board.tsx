@@ -4,7 +4,15 @@ import Tile from './Tile';
 import BlankTile from './BlankTile';
 import EmptyTile from './EmptyTile';
 
-function Board({ layout, numRows, numCols, addTileFlag, letters, placeToken }) {
+function Board({ 
+    layout, 
+    numRows, 
+    numCols, 
+    addTileFlag, 
+    letters, 
+    placeToken,
+    moveTile
+}) {
     const [board, setBoard] = useState([]);
     const styles = useStyles();
     const width = (100 / numCols - 1).toString() + '%';
@@ -12,8 +20,9 @@ function Board({ layout, numRows, numCols, addTileFlag, letters, placeToken }) {
 
     useEffect(() => {
         let counter = 0;
-        setBoard(layout.map((spot: number, index: number) => {
-            if (spot === 2) {
+        let blankIndex = 0;
+        setBoard(layout.map((spot, index: number) => {
+            if (spot.key === 2) {
                 return <Tile 
                     id={counter}
                     letters={letters[counter++]} 
@@ -21,9 +30,12 @@ function Board({ layout, numRows, numCols, addTileFlag, letters, placeToken }) {
                     width={width}
                     height={height}
                 />;
-            } else if (spot === 1) {
+            } else if (spot.key === 1) {
                 return <BlankTile 
-                    id={index}
+                    id={blankIndex++}
+                    row={spot.row}
+                    col={spot.col}
+                    moveTile={moveTile}
                     addTileFlag={addTileFlag}
                     width={width} 
                     height={height} 
@@ -35,11 +47,11 @@ function Board({ layout, numRows, numCols, addTileFlag, letters, placeToken }) {
                 />;
             }
         }));
-    }, [letters, addTileFlag]);
+    }, [layout, letters, addTileFlag]);
 
     return (
         <div className={styles.board}>
-            {layout.map((spot: boolean, index: number) => {
+            {layout.map((spot, index: number) => {
                 return board[index];
             })}
         </div>

@@ -76,7 +76,7 @@ export class Controller {
         const minRow = await this.models.Tile.min('row');
         const minCol = await this.models.Tile.min('column');
 
-        let layout: number[] = [];
+        let layout: { key: number, row: number, col: number }[] = [];
         for (let row = minRow - 1; row <= maxRow + 1; ++row) {
             for (let col = minCol - 1; col <= maxCol + 1; ++col) {
                 const tile = await this.models.Tile.findOne({
@@ -90,9 +90,27 @@ export class Controller {
                 // 1: valid spot to add tile
                 // 0: placeholder spot
 
-                if (tile) layout.push(2);
-                else if (await this.checkNeighbors(row, col)) layout.push(1);
-                else layout.push(0);
+                if (tile) {
+                    layout.push({
+                        key: 2,
+                        row: row,
+                        col: col
+                    });
+                }
+                else if (await this.checkNeighbors(row, col)) {
+                    layout.push({
+                        key: 1,
+                        row: row,
+                        col: col
+                    });
+                }
+                else {
+                    layout.push({
+                        key: 0,
+                        row: row,
+                        col: col
+                    });
+                }
             }
         }
 

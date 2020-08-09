@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import Board from './Board';
 import ScoreBoard from './ScoreBoard';
 import axios from 'axios';
+import { cloneDeep } from 'lodash';
 import { Grid } from '@material-ui/core';
-import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 function Game() {
     const [layout, setLayout] = useState([]);
@@ -48,11 +49,29 @@ function Game() {
         const tile = Math.floor(id / 4);
         const letter = id % 4;
 
-        const l = [...letters];
+        let l = cloneDeep(letters);
         l[tile][letter].clicked = !l[tile][letter].clicked;
         setLetters(l);
     }
     
+    const moveTile = ({
+        extraLetters,
+        hoverRow, 
+        hoverCol
+    }) => {
+        let newLayout = cloneDeep(layout);
+        const tile = newLayout.findIndex(spot => spot.row === hoverRow && spot.col === hoverCol);
+        newLayout[tile].key = 2;
+        setLayout(layout);
+
+        let newLetters = cloneDeep(letters);
+        let newTile = extraLetters.map(letter => {
+            
+        });
+        console.log(newTile)
+        //setLetters(newLetters);
+    };
+
     function addTile() {
         setAddTileFlag(!addTileFlag);
     }
@@ -82,6 +101,7 @@ function Game() {
                                 addTileFlag={addTileFlag}
                                 letters={letters}
                                 placeToken={placeToken} 
+                                moveTile={moveTile}
                             />
                         </Grid>
                         <Grid item xs={6}>
