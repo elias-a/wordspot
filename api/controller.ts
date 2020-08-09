@@ -1,4 +1,5 @@
 import { models, Models } from './models';
+import { QueryTypes } from 'sequelize';
 
 export class Controller {
     models: Models;
@@ -63,14 +64,25 @@ export class Controller {
                 }
             });
         }));
-        const extraTiles = await Promise.all(players.map(async (player: any) => {
-            return await this.models.ExtraTile.findAll({
-                where: {
-                    player: player.id
-                }
-            })
+        let extraTiles: any = await Promise.all(players.map(async (player: any) => {
+            const distinctTiles = await this.models.sequelize.query(
+                'SELECT DISTINCT tile FROM ExtraTile', {
+                    type: QueryTypes.SELECT
+                });
+            return await Promise.all(distinctTiles.map(async (tile: any) => {
+                return await this.models.ExtraTile.findAll({
+                    where: {
+                        player: player.id,
+                        tile: tile.tile
+                    }
+                });
+            }));
         }));
         
+        extraTiles = extraTiles.map((playerTiles: any) => {
+            return playerTiles.filter((tile: any) => tile.length !== 0);
+        });
+
         const maxRow = await this.models.Tile.max('row');
         const maxCol = await this.models.Tile.max('column');
         const minRow = await this.models.Tile.min('row');

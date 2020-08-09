@@ -28,8 +28,10 @@ function BlankTile({
             }
 
             const extraLetters = item.letters;
+            const extraTile = item.id;
 
             moveTile({
+                extraTile,
                 extraLetters,
                 hoverRow, 
                 hoverCol

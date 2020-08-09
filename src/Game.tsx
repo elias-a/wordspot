@@ -55,6 +55,7 @@ function Game() {
     }
     
     const moveTile = ({
+        extraTile,
         extraLetters,
         hoverRow, 
         hoverCol
@@ -65,11 +66,25 @@ function Game() {
         setLayout(layout);
 
         let newLetters = cloneDeep(letters);
-        let newTile = extraLetters.map(letter => {
-            
+        let newTile = extraLetters.map((letter: string, index: number) => {
+            return {
+                id: 4 * letters.length + 1 + index,
+                clicked: 0,
+                index: index,
+                tile: letters.length + 1,
+                letter: letter
+            }
         });
-        console.log(newTile)
-        //setLetters(newLetters);
+        newLetters.push(newTile);
+        setLetters(newLetters);
+        
+        let newExtraTiles = cloneDeep(extraTiles);
+        if (turn) {
+            newExtraTiles[0].splice(extraTile, 1);
+        } else {
+            newExtraTiles[1].splice(extraTile, 1);
+        }
+        setExtraTiles(newExtraTiles);
     };
 
     function addTile() {

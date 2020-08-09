@@ -23,9 +23,9 @@ function ExtraTile({ id, letters }) {
 
     return (
         <div className={styles.extraTile} ref={ref}>
-            {letters.map((letter, index) => 
+            {extraLetters.map((letter: string) => 
                 <Button className={styles.letter} disabled>
-                    {letter.letter}
+                    {letter}
                 </Button>
             )}
         </div>

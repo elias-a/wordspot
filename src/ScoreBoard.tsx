@@ -14,10 +14,12 @@ function ScoreBoard({ players, turn, extraTiles, addTile, endTurn }) {
     return (
         <Container className={styles.container}>
             <Score players={players} />
-            <ExtraTile 
-                id={0}
-                letters={currExtraTiles}
-            />
+            {currExtraTiles.map((extraTile, index: number) => {
+                return <ExtraTile 
+                            id={index}
+                            letters={extraTile}
+                        />;
+            })}
             <Button
                 className={styles.button}
                 onClick={addTile}
