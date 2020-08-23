@@ -47,7 +47,7 @@ function Board({
                 />;
             }
         }));
-    }, [layout, letters, addTileFlag]);
+    }, [letters, addTileFlag]);
 
     return (
         <div className={styles.board}>

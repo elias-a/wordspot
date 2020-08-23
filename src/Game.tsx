@@ -63,7 +63,7 @@ function Game() {
         let newLayout = cloneDeep(layout);
         const tile = newLayout.findIndex(spot => spot.row === hoverRow && spot.col === hoverCol);
         newLayout[tile].key = 2;
-        setLayout(layout);
+        setLayout(newLayout);
 
         let newLetters = cloneDeep(letters);
         let newTile = extraLetters.map((letter: string, index: number) => {
