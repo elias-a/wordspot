@@ -88,7 +88,8 @@ export class Controller {
         const minRow = await this.models.Tile.min('row');
         const minCol = await this.models.Tile.min('column');
 
-        let layout: { key: number, row: number, col: number }[] = [];
+        let index = 0;
+        let layout: { key: number, row: number, col: number, index: number }[] = [];
         for (let row = minRow - 1; row <= maxRow + 1; ++row) {
             for (let col = minCol - 1; col <= maxCol + 1; ++col) {
                 const tile = await this.models.Tile.findOne({
@@ -106,21 +107,24 @@ export class Controller {
                     layout.push({
                         key: 2,
                         row: row,
-                        col: col
+                        col: col,
+                        index: index++
                     });
                 }
                 else if (await this.checkNeighbors(row, col)) {
                     layout.push({
                         key: 1,
                         row: row,
-                        col: col
+                        col: col,
+                        index: index
                     });
                 }
                 else {
                     layout.push({
                         key: 0,
                         row: row,
-                        col: col
+                        col: col,
+                        index: index
                     });
                 }
             }

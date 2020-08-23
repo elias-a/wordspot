@@ -75,7 +75,8 @@ function Game() {
                 letter: letter
             }
         });
-        newLetters.push(newTile);
+        //newLetters.push(newTile);
+        newLetters.splice(newLayout[tile].index, 0, newTile);
         setLetters(newLetters);
         
         let newExtraTiles = cloneDeep(extraTiles);
