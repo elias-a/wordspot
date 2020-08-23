@@ -6,7 +6,7 @@ import { useStyles } from './styles';
 import { Container } from '@material-ui/core';
 import { Button } from '@material-ui/core';
 
-function ScoreBoard({ players, turn, extraTiles, addTile, endTurn }) {
+function ScoreBoard({ players, tokens, turn, extraTiles, addTile, endTurn }) {
     const currPlayer = turn ? players[0].name : players[1].name;
     const currExtraTiles = turn ? extraTiles[0] : extraTiles[1];
     const disabled = currExtraTiles.length ? false : true;
@@ -14,7 +14,7 @@ function ScoreBoard({ players, turn, extraTiles, addTile, endTurn }) {
 
     return (
         <Container className={styles.container}>
-            <Score players={players} />
+            <Score players={players} tokens={tokens} />
             {currExtraTiles.map((extraTile, index: number) => {
                 return <ExtraTile 
                             id={index}

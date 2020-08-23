@@ -48,7 +48,7 @@ function BlankTile({
             className={addTileFlag ? styles.tile : styles.blankTile } 
             style={{ width: width, height: height }}
             ref={ref}
-        >{"row: "}{row}{", col: "}{col}</div>
+        ></div>
     );
 }
 

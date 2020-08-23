@@ -9,6 +9,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 
 function Game() {
     const [layout, setLayout] = useState([]);
+    const [tiles, setTiles] = useState([]);
     const [numRows, setNumRows] = useState(0);
     const [numCols, setNumCols] = useState(0);
     const [letters, setLetters] = useState([]);
@@ -23,6 +24,7 @@ function Game() {
     useEffect(() => {
         axios.get('/api/get-game-details').then(res => {
             setLayout(res.data.layout);
+            setTiles(res.data.tiles);
             setNumRows(res.data.numRows);
             setNumCols(res.data.numCols);
             setLetters(res.data.letters);
@@ -49,9 +51,18 @@ function Game() {
         const tile = Math.floor(id / 4);
         const letter = id % 4;
 
-        let l = cloneDeep(letters);
-        l[tile][letter].clicked = !l[tile][letter].clicked;
-        setLetters(l);
+        let newLetters = cloneDeep(letters);
+        newLetters[tile][letter].clicked = !newLetters[tile][letter].clicked;
+        setLetters(newLetters);
+
+        let newTokens = cloneDeep(tokens);
+        console.log(turn)
+        if (turn) {
+            newLetters[tile][letter].clicked ? --newTokens[0] : ++newTokens[0];
+        } else {
+            newLetters[tile][letter].clicked ? --newTokens[1] : ++newTokens[1];
+        }
+        setTokens(newTokens);
     }
     
     const moveTile = ({
@@ -65,6 +76,17 @@ function Game() {
         newLayout[tile].key = 2;
         setLayout(newLayout);
 
+        const game = tiles[0].game;
+        let newTiles = cloneDeep(tiles);
+        let t = {
+          id: letters.length + 1,
+          row: hoverRow,
+          column: hoverCol,
+          game: game
+        };
+        newTiles.splice(newLayout[tile].index, 0, t);
+        setTiles(newTiles);
+
         let newLetters = cloneDeep(letters);
         let newTile = extraLetters.map((letter: string, index: number) => {
             return {
@@ -75,7 +97,6 @@ function Game() {
                 letter: letter
             }
         });
-        //newLetters.push(newTile);
         newLetters.splice(newLayout[tile].index, 0, newTile);
         setLetters(newLetters);
         
@@ -93,9 +114,9 @@ function Game() {
     }
 
     function endTurn() {
-        //setLoading(true);
         setTurn(!turn);
-        axios.post('/api/end-turn', {}).then(res => {
+        const updatedData = { tokens, tiles, letters, extraTiles };
+        axios.post('/api/end-turn', updatedData).then(res => {
             setError("");
         }).catch(err => {
             setError(err);
@@ -111,6 +132,7 @@ function Game() {
                     <Grid container>
                         <Grid item xs={6}>
                             <Board 
+                                turn={turn}
                                 layout={layout}
                                 numRows={numRows}
                                 numCols={numCols}
@@ -123,6 +145,7 @@ function Game() {
                         <Grid item xs={6}>
                             <ScoreBoard 
                                 players={players} 
+                                tokens={tokens}
                                 turn={turn} 
                                 extraTiles={extraTiles}
                                 addTile={addTile}

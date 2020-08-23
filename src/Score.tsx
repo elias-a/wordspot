@@ -8,7 +8,7 @@ import {
 } from '@material-ui/core';
 import { useStyles } from './styles';
 
-function Score({ players }) {
+function Score({ players, tokens }) {
     const styles = useStyles();
 
     return (
@@ -22,11 +22,11 @@ function Score({ players }) {
           <TableBody>
               <TableRow>
                 <TableCell align="center">{players[0].name}</TableCell>
-                <TableCell align="center">{players[0].tokens}</TableCell>
+                <TableCell align="center">{tokens[0]}</TableCell>
               </TableRow>
               <TableRow>
                   <TableCell align="center">{players[1].name}</TableCell>
-                  <TableCell align="center">{players[1].tokens}</TableCell>
+                  <TableCell align="center">{tokens[1]}</TableCell>
               </TableRow>
           </TableBody>     
       </Table>

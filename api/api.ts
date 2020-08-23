@@ -18,7 +18,8 @@ export class Api {
         });
 
         this.router.post('/end-turn', async (ctx) => {
-            const { status, result } = await this.controller.endTurn();
+            const { tokens, tiles, letters, extraTiles } = ctx.request.body;
+            const { status, result } = await this.controller.endTurn(tokens, tiles, letters, extraTiles);
             ctx.status = status;
             ctx.body = result;
         });

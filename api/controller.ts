@@ -134,6 +134,7 @@ export class Controller {
                 players: players, 
                 letters: letters,
                 layout: layout,
+                tiles: tiles,
                 numRows: maxRow - minRow + 3,
                 numCols: maxCol - minCol + 3,
                 extraTiles: extraTiles
@@ -141,7 +142,10 @@ export class Controller {
         };
     }
 
-    async endTurn() {
+    async endTurn(tokens: number[], tiles: any, letters: any, extraTiles: any) {
+        console.log(tiles)
+
+        // Update turn and tokens
         await Promise.all((await this.models.Player.findAll()).map(async (player: any) => {
             const turn = player.turn ? 0 : 1;
 
@@ -152,6 +156,60 @@ export class Controller {
                     id: player.id
                 }
             });
+        }));
+        
+        await this.models.sequelize.query(
+            'DELETE FROM ExtraTile', {
+                type: QueryTypes.DELETE
+            }
+        );
+        await this.models.sequelize.query(
+            'DELETE FROM Letter', {
+                type: QueryTypes.DELETE
+            }
+        );
+        await this.models.sequelize.query(
+            'DELETE FROM Tile', {
+                type: QueryTypes.DELETE
+            }
+        );
+        
+        // Update tiles 
+        await Promise.all(tiles.map(async (tile: any) => {
+            await this.models.Tile.create({
+                id: tile.id,
+                row: tile.row,
+                column: tile.column,
+                game: tile.game
+            });
+        }));
+
+        // Update letters
+        await Promise.all(letters.map(async (tile: any) => {
+            await Promise.all(tile.map(async (letter: any) => {
+                await this.models.Letter.create({
+                    id: letter.id,
+                    letter: letter.letter,
+                    tile: letter.tile,
+                    index: letter.index,
+                    clicked: letter.clicked
+                });
+            }));
+        }));
+
+        // Update extra tiles
+        await Promise.all(extraTiles.map(async (extraTile: any) => {
+            await Promise.all(extraTile.map(async (tile: any) => {
+                await Promise.all(tile.map(async (letter: any) => {
+                    await this.models.ExtraTile.create({
+                        id: letter.id,
+                        player: letter.player,
+                        tile: letter.tile,
+                        letter: letter.letter,
+                        index: letter.index
+                    });
+                }));
+            }));
         }));
 
         return { status: 200, result: "" };

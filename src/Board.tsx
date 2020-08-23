@@ -5,6 +5,7 @@ import BlankTile from './BlankTile';
 import EmptyTile from './EmptyTile';
 
 function Board({ 
+    turn,
     layout, 
     numRows, 
     numCols, 
@@ -47,7 +48,7 @@ function Board({
                 />;
             }
         }));
-    }, [letters, addTileFlag]);
+    }, [letters, addTileFlag, turn]);
 
     return (
         <div className={styles.board}>
