@@ -6,6 +6,7 @@ import { cloneDeep } from 'lodash';
 import { Grid } from '@material-ui/core';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { useStyles } from './styles';
 
 function Game() {
     const [layout, setLayout] = useState([]);
@@ -20,6 +21,7 @@ function Game() {
     const [addTileFlag, setAddTileFlag] = useState(false);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(true);
+    const styles = useStyles();
 
     useEffect(() => {
         axios.get('/api/get-game-details').then(res => {
@@ -56,7 +58,6 @@ function Game() {
         setLetters(newLetters);
 
         let newTokens = cloneDeep(tokens);
-        console.log(turn)
         if (turn) {
             newLetters[tile][letter].clicked ? --newTokens[0] : ++newTokens[0];
         } else {
@@ -129,8 +130,8 @@ function Game() {
         <DndProvider backend={HTML5Backend}>
             <div>
                 {!loading ? 
-                    <Grid container>
-                        <Grid item xs={6}>
+                    <Grid container className={styles.game}>
+                        <Grid item xs={8}>
                             <Board 
                                 turn={turn}
                                 layout={layout}
@@ -142,7 +143,7 @@ function Game() {
                                 moveTile={moveTile}
                             />
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item xs={4}>
                             <ScoreBoard 
                                 players={players} 
                                 tokens={tokens}

@@ -1,9 +1,13 @@
 import { makeStyles } from '@material-ui/core/styles';
 
 export const useStyles = makeStyles({
+    game: {
+        width: '800px',
+        height: '800px'
+    },
     board: {
-        width: '820px',
-        height: '820px'
+        width: '100%',
+        height: '100%'
     },
     tile: {
         display: 'inline-block',
@@ -13,11 +17,12 @@ export const useStyles = makeStyles({
     blankTile: {
         display: 'inline-block',
         verticalAlign: 'top',
-        //margin: '2px'
+        border: '1px solid #fff'
     },
     emptyTile: {
         display: 'inline-block',
-        margin: '2px'
+        verticalAlign: 'top',
+        border: '1px solid #fff'
     },
     extraTile: {
         display: 'inline-block',
@@ -42,21 +47,6 @@ export const useStyles = makeStyles({
     },
     clicked: {
         backgroundColor: '#80aaff'
-    },
-    container: {
-        backgroundColor: '#fff',
-        border: '4px solid #e6eeff',
-        width: '50%',
-        padding: '10px',
-        margin: '40px auto',
-    },
-    data: {
-        backgroundColor: '#99bbff',
-        width: '90%',
-        margin: '10px auto',
-        padding: '10px',
-        fontSize: '24px',
-        color: '#fff',
     },
     button: {
         background: 'linear-gradient(45deg, #80aaff 30%, #4d88ff 90%)',
