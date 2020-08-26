@@ -143,20 +143,22 @@ export class Controller {
     }
 
     async endTurn(tokens: number[], tiles: any, letters: any, extraTiles: any) {
-        console.log(tiles)
 
         // Update turn and tokens
-        await Promise.all((await this.models.Player.findAll()).map(async (player: any) => {
-            const turn = player.turn ? 0 : 1;
+        await Promise.all((await this.models.Player.findAll())
+            .map(async (player: any, index: number) => {
+                const turn = player.turn ? 0 : 1;
 
-            await this.models.Player.update({
-                turn: turn
-            }, {
-                where: {
-                    id: player.id
-                }
-            });
-        }));
+                await this.models.Player.update({
+                    turn: turn,
+                    tokens: tokens[index]
+                }, {
+                    where: {
+                        id: player.id
+                    }
+                });
+            })
+        );
         
         await this.models.sequelize.query(
             'DELETE FROM ExtraTile', {
