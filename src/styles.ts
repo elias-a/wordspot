@@ -40,13 +40,16 @@ export const useStyles = makeStyles({
         width: '49%',
         height: '49%',
         display: 'inline-block',
+        background: 'linear-gradient(45deg, #d8e5ff 30%, #ccddff 90%)'
+    },
+    letterSelected: {
+        width: '49%',
+        height: '49%',
+        display: 'inline-block',
         background: 'linear-gradient(45deg, #80aaff 30%, #4d88ff 90%)'
     },
     turn: {
         textAlign: 'center'
-    },
-    clicked: {
-        backgroundColor: '#80aaff'
     },
     button: {
         background: 'linear-gradient(45deg, #80aaff 30%, #4d88ff 90%)',

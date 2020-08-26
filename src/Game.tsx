@@ -14,6 +14,7 @@ function Game() {
     const [numRows, setNumRows] = useState(0);
     const [numCols, setNumCols] = useState(0);
     const [letters, setLetters] = useState([]);
+    const [selected, setSelected] = useState([]);
     const [players, setPlayers] = useState([]);
     const [turn, setTurn] = useState(true);
     const [tokens, setTokens] = useState([]);
@@ -52,16 +53,21 @@ function Game() {
     function placeToken(id: number) {
         const tile = Math.floor(id / 4);
         const letter = id % 4;
+        const isSelected = letters[tile][letter].hasOwnProperty('selected');
 
         let newLetters = cloneDeep(letters);
-        newLetters[tile][letter].clicked = !newLetters[tile][letter].clicked;
+        if (isSelected) {
+            delete newLetters[tile][letter].selected;
+        } else {
+            newLetters[tile][letter].selected = true;
+        }
         setLetters(newLetters);
 
         let newTokens = cloneDeep(tokens);
         if (turn) {
-            newLetters[tile][letter].clicked ? --newTokens[0] : ++newTokens[0];
+            isSelected ? ++newTokens[0] : --newTokens[0];
         } else {
-            newLetters[tile][letter].clicked ? --newTokens[1] : ++newTokens[1];
+            isSelected ? ++newTokens[1] : --newTokens[1];
         }
         setTokens(newTokens);
     }
@@ -115,10 +121,12 @@ function Game() {
     }
 
     function endTurn() {
+        setLoading(true);
         setTurn(!turn);
         const updatedData = { tokens, tiles, letters, extraTiles };
         axios.post('/api/end-turn', updatedData).then(res => {
             setError("");
+            setLetters(res.data.newLetters);
         }).catch(err => {
             setError(err);
         }).then(() => {

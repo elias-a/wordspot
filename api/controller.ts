@@ -187,12 +187,15 @@ export class Controller {
         // Update letters
         await Promise.all(letters.map(async (tile: any) => {
             await Promise.all(tile.map(async (letter: any) => {
+                const clicked = letter.hasOwnProperty('selected') 
+                    || letter.clicked
+                    ? true : false;
                 await this.models.Letter.create({
                     id: letter.id,
                     letter: letter.letter,
                     tile: letter.tile,
                     index: letter.index,
-                    clicked: letter.clicked
+                    clicked: clicked
                 });
             }));
         }));
@@ -212,7 +215,15 @@ export class Controller {
             }));
         }));
 
-        return { status: 200, result: "" };
+        const newLetters = await Promise.all(tiles.map(async (tile: any) => {
+            return await this.models.Letter.findAll({
+                where: {
+                    tile: tile.id
+                }
+            });
+        }));
+
+        return { status: 200, result: { newLetters } };
     }
 }
 
