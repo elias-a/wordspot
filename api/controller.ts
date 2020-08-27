@@ -89,7 +89,12 @@ export class Controller {
         const minCol = await this.models.Tile.min('column');
 
         let index = 0;
-        let layout: { key: number, row: number, col: number, index: number }[] = [];
+        let layout: { 
+            key: number, 
+            row: number, 
+            col: number, 
+            index: number, 
+            tile: number | null }[] = [];
         for (let row = minRow - 1; row <= maxRow + 1; ++row) {
             for (let col = minCol - 1; col <= maxCol + 1; ++col) {
                 const tile = await this.models.Tile.findOne({
@@ -108,7 +113,8 @@ export class Controller {
                         key: 2,
                         row: row,
                         col: col,
-                        index: index++
+                        index: index++,
+                        tile: tile.id
                     });
                 }
                 else if (await this.checkNeighbors(row, col)) {
@@ -116,7 +122,8 @@ export class Controller {
                         key: 1,
                         row: row,
                         col: col,
-                        index: index
+                        index: index,
+                        tile: null
                     });
                 }
                 else {
@@ -124,7 +131,8 @@ export class Controller {
                         key: 0,
                         row: row,
                         col: col,
-                        index: index
+                        index: index,
+                        tile: null
                     });
                 }
             }

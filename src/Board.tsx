@@ -20,13 +20,12 @@ function Board({
     const height = (100 / numRows - 1).toString() + '%';
 
     useEffect(() => {
-        let counter = 0;
         let blankIndex = 0;
-        setBoard(layout.map((spot, index: number) => {
+        setBoard(layout.map((spot) => {
             if (spot.key === 2) {
                 return <Tile 
-                    id={counter}
-                    letters={letters[counter++]} 
+                    id={spot.tile - 1}
+                    letters={letters[spot.tile - 1]} 
                     placeToken={placeToken} 
                     width={width}
                     height={height}
@@ -52,7 +51,7 @@ function Board({
 
     return (
         <div className={styles.board}>
-            {layout.map((spot, index: number) => {
+            {layout.map((_spot, index: number) => {
                 return board[index];
             })}
         </div>
