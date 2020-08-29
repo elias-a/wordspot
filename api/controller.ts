@@ -64,6 +64,7 @@ export class Controller {
                 }
             });
         }));
+        // It would be better to only send the current player's extra tiles.
         let extraTiles: any = await Promise.all(players.map(async (player: any) => {
             const distinctTiles = await this.models.sequelize.query(
                 'SELECT DISTINCT tile FROM ExtraTile', {

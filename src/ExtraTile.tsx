@@ -35,7 +35,7 @@ function ExtraTile({
         >
             {letters.map((letter, index: number) => {
                 return <Letter 
-                    id={id*4+index+1}
+                    id={id*4+index}
                     letter={letter}
                     placeToken={placeToken}
                     disabled={disabled}

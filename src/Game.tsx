@@ -54,7 +54,7 @@ function Game() {
     }, []);
 
     function placeToken(id: number) {
-        if (id > letters.length * 4) {
+        if (id >= letters.length * 4) {
             let newBoardExtraTiles = cloneDeep(boardExtraTiles);
             const letter = id % 4;
 
@@ -67,6 +67,14 @@ function Game() {
                 tmp[0][letter].selected = true;
             }
             setBoardExtraTiles(newBoardExtraTiles);
+
+            let newTokens = cloneDeep(tokens);
+            if (turn) {
+                isSelected ? ++newTokens[0] : --newTokens[0];
+            } else {
+                isSelected ? ++newTokens[1] : --newTokens[1];
+            }
+            setTokens(newTokens);
         } else {
             const tile = Math.floor(id / 4);
             const letter = id % 4;
