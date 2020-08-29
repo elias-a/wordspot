@@ -16,7 +16,7 @@ function BlankTile({
 
     const [, drop] = useDrop({
         accept: 'ExtraTile',
-        drop(item) {
+        drop(item: any) {
             if (!ref.current) {
                 return;
             }
@@ -27,12 +27,10 @@ function BlankTile({
                 return;
             }
 
-            const extraLetters = item.letters;
             const extraTile = item.id;
 
             moveTile({
                 extraTile,
-                extraLetters,
                 hoverRow, 
                 hoverCol
             });

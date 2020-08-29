@@ -3,6 +3,7 @@ import { useStyles } from './styles';
 import Tile from './Tile';
 import BlankTile from './BlankTile';
 import EmptyTile from './EmptyTile';
+import ExtraTile from './ExtraTile';
 
 function Board({ 
     turn,
@@ -11,10 +12,12 @@ function Board({
     numCols, 
     addTileFlag, 
     letters, 
+    extraTiles,
     placeToken,
     moveTile
 }) {
     const [board, setBoard] = useState([]);
+    const currExtraTiles = turn ? extraTiles[0] : extraTiles[1];
     const styles = useStyles();
     const width = (100 / numCols - 1).toString() + '%';
     const height = (100 / numRows - 1).toString() + '%';
@@ -32,6 +35,7 @@ function Board({
                     placeToken={placeToken} 
                     width={width}
                     height={height}
+                    disabled={false}
                 />;
             } else if (spot.key === 1) {
                 return <BlankTile 
@@ -43,6 +47,29 @@ function Board({
                     width={width} 
                     height={height} 
                 />;
+            } else if (spot.key === 4) {
+                // Temporarily consider case 
+                // of only 1 extra tile. 
+                const extraLetters = currExtraTiles[0].map((extraLetter, index: number) => {
+                    let obj: any = {
+                        id: letters.length * 4 + index,
+                        letter: extraLetter.letter,
+                        tile: letters.length + 1,
+                        index: index,
+                        clicked: extraLetter.clicked
+                    };
+                    if (extraLetter.hasOwnProperty('selected')) obj.selected = true;
+                    return obj;
+                });
+
+                return <ExtraTile
+                    id={letters.length} 
+                    letters={extraLetters}
+                    width={width}
+                    height={height}
+                    disabled={false}
+                    placeToken={placeToken} 
+                />;
             } else {
                 return <EmptyTile
                     width={width}
@@ -50,7 +77,7 @@ function Board({
                 />;
             }
         }));
-    }, [letters, addTileFlag, turn]);
+    }, [letters, addTileFlag, turn, extraTiles]);
 
     return (
         <div className={styles.board}>

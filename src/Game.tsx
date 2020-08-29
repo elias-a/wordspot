@@ -19,6 +19,8 @@ function Game() {
     const [turn, setTurn] = useState(true);
     const [tokens, setTokens] = useState([]);
     const [extraTiles, setExtraTiles] = useState([]);
+    const [currExtraTiles, setCurrExtraTiles] = useState([]);
+    const [boardExtraTiles, setBoardExtraTiles] = useState([[], []]);
     const [addTileFlag, setAddTileFlag] = useState(false);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(true);
@@ -32,6 +34,7 @@ function Game() {
             setNumCols(res.data.numCols);
             setLetters(res.data.letters);
             setExtraTiles(res.data.extraTiles);
+            setCurrExtraTiles(res.data.extraTiles);
 
             const players = res.data.players;
             setPlayers(players);
@@ -51,34 +54,80 @@ function Game() {
     }, []);
 
     function placeToken(id: number) {
-        const tile = Math.floor(id / 4);
-        const letter = id % 4;
-        const isSelected = letters[tile][letter].hasOwnProperty('selected');
+        if (id > letters.length * 4) {
+            let newBoardExtraTiles = cloneDeep(boardExtraTiles);
+            const letter = id % 4;
 
-        let newLetters = cloneDeep(letters);
-        if (isSelected) {
-            delete newLetters[tile][letter].selected;
+            let tmp = turn ? newBoardExtraTiles[0] : newBoardExtraTiles[1];
+            // Only consider case of 1 extra tile
+            const isSelected = tmp[0][letter].hasOwnProperty('selected');
+            if (isSelected) {
+                delete tmp[0][letter].selected;
+            } else {
+                tmp[0][letter].selected = true;
+            }
+            setBoardExtraTiles(newBoardExtraTiles);
         } else {
-            newLetters[tile][letter].selected = true;
+            const tile = Math.floor(id / 4);
+            const letter = id % 4;
+            const isSelected = letters[tile][letter].hasOwnProperty('selected');
+    
+            let newLetters = cloneDeep(letters);
+            if (isSelected) {
+                delete newLetters[tile][letter].selected;
+            } else {
+                newLetters[tile][letter].selected = true;
+            }
+            setLetters(newLetters);
+    
+            let newTokens = cloneDeep(tokens);
+            if (turn) {
+                isSelected ? ++newTokens[0] : --newTokens[0];
+            } else {
+                isSelected ? ++newTokens[1] : --newTokens[1];
+            }
+            setTokens(newTokens);
         }
-        setLetters(newLetters);
-
-        let newTokens = cloneDeep(tokens);
-        if (turn) {
-            isSelected ? ++newTokens[0] : --newTokens[0];
-        } else {
-            isSelected ? ++newTokens[1] : --newTokens[1];
-        }
-        setTokens(newTokens);
     }
     
     const moveTile = ({
         extraTile,
-        extraLetters,
         hoverRow, 
         hoverCol
     }) => {
         let newLayout = cloneDeep(layout);
+        let newExtraTiles = cloneDeep(currExtraTiles);
+        let newBoardExtraTiles = [[], []];
+
+        const tile = newLayout.findIndex(spot => spot.row === hoverRow && spot.col === hoverCol);
+        newLayout[tile].key = 4;
+        setLayout(newLayout);
+
+        if (turn) {
+            const extra = newExtraTiles[0].splice(extraTile, 1);
+            let newExtra = extra[0].map(e => {
+                return {
+                    letter: e.letter,
+                    clicked: false
+                };
+            });
+            newBoardExtraTiles[0].push(newExtra);
+        } else {
+            const extra = newExtraTiles[1].splice(extraTile, 1);
+            let newExtra = extra[0].map(e => {
+                return {
+                    letter: e.letter,
+                    clicked: false
+                };
+            }); 
+            newBoardExtraTiles[1].push(newExtra);
+        }
+        setCurrExtraTiles(newExtraTiles);
+        setBoardExtraTiles(newBoardExtraTiles);
+
+        setAddTileFlag(false);
+
+        /*let newLayout = cloneDeep(layout);
         let newTiles = cloneDeep(tiles);
         let newLetters = cloneDeep(letters);
         let newExtraTiles = cloneDeep(extraTiles);
@@ -120,7 +169,7 @@ function Game() {
         }
         setExtraTiles(newExtraTiles);
 
-        setAddTileFlag(false);
+        setAddTileFlag(false);*/
     };
 
     function addTile() {
@@ -154,6 +203,7 @@ function Game() {
                                 numCols={numCols}
                                 addTileFlag={addTileFlag}
                                 letters={letters}
+                                extraTiles={boardExtraTiles}
                                 placeToken={placeToken} 
                                 moveTile={moveTile}
                             />
@@ -163,7 +213,7 @@ function Game() {
                                 players={players} 
                                 tokens={tokens}
                                 turn={turn} 
-                                extraTiles={extraTiles}
+                                extraTiles={currExtraTiles}
                                 addTile={addTile}
                                 endTurn={endTurn} 
                             />

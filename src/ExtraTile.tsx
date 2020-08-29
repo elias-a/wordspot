@@ -1,18 +1,24 @@
 import React, { useRef } from 'react';
 import { useStyles } from './styles';
-import { Button } from '@material-ui/core';
 import { useDrag } from 'react-dnd';
+import Letter from './Letter';
 
-function ExtraTile({ id, letters }) {
+function ExtraTile({ 
+    id, 
+    letters, 
+    width, 
+    height,
+    disabled,
+    placeToken
+}) {
     const extraLetters = letters.map(letter => letter.letter);
     const ref = useRef(null);
     const styles = useStyles();
 
-    const [{ isDragging }, drag] = useDrag({
+    const [, drag] = useDrag({
         item: { 
             id: id, 
-            type: 'ExtraTile',
-            letters: extraLetters
+            type: 'ExtraTile'
         },
         collect: monitor => ({
             isDragging: monitor.isDragging()
@@ -22,11 +28,19 @@ function ExtraTile({ id, letters }) {
     drag(ref);
 
     return (
-        <div className={styles.extraTile} ref={ref}>
-            {extraLetters.map((letter: string) => 
-                <Button className={styles.letter} disabled>
-                    {letter}
-                </Button>
+        <div 
+            className={styles.tile} 
+            style={{ width: width, height: height }} 
+            ref={ref}
+        >
+            {letters.map((letter, index: number) => {
+                return <Letter 
+                    id={id*4+index+1}
+                    letter={letter}
+                    placeToken={placeToken}
+                    disabled={disabled}
+                />;
+            }
             )}
         </div>
     );

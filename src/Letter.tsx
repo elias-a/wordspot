@@ -2,8 +2,9 @@ import React from 'react';
 import { useStyles } from './styles';
 import { Button } from '@material-ui/core';
 
-function Letter({ id, letter, placeToken }) {
+function Letter(props) {
     const styles = useStyles();
+    const letter = props.letter;
     let disabled: boolean = false;
     let style;
     if (letter.clicked) {
@@ -14,12 +15,13 @@ function Letter({ id, letter, placeToken }) {
     } else {
         style = styles.letter;
     }
+    disabled = disabled || props.disabled;
 
     return (
         <Button 
             className={style}
             disabled={disabled}
-            onClick={() => placeToken(id)}
+            onClick={() => props.placeToken(props.id)}
         >
             {letter.letter}
         </Button>

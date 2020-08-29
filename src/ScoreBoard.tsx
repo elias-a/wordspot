@@ -16,9 +16,15 @@ function ScoreBoard({ players, tokens, turn, extraTiles, addTile, endTurn }) {
         <Container>
             <Score players={players} tokens={tokens} />
             {currExtraTiles.map((extraTile, index: number) => {
+                // Note that the `clicked` prop of each element of 
+                // extraTile is undefined. 
                 return <ExtraTile 
                             id={index}
                             letters={extraTile}
+                            width={'200px'}
+                            height={'200px'}
+                            disabled={true}
+                            placeToken={() => {}}
                         />;
             })}
             <Button
