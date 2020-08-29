@@ -23,9 +23,12 @@ function Board({
         let blankIndex = 0;
         setBoard(layout.map((spot) => {
             if (spot.key === 2) {
+                const tile = letters.find(tile => {
+                    return tile[0].tile === spot.tile;
+                });
                 return <Tile 
                     id={spot.tile - 1}
-                    letters={letters[spot.tile - 1]} 
+                    letters={tile}
                     placeToken={placeToken} 
                     width={width}
                     height={height}

@@ -13,7 +13,7 @@ function ScoreBoard({ players, tokens, turn, extraTiles, addTile, endTurn }) {
     const styles = useStyles();
 
     return (
-        <Container className={styles.container}>
+        <Container>
             <Score players={players} tokens={tokens} />
             {currExtraTiles.map((extraTile, index: number) => {
                 return <ExtraTile 

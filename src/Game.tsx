@@ -79,14 +79,21 @@ function Game() {
         hoverCol
     }) => {
         let newLayout = cloneDeep(layout);
+        let newTiles = cloneDeep(tiles);
+        let newLetters = cloneDeep(letters);
+        let newExtraTiles = cloneDeep(extraTiles);
+
         const tile = newLayout.findIndex(spot => spot.row === hoverRow && spot.col === hoverCol);
         newLayout[tile].key = 2;
+        newLayout[tile].tile = tiles.length + 1;
+        for (let i = tile + 1; i < newLayout.length; ++i) {
+            ++newLayout[i].index;
+        }
         setLayout(newLayout);
 
         const game = tiles[0].game;
-        let newTiles = cloneDeep(tiles);
         let t = {
-          id: letters.length + 1,
+          id: tiles.length + 1,
           row: hoverRow,
           column: hoverCol,
           game: game
@@ -94,7 +101,6 @@ function Game() {
         newTiles.splice(newLayout[tile].index, 0, t);
         setTiles(newTiles);
 
-        let newLetters = cloneDeep(letters);
         let newTile = extraLetters.map((letter: string, index: number) => {
             return {
                 id: 4 * letters.length + 1 + index,
@@ -107,13 +113,14 @@ function Game() {
         newLetters.splice(newLayout[tile].index, 0, newTile);
         setLetters(newLetters);
         
-        let newExtraTiles = cloneDeep(extraTiles);
         if (turn) {
             newExtraTiles[0].splice(extraTile, 1);
         } else {
             newExtraTiles[1].splice(extraTile, 1);
         }
         setExtraTiles(newExtraTiles);
+
+        setAddTileFlag(false);
     };
 
     function addTile() {

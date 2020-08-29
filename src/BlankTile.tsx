@@ -16,7 +16,7 @@ function BlankTile({
 
     const [, drop] = useDrop({
         accept: 'ExtraTile',
-        hover(item) {
+        drop(item) {
             if (!ref.current) {
                 return;
             }
