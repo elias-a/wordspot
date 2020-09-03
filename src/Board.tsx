@@ -17,7 +17,6 @@ function Board({
     moveTile
 }) {
     const [board, setBoard] = useState([]);
-    const currExtraTiles = turn ? extraTiles[0] : extraTiles[1];
     const styles = useStyles();
     const width = (100 / numCols - 1).toString() + '%';
     const height = (100 / numRows - 1).toString() + '%';
@@ -50,7 +49,7 @@ function Board({
             } else if (spot.key === 4) {
                 // Temporarily consider case 
                 // of only 1 extra tile. 
-                const extraLetters = currExtraTiles[0].map((extraLetter, index: number) => {
+                const extraLetters = extraTiles[0].map((extraLetter, index: number) => {
                     let obj: any = {
                         id: letters.length * 4 + index,
                         letter: extraLetter.letter,

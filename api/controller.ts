@@ -64,20 +64,18 @@ export class Controller {
                 }
             });
         }));
-        // It would be better to only send the current player's extra tiles.
-        let extraTiles: any = await Promise.all(players.map(async (player: any) => {
-            const distinctTiles = await this.models.sequelize.query(
-                'SELECT DISTINCT tile FROM ExtraTile', {
-                    type: QueryTypes.SELECT
-                });
-            return await Promise.all(distinctTiles.map(async (tile: any) => {
-                return await this.models.ExtraTile.findAll({
-                    where: {
-                        player: player.id,
-                        tile: tile.tile
-                    }
-                });
-            }));
+        const playerId = players[0].turn ? players[0].id : players[1].id;
+        const sql = `SELECT DISTINCT tile FROM ExtraTile WHERE
+                     player=${playerId}`;
+        const distinctTiles = await this.models.sequelize.query(sql, {
+            type: QueryTypes.SELECT
+        });
+        let extraTiles: any = await Promise.all(distinctTiles.map(async (tile: any) => {
+            return await this.models.ExtraTile.findAll({
+                where: {
+                    tile: tile.tile
+                }
+            });
         }));
         
         extraTiles = extraTiles.map((playerTiles: any) => {
@@ -105,6 +103,7 @@ export class Controller {
                     }
                 });
 
+                // 4: Extra tile is currently added here
                 // 2: tile
                 // 1: valid spot to add tile
                 // 0: placeholder spot

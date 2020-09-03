@@ -14,13 +14,12 @@ function Game() {
     const [numRows, setNumRows] = useState(0);
     const [numCols, setNumCols] = useState(0);
     const [letters, setLetters] = useState([]);
-    const [selected, setSelected] = useState([]);
     const [players, setPlayers] = useState([]);
     const [turn, setTurn] = useState(true);
     const [tokens, setTokens] = useState([]);
     const [extraTiles, setExtraTiles] = useState([]);
     const [currExtraTiles, setCurrExtraTiles] = useState([]);
-    const [boardExtraTiles, setBoardExtraTiles] = useState([[], []]);
+    const [boardExtraTiles, setBoardExtraTiles] = useState([]);
     const [addTileFlag, setAddTileFlag] = useState(false);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(true);
@@ -28,6 +27,9 @@ function Game() {
 
     useEffect(() => {
         axios.get('/api/get-game-details').then(res => {
+            // res.data.extraTiles: array, each element
+            // is array of letters forming a single tile
+
             setLayout(res.data.layout);
             setTiles(res.data.tiles);
             setNumRows(res.data.numRows);
@@ -58,13 +60,12 @@ function Game() {
             let newBoardExtraTiles = cloneDeep(boardExtraTiles);
             const letter = id % 4;
 
-            let tmp = turn ? newBoardExtraTiles[0] : newBoardExtraTiles[1];
             // Only consider case of 1 extra tile
-            const isSelected = tmp[0][letter].hasOwnProperty('selected');
+            const isSelected = newBoardExtraTiles[0][letter].hasOwnProperty('selected');
             if (isSelected) {
-                delete tmp[0][letter].selected;
+                delete newBoardExtraTiles[0][letter].selected;
             } else {
-                tmp[0][letter].selected = true;
+                newBoardExtraTiles[0][letter].selected = true;
             }
             setBoardExtraTiles(newBoardExtraTiles);
 
@@ -97,43 +98,48 @@ function Game() {
             setTokens(newTokens);
         }
     }
-    
+
     const moveTile = ({
-        extraTile,
+        extraTileIndex,
         hoverRow, 
         hoverCol
     }) => {
         let newLayout = cloneDeep(layout);
         let newExtraTiles = cloneDeep(currExtraTiles);
-        let newBoardExtraTiles = [[], []];
+        let newBoardExtraTiles = cloneDeep(boardExtraTiles);
+
+        const spot = newLayout.findIndex(spot => spot.key === 4);
+        let extraTileLetters = [];
+        if (spot >= 0) {
+            newLayout[spot].key = 1;
+            extraTileLetters.push(newBoardExtraTiles.pop()
+                .map(letter => letter.letter));
+
+            
+
+            // Count how many of the letters are clicked,
+            // and add that number back to current player's
+            // tokens.
+        }
 
         const tile = newLayout.findIndex(spot => spot.row === hoverRow && spot.col === hoverCol);
         newLayout[tile].key = 4;
         setLayout(newLayout);
 
-        if (turn) {
-            const extra = newExtraTiles[0].splice(extraTile, 1);
-            let newExtra = extra[0].map(e => {
-                return {
-                    letter: e.letter,
-                    clicked: false
-                };
-            });
-            newBoardExtraTiles[0].push(newExtra);
-        } else {
-            const extra = newExtraTiles[1].splice(extraTile, 1);
-            let newExtra = extra[0].map(e => {
-                return {
-                    letter: e.letter,
-                    clicked: false
-                };
-            }); 
-            newBoardExtraTiles[1].push(newExtra);
-        }
+        // Remove extra tile from player's stash
+        const extraTile = newExtraTiles.splice(extraTileIndex, 1)[0];
+        let newExtra = extraTile.map(letter => {
+            return {
+                letter: letter.letter,
+                clicked: false
+            };
+        });
+
+        newBoardExtraTiles.push(newExtra);
         setCurrExtraTiles(newExtraTiles);
         setBoardExtraTiles(newBoardExtraTiles);
 
-        setAddTileFlag(false);
+        //setAddTileFlag(false);
 
         /*let newLayout = cloneDeep(layout);
         let newTiles = cloneDeep(tiles);

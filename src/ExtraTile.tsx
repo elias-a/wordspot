@@ -11,7 +11,6 @@ function ExtraTile({
     disabled,
     placeToken
 }) {
-    const extraLetters = letters.map(letter => letter.letter);
     const ref = useRef(null);
     const styles = useStyles();
 
