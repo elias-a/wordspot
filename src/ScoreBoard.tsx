@@ -29,6 +29,7 @@ function ScoreBoard({
                     // extraTile is undefined. 
                     return <ExtraTile 
                             id={index}
+                            tileId={index}
                             letters={extraTile}
                             width={'200px'}
                             height={'200px'}
@@ -36,15 +37,17 @@ function ScoreBoard({
                             placeToken={() => {}}
                         />;
                 } else {
+                    // Negative id indicates this blank
+                    // tile is on the scoreboard. 
                     return <BlankTile 
-                        id={index}
-                        row={null} 
-                        col={null} 
-                        moveTile={moveTile}
-                        addTileFlag={true}
-                        width={'200px'} 
-                        height={'200px'}
-                        />
+                            id={-index-1}
+                            row={null} 
+                            col={null} 
+                            moveTile={moveTile}
+                            addTileFlag={true}
+                            width={'200px'} 
+                            height={'200px'}
+                        />;
                 }
             })}
             <Button

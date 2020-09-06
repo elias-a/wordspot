@@ -99,6 +99,7 @@ function Game() {
     }
 
     const moveTile = ({
+        blankTileIndex,
         extraTileIndex,
         hoverRow, 
         hoverCol
@@ -124,25 +125,31 @@ function Game() {
 
             // Add extra tile back to player's stash
             newExtraTiles.splice(extraTileIndex, 1, extraTileLetters);
+            newBoardExtraTiles = [];
             
             // Count how many of the letters are clicked,
             // and add that number back to current player's
             // tokens.
         }
 
-        const tile = newLayout.findIndex(spot => spot.row === hoverRow && spot.col === hoverCol);
-        newLayout[tile].key = 4;
+        if (blankTileIndex < 0) {
+
+        } else {
+            const tile = newLayout.findIndex(spot => spot.row === hoverRow && spot.col === hoverCol);
+            newLayout[tile].key = 4;
+    
+            // Remove extra tile from player's stash
+            const extraTile = newExtraTiles.splice(extraTileIndex, 1, [])[0];
+            newBoardExtraTiles = extraTile.map(letter => {
+                return {
+                    id: extraTileIndex,
+                    letter: letter.letter,
+                    clicked: false
+                };
+            });
+        }
+
         setLayout(newLayout);
-
-        // Remove extra tile from player's stash
-        const extraTile = newExtraTiles.splice(extraTileIndex, 1, [])[0];
-        newBoardExtraTiles = extraTile.map(letter => {
-            return {
-                letter: letter.letter,
-                clicked: false
-            };
-        });
-
         setCurrExtraTiles(newExtraTiles);
         setBoardExtraTiles(newBoardExtraTiles);
 

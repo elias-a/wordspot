@@ -4,7 +4,8 @@ import { useDrag } from 'react-dnd';
 import Letter from './Letter';
 
 function ExtraTile({ 
-    id, 
+    id,
+    tileId, 
     letters, 
     width, 
     height,
@@ -34,7 +35,7 @@ function ExtraTile({
         >
             {letters.map((letter, index: number) => {
                 return <Letter 
-                    id={id*4+index}
+                    id={tileId*4+index}
                     letter={letter}
                     placeToken={placeToken}
                     disabled={disabled}

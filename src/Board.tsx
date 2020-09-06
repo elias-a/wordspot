@@ -60,7 +60,8 @@ function Board({
                 });
 
                 return <ExtraTile
-                    id={letters.length} 
+                    id={extraTile[0].id} 
+                    tileId={letters.length}
                     letters={extraLetters}
                     width={width}
                     height={height}

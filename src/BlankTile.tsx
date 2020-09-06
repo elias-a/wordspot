@@ -27,10 +27,12 @@ function BlankTile({
                 return;
             }
 
-            const extraTile = item.id;
+            const extraTileIndex = item.id;
+            const blankTileIndex = id;
 
             moveTile({
-                extraTile,
+                blankTileIndex,
+                extraTileIndex,
                 hoverRow, 
                 hoverCol
             });
