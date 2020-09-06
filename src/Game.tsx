@@ -112,19 +112,20 @@ function Game() {
         const spot = newLayout.findIndex(spot => spot.key === 4);
         let extraTileLetters = [];
         if (spot >= 0) {
+            const extraTileId = newBoardExtraTiles[0].id;
             newLayout[spot].key = 1;
             extraTileLetters = newBoardExtraTiles
                 .map((letter, index: number) => {
                     return {
                         player: turn ? 1 : 0,
-                        tile: extraTileIndex,
+                        tile: extraTileId,
                         letter: letter.letter,
                         index: index
                     };
                 });
 
             // Add extra tile back to player's stash
-            newExtraTiles.splice(extraTileIndex, 1, extraTileLetters);
+            newExtraTiles.splice(extraTileId, 1, extraTileLetters);
             newBoardExtraTiles = [];
             
             // Count how many of the letters are clicked,
@@ -132,9 +133,9 @@ function Game() {
             // tokens.
         }
 
-        if (blankTileIndex < 0) {
+        //console.log(newExtraTiles[0], newExtraTiles[1])
 
-        } else {
+        if (blankTileIndex >= 0) {
             const tile = newLayout.findIndex(spot => spot.row === hoverRow && spot.col === hoverCol);
             newLayout[tile].key = 4;
     
