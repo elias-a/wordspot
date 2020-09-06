@@ -23,9 +23,6 @@ function BlankTile({
 
             const hoverRow = row;
             const hoverCol = col;
-            if (id === item.id) {
-                return;
-            }
 
             const extraTileIndex = item.id;
             const blankTileIndex = id;
