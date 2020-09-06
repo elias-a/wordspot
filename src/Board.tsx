@@ -12,7 +12,7 @@ function Board({
     numCols, 
     addTileFlag, 
     letters, 
-    extraTiles,
+    extraTile,
     placeToken,
     moveTile
 }) {
@@ -47,9 +47,7 @@ function Board({
                     height={height} 
                 />;
             } else if (spot.key === 4) {
-                // Temporarily consider case 
-                // of only 1 extra tile. 
-                const extraLetters = extraTiles[0].map((extraLetter, index: number) => {
+                const extraLetters = extraTile.map((extraLetter, index: number) => {
                     let obj: any = {
                         id: letters.length * 4 + index,
                         letter: extraLetter.letter,
@@ -76,7 +74,7 @@ function Board({
                 />;
             }
         }));
-    }, [letters, addTileFlag, turn, extraTiles]);
+    }, [letters, addTileFlag, turn, extraTile]);
 
     return (
         <div className={styles.board}>

@@ -60,12 +60,11 @@ function Game() {
             let newBoardExtraTiles = cloneDeep(boardExtraTiles);
             const letter = id % 4;
 
-            // Only consider case of 1 extra tile
-            const isSelected = newBoardExtraTiles[0][letter].hasOwnProperty('selected');
+            const isSelected = newBoardExtraTiles[letter].hasOwnProperty('selected');
             if (isSelected) {
-                delete newBoardExtraTiles[0][letter].selected;
+                delete newBoardExtraTiles[letter].selected;
             } else {
-                newBoardExtraTiles[0][letter].selected = true;
+                newBoardExtraTiles[letter].selected = true;
             }
             setBoardExtraTiles(newBoardExtraTiles);
 
@@ -108,15 +107,24 @@ function Game() {
         let newExtraTiles = cloneDeep(currExtraTiles);
         let newBoardExtraTiles = cloneDeep(boardExtraTiles);
 
+        // Remove extra tile from its current place on the board
         const spot = newLayout.findIndex(spot => spot.key === 4);
         let extraTileLetters = [];
         if (spot >= 0) {
             newLayout[spot].key = 1;
-            extraTileLetters.push(newBoardExtraTiles.pop()
-                .map(letter => letter.letter));
+            extraTileLetters = newBoardExtraTiles
+                .map((letter, index: number) => {
+                    return {
+                        player: turn ? 1 : 0,
+                        tile: extraTileIndex,
+                        letter: letter.letter,
+                        index: index
+                    };
+                });
 
+            // Add extra tile back to player's stash
+            newExtraTiles.splice(extraTileIndex, 1, extraTileLetters);
             
-
             // Count how many of the letters are clicked,
             // and add that number back to current player's
             // tokens.
@@ -127,15 +135,14 @@ function Game() {
         setLayout(newLayout);
 
         // Remove extra tile from player's stash
-        const extraTile = newExtraTiles.splice(extraTileIndex, 1)[0];
-        let newExtra = extraTile.map(letter => {
+        const extraTile = newExtraTiles.splice(extraTileIndex, 1, [])[0];
+        newBoardExtraTiles = extraTile.map(letter => {
             return {
                 letter: letter.letter,
                 clicked: false
             };
         });
 
-        newBoardExtraTiles.push(newExtra);
         setCurrExtraTiles(newExtraTiles);
         setBoardExtraTiles(newBoardExtraTiles);
 
@@ -217,7 +224,7 @@ function Game() {
                                 numCols={numCols}
                                 addTileFlag={addTileFlag}
                                 letters={letters}
-                                extraTiles={boardExtraTiles}
+                                extraTile={boardExtraTiles}
                                 placeToken={placeToken} 
                                 moveTile={moveTile}
                             />
@@ -230,6 +237,7 @@ function Game() {
                                 extraTiles={currExtraTiles}
                                 addTile={addTile}
                                 endTurn={endTurn} 
+                                moveTile={moveTile}
                             />
                         </Grid>
                     </Grid> : 
