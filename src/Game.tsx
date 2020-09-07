@@ -112,6 +112,16 @@ function Game() {
         const spot = newLayout.findIndex(spot => spot.key === 4);
         let extraTileLetters = [];
         if (spot >= 0) {
+            let newTokens = cloneDeep(tokens);
+            const numSelected = newBoardExtraTiles.filter(letter => 
+                letter.hasOwnProperty('selected') === true).length;
+            if (turn) {
+                newTokens[0] += numSelected;
+            } else {
+                newTokens[1] += numSelected;
+            }
+            setTokens(newTokens);
+
             const extraTileId = newBoardExtraTiles[0].id;
             newLayout[spot].key = 1;
             extraTileLetters = newBoardExtraTiles
@@ -127,13 +137,7 @@ function Game() {
             // Add extra tile back to player's stash
             newExtraTiles.splice(extraTileId, 1, extraTileLetters);
             newBoardExtraTiles = [];
-            
-            // Count how many of the letters are clicked,
-            // and add that number back to current player's
-            // tokens.
         }
-
-        //console.log(newExtraTiles[0], newExtraTiles[1])
 
         if (blankTileIndex >= 0) {
             const tile = newLayout.findIndex(spot => spot.row === hoverRow && spot.col === hoverCol);
