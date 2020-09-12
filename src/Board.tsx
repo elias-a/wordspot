@@ -8,8 +8,8 @@ import ExtraTile from './ExtraTile';
 function Board({ 
     turn,
     layout, 
-    numRows, 
-    numCols, 
+    width,
+    height,
     addTileFlag, 
     letters, 
     extraTile,
@@ -18,8 +18,6 @@ function Board({
 }) {
     const [board, setBoard] = useState([]);
     const styles = useStyles();
-    const width = (100 / numCols - 1).toString() + '%';
-    const height = (100 / numRows - 1).toString() + '%';
 
     useEffect(() => {
         let blankIndex = 0;

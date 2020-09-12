@@ -25,11 +25,11 @@ function Game() {
     const [loading, setLoading] = useState(true);
     const styles = useStyles();
 
+    const width = (100 / numCols - 1).toString() + '%';
+    const height = (100 / numRows - 1).toString() + '%';
+
     useEffect(() => {
         axios.get('/api/get-game-details').then(res => {
-            // res.data.extraTiles: array, each element
-            // is array of letters forming a single tile
-
             setLayout(res.data.layout);
             setTiles(res.data.tiles);
             setNumRows(res.data.numRows);
@@ -157,52 +157,6 @@ function Game() {
         setLayout(newLayout);
         setCurrExtraTiles(newExtraTiles);
         setBoardExtraTiles(newBoardExtraTiles);
-
-        //setAddTileFlag(false);
-
-        /*let newLayout = cloneDeep(layout);
-        let newTiles = cloneDeep(tiles);
-        let newLetters = cloneDeep(letters);
-        let newExtraTiles = cloneDeep(extraTiles);
-
-        const tile = newLayout.findIndex(spot => spot.row === hoverRow && spot.col === hoverCol);
-        newLayout[tile].key = 2;
-        newLayout[tile].tile = tiles.length + 1;
-        for (let i = tile + 1; i < newLayout.length; ++i) {
-            ++newLayout[i].index;
-        }
-        setLayout(newLayout);
-
-        const game = tiles[0].game;
-        let t = {
-          id: tiles.length + 1,
-          row: hoverRow,
-          column: hoverCol,
-          game: game
-        };
-        newTiles.splice(newLayout[tile].index, 0, t);
-        setTiles(newTiles);
-
-        let newTile = extraLetters.map((letter: string, index: number) => {
-            return {
-                id: 4 * letters.length + 1 + index,
-                clicked: 0,
-                index: index,
-                tile: letters.length + 1,
-                letter: letter
-            }
-        });
-        newLetters.splice(newLayout[tile].index, 0, newTile);
-        setLetters(newLetters);
-        
-        if (turn) {
-            newExtraTiles[0].splice(extraTile, 1);
-        } else {
-            newExtraTiles[1].splice(extraTile, 1);
-        }
-        setExtraTiles(newExtraTiles);
-
-        setAddTileFlag(false);*/
     };
 
     function addTile() {
@@ -211,8 +165,64 @@ function Game() {
 
     function endTurn() {
         setLoading(true);
+        setAddTileFlag(false);
         setTurn(!turn);
-        const updatedData = { tokens, tiles, letters, extraTiles };
+
+        let newLayout = cloneDeep(layout);
+        let newTiles = cloneDeep(tiles);
+        let newLetters = cloneDeep(letters);
+        let newExtraTiles = cloneDeep(extraTiles);
+
+        const spot = newLayout.findIndex(spot => spot.key === 4);
+        if (spot >= 0) {
+            newLayout[spot].key = 2;
+            newLayout[spot].tile = tiles.length + 1;
+            for (let i = spot + 1; i < newLayout.length; ++i) {
+                ++newLayout[i].index;
+            }
+            setLayout(newLayout);
+    
+            const game = tiles[0].game;
+            let t = {
+              id: tiles.length + 1,
+              row: newLayout[spot].row,
+              column: newLayout[spot].col,
+              game: game
+            };
+            newTiles.splice(newLayout[spot].index, 0, t);
+            setTiles(newTiles);
+    
+            let newTile = boardExtraTiles.map((letter, index: number) => {
+                return {
+                    id: 4 * letters.length + 1 + index,
+                    clicked: 0,
+                    index: index,
+                    tile: letters.length + 1,
+                    letter: letter.letter
+                }
+            });
+            newLetters.splice(newLayout[spot].index, 0, newTile);
+            setLetters(newLetters);
+            
+            const extraTileIndex = currExtraTiles.findIndex(tile => 
+                tile.length === 0
+            );
+            newExtraTiles.splice(extraTileIndex, 1);
+        }
+
+        setLayout(newLayout);
+        setTiles(newTiles);
+        setLetters(newLetters);
+        setExtraTiles(newExtraTiles);
+        setCurrExtraTiles(newExtraTiles);
+        console.log(newExtraTiles)
+
+        const updatedData = { 
+            tokens: tokens, 
+            tiles: newTiles, 
+            letters: newLetters, 
+            extraTiles: newExtraTiles 
+        };
         axios.post('/api/end-turn', updatedData).then(res => {
             setError("");
             setLetters(res.data.newLetters);
@@ -232,8 +242,8 @@ function Game() {
                             <Board 
                                 turn={turn}
                                 layout={layout}
-                                numRows={numRows}
-                                numCols={numCols}
+                                width={width}
+                                height={height}
                                 addTileFlag={addTileFlag}
                                 letters={letters}
                                 extraTile={boardExtraTiles}
@@ -246,6 +256,8 @@ function Game() {
                                 players={players} 
                                 tokens={tokens}
                                 turn={turn} 
+                                width={width}
+                                height={height}
                                 extraTiles={currExtraTiles}
                                 addTile={addTile}
                                 endTurn={endTurn} 

@@ -22,6 +22,12 @@ function Letter(props) {
             className={style}
             disabled={disabled}
             onClick={() => props.placeToken(props.id)}
+            style={{ 
+                minWidth: '50%',
+                maxWidth: '50%',
+                minHeight: '50%',
+                maxHeight: '50%'
+            }}
         >
             {letter.letter}
         </Button>

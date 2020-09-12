@@ -25,19 +25,15 @@ export const useStyles = makeStyles({
         border: '1px solid #fff'
     },
     letter: {
-        width: '49%',
-        height: '49%',
-        display: 'inline-block'
+        display: 'inline-block',
+        padding: 0,
+        margin: 0
     },
     letterClicked: {
-        width: '49%',
-        height: '49%',
         display: 'inline-block',
         background: 'linear-gradient(45deg, #d8e5ff 30%, #ccddff 90%)'
     },
     letterSelected: {
-        width: '49%',
-        height: '49%',
         display: 'inline-block',
         background: 'linear-gradient(45deg, #80aaff 30%, #4d88ff 90%)'
     },

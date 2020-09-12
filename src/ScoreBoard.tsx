@@ -11,6 +11,8 @@ function ScoreBoard({
     players, 
     tokens, 
     turn, 
+    width,
+    height,
     extraTiles, 
     addTile, 
     endTurn, 
@@ -20,10 +22,15 @@ function ScoreBoard({
     const disabled = extraTiles.length ? false : true;
     const styles = useStyles();
 
+    // Convert width and height to pixels.
+    // Assumes the width and height of the board is 800px.
+    width = (800 * parseFloat(width) / 100).toString() + 'px';
+    height = (800 * parseFloat(height) / 100).toString() + 'px';
+
     return (
         <Container>
             <Score players={players} tokens={tokens} />
-            {extraTiles.map((extraTile, index: number) => {
+             {extraTiles.map((extraTile, index: number) => {
                 if (extraTile.length > 0) {
                     // Note that the `clicked` prop of each element of 
                     // extraTile is undefined. 
@@ -31,8 +38,8 @@ function ScoreBoard({
                             id={index}
                             tileId={index}
                             letters={extraTile}
-                            width={'200px'}
-                            height={'200px'}
+                            width={width}
+                            height={height}
                             disabled={true}
                             placeToken={() => {}}
                         />;
@@ -45,8 +52,8 @@ function ScoreBoard({
                             col={null} 
                             moveTile={moveTile}
                             addTileFlag={true}
-                            width={'200px'} 
-                            height={'200px'}
+                            width={width} 
+                            height={height}
                         />;
                 }
             })}
