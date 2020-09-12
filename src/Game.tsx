@@ -21,6 +21,7 @@ function Game() {
     const [currExtraTiles, setCurrExtraTiles] = useState([]);
     const [boardExtraTiles, setBoardExtraTiles] = useState([]);
     const [addTileFlag, setAddTileFlag] = useState(false);
+    const [moveMade, setMoveMade] = useState(false);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(true);
     const styles = useStyles();
@@ -63,8 +64,10 @@ function Game() {
             const isSelected = newBoardExtraTiles[letter].hasOwnProperty('selected');
             if (isSelected) {
                 delete newBoardExtraTiles[letter].selected;
+                setMoveMade(false);
             } else {
                 newBoardExtraTiles[letter].selected = true;
+                setMoveMade(true);
             }
             setBoardExtraTiles(newBoardExtraTiles);
 
@@ -83,8 +86,10 @@ function Game() {
             let newLetters = cloneDeep(letters);
             if (isSelected) {
                 delete newLetters[tile][letter].selected;
+                setMoveMade(false);
             } else {
                 newLetters[tile][letter].selected = true;
+                setMoveMade(true);
             }
             setLetters(newLetters);
     
@@ -164,6 +169,8 @@ function Game() {
     }
 
     function endTurn() {
+        if (!moveMade) return;
+        
         setLoading(true);
         setAddTileFlag(false);
         setTurn(!turn);
@@ -215,7 +222,6 @@ function Game() {
         setLetters(newLetters);
         setExtraTiles(newExtraTiles);
         setCurrExtraTiles(newExtraTiles);
-        console.log(newExtraTiles)
 
         const updatedData = { 
             tokens: tokens, 
@@ -226,6 +232,7 @@ function Game() {
         axios.post('/api/end-turn', updatedData).then(res => {
             setError("");
             setLetters(res.data.newLetters);
+            setMoveMade(false);
         }).catch(err => {
             setError(err);
         }).then(() => {
