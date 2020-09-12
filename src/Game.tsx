@@ -3,7 +3,12 @@ import Board from './Board';
 import ScoreBoard from './ScoreBoard';
 import axios from 'axios';
 import { cloneDeep } from 'lodash';
-import { Grid } from '@material-ui/core';
+import { 
+    Grid, 
+    Button,
+    Dialog,
+    DialogActions
+} from '@material-ui/core';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useStyles } from './styles';
@@ -22,6 +27,7 @@ function Game() {
     const [boardExtraTiles, setBoardExtraTiles] = useState([]);
     const [addTileFlag, setAddTileFlag] = useState(false);
     const [moveMade, setMoveMade] = useState(false);
+    const [confirm, setConfirm] = useState(false);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(true);
     const styles = useStyles();
@@ -168,12 +174,34 @@ function Game() {
         setAddTileFlag(!addTileFlag);
     }
 
-    function endTurn() {
-        if (!moveMade) return;
-        
+    const endTurn = (endTurn: boolean) => {
+        setConfirm(false);
+        if (!endTurn) {
+            setLoading(false);
+            return;
+        }
+
+        const updatedData = { 
+            tokens,
+            tiles, 
+            letters,
+            extraTiles,
+        };
+        axios.post('/api/end-turn', updatedData).then(res => {
+            setError("");
+            setLetters(res.data.newLetters);
+            setMoveMade(false);
+            setTurn(!turn);
+        }).catch(err => {
+            setError(err);
+        }).then(() => {
+            setLoading(false);
+        });
+    }
+
+    function updateBoard() {
         setLoading(true);
         setAddTileFlag(false);
-        setTurn(!turn);
 
         let newLayout = cloneDeep(layout);
         let newTiles = cloneDeep(tiles);
@@ -223,21 +251,11 @@ function Game() {
         setExtraTiles(newExtraTiles);
         setCurrExtraTiles(newExtraTiles);
 
-        const updatedData = { 
-            tokens: tokens, 
-            tiles: newTiles, 
-            letters: newLetters, 
-            extraTiles: newExtraTiles 
-        };
-        axios.post('/api/end-turn', updatedData).then(res => {
-            setError("");
-            setLetters(res.data.newLetters);
-            setMoveMade(false);
-        }).catch(err => {
-            setError(err);
-        }).then(() => {
-            setLoading(false);
-        });
+        if (!moveMade) {
+            setConfirm(true);
+        } else {
+            endTurn(true);
+        }
     }
 
     return (
@@ -267,7 +285,7 @@ function Game() {
                                 height={height}
                                 extraTiles={currExtraTiles}
                                 addTile={addTile}
-                                endTurn={endTurn} 
+                                endTurn={updateBoard} 
                                 moveTile={moveTile}
                             />
                         </Grid>
@@ -275,6 +293,25 @@ function Game() {
                     <p>Loading...</p>
                 }
             </div>
+            {confirm && 
+                <Dialog 
+                    open={confirm}
+                >
+                    <DialogActions>
+                        <Button 
+                            onClick={() => endTurn(false)} 
+                            color="primary"
+                        >
+                            Do not end turn
+                        </Button>
+                        <Button 
+                            onClick={() => endTurn(true)} 
+                            color="primary" 
+                        >
+                            End turn
+                        </Button>
+                    </DialogActions>
+                </Dialog>}
         </DndProvider>
     );
 }
