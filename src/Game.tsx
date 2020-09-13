@@ -7,6 +7,9 @@ import {
     Grid, 
     Button,
     Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogContentText,
     DialogActions
 } from '@material-ui/core';
 import { DndProvider } from 'react-dnd';
@@ -175,18 +178,31 @@ function Game() {
     }
 
     const endTurn = (endTurn: boolean) => {
+        setLoading(true);
         setConfirm(false);
         if (!endTurn) {
             setLoading(false);
             return;
         }
 
+        const newTokens = cloneDeep(tokens);
+        if (!moveMade) {
+            if (turn) {
+                newTokens[0] += 2;
+            } else {
+                newTokens[1] += 2;
+            }
+
+            setTokens(newTokens);
+        }
+
         const updatedData = { 
-            tokens,
+            tokens: newTokens,
             tiles, 
             letters,
             extraTiles,
         };
+
         axios.post('/api/end-turn', updatedData).then(res => {
             setError("");
             setLetters(res.data.newLetters);
@@ -200,7 +216,6 @@ function Game() {
     }
 
     function updateBoard() {
-        setLoading(true);
         setAddTileFlag(false);
 
         let newLayout = cloneDeep(layout);
@@ -251,11 +266,7 @@ function Game() {
         setExtraTiles(newExtraTiles);
         setCurrExtraTiles(newExtraTiles);
 
-        if (!moveMade) {
-            setConfirm(true);
-        } else {
-            endTurn(true);
-        }
+        setConfirm(true);
     }
 
     return (
@@ -297,6 +308,16 @@ function Game() {
                 <Dialog 
                     open={confirm}
                 >
+                    <DialogTitle>
+                        {"Are you sure you want to end your turn?"}
+                    </DialogTitle>
+                    {!moveMade ? 
+                        <DialogContent>
+                            <DialogContentText>
+                                {"Since you have not made a move, you will be given two tokens if you end your turn."}
+                            </DialogContentText>
+                        </DialogContent> : <></>
+                    }
                     <DialogActions>
                         <Button 
                             onClick={() => endTurn(false)} 
