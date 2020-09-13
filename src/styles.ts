@@ -37,6 +37,10 @@ export const useStyles = makeStyles({
         display: 'inline-block',
         background: 'linear-gradient(45deg, #80aaff 30%, #4d88ff 90%)'
     },
+    letterUsed: {
+        display: 'inline-block',
+        background: 'linear-gradient(45deg, #a6c3ff 30%, #b2ccff 90%)'
+    },
     turn: {
         textAlign: 'center'
     },

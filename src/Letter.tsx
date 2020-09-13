@@ -5,22 +5,21 @@ import { Button } from '@material-ui/core';
 function Letter(props) {
     const styles = useStyles();
     const letter = props.letter;
-    let disabled: boolean = false;
     let style;
-    if (letter.clicked) {
-        style = styles.letterClicked;
-        disabled = true;
+    if (letter.hasOwnProperty('used')) {
+        style = styles.letterUsed;
     } else if (letter.hasOwnProperty('selected')) {
         style = styles.letterSelected;
+    } else if (letter.clicked) {
+        style = styles.letterClicked;
     } else {
         style = styles.letter;
     }
-    disabled = disabled || props.disabled;
 
     return (
         <Button 
             className={style}
-            disabled={disabled}
+            disabled={props.disabled}
             onClick={() => props.placeToken(props.id)}
             style={{ 
                 minWidth: '50%',

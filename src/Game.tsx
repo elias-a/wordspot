@@ -91,23 +91,34 @@ function Game() {
             const tile = Math.floor(id / 4);
             const letter = id % 4;
             const isSelected = letters[tile][letter].hasOwnProperty('selected');
+            const isClicked = letters[tile][letter].clicked;
     
             let newLetters = cloneDeep(letters);
-            if (isSelected) {
-                delete newLetters[tile][letter].selected;
-                setMoveMade(false);
-            } else {
-                newLetters[tile][letter].selected = true;
-                setMoveMade(true);
-            }
-            setLetters(newLetters);
-    
             let newTokens = cloneDeep(tokens);
-            if (turn) {
-                isSelected ? ++newTokens[0] : --newTokens[0];
+            if (isClicked) {
+                const isUsed = letters[tile][letter].hasOwnProperty('used');
+                if (isUsed) {
+                    delete newLetters[tile][letter].used;
+                } else {
+                    newLetters[tile][letter].used = true;
+                }
             } else {
-                isSelected ? ++newTokens[1] : --newTokens[1];
+                if (isSelected) {
+                    delete newLetters[tile][letter].selected;
+                    setMoveMade(false); // bug
+                } else {
+                    newLetters[tile][letter].selected = true;
+                    setMoveMade(true);
+                }
+
+                if (turn) {
+                    isSelected ? ++newTokens[0] : --newTokens[0];
+                } else {
+                    isSelected ? ++newTokens[1] : --newTokens[1];
+                }
             }
+
+            setLetters(newLetters);
             setTokens(newTokens);
         }
     }
