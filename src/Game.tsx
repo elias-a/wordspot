@@ -73,10 +73,8 @@ function Game() {
             const isSelected = newBoardExtraTiles[letter].hasOwnProperty('selected');
             if (isSelected) {
                 delete newBoardExtraTiles[letter].selected;
-                setMoveMade(false);
             } else {
                 newBoardExtraTiles[letter].selected = true;
-                setMoveMade(true);
             }
             setBoardExtraTiles(newBoardExtraTiles);
 
@@ -105,10 +103,8 @@ function Game() {
             } else {
                 if (isSelected) {
                     delete newLetters[tile][letter].selected;
-                    setMoveMade(false); // bug
                 } else {
                     newLetters[tile][letter].selected = true;
-                    setMoveMade(true);
                 }
 
                 if (turn) {
@@ -229,6 +225,15 @@ function Game() {
     function updateBoard() {
         setAddTileFlag(false);
 
+        // Checks if any tokens have been placed. 
+        const anySelected = letters.map(tile => {
+            return tile.some(letter => letter.hasOwnProperty('selected'));
+        }).some(tile => tile === true);
+
+        if (anySelected) {
+            setMoveMade(true);
+        }
+            
         let newLayout = cloneDeep(layout);
         let newTiles = cloneDeep(tiles);
         let newLetters = cloneDeep(letters);
