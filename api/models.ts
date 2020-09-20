@@ -16,6 +16,7 @@ const tilesSet = [
 
 const shuffledTiles = tilesSet.sort(() => Math.random() - 0.5);
 const tiles = shuffledTiles.slice(0, 16);
+const availableTiles = shuffledTiles.slice(16);
 
 export class Models {
     sequelize: Sequelize;
@@ -24,6 +25,7 @@ export class Models {
     Tile: any;
     Letter: any;
     ExtraTile: any;
+    AvailableTile: any;
 
     constructor(sequelize: Sequelize) {
         this.sequelize = sequelize;
@@ -41,6 +43,7 @@ export class Models {
         await this.initTile();
         await this.initLetter();
         await this.initExtraTile();
+        await this.initAvailableTile();
     }
     
     async initGame() {
@@ -232,6 +235,43 @@ export class Models {
         });
 
         await this.ExtraTile.sync();
+    }
+
+    async initAvailableTile() {
+        this.AvailableTile = this.sequelize.define('AvailableTile', {
+            id: {
+                type: DataTypes.INTEGER,
+                primaryKey: true,
+                autoIncrement: true
+            },
+            tile: {
+                type: DataTypes.INTEGER
+            },
+            letter: {
+                type: DataTypes.STRING
+            },
+            index: {
+                type: DataTypes.INTEGER
+            }
+        }, {
+            tableName: 'AvailableTile',
+            timestamps: false
+        });
+
+        await this.AvailableTile.sync();
+
+        if (!(await this.AvailableTile.findAll()).length) {
+            await Promise.all(availableTiles.map(async (tile, i) => {
+                const letters = tile.split('');
+                await Promise.all(letters.map(async (letter, j) => {
+                    await this.AvailableTile.create({
+                        tile: i + 1,
+                        letter: letter,
+                        index: j,
+                    });
+                }));
+            }));
+        }
     }
 }
 

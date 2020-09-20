@@ -213,6 +213,8 @@ function Game() {
         axios.post('/api/end-turn', updatedData).then(res => {
             setError("");
             setLetters(res.data.newLetters);
+            setExtraTiles(res.data.newExtraTiles);
+            setCurrExtraTiles(res.data.newExtraTiles);
             setMoveMade(false);
             setTurn(!turn);
         }).catch(err => {

@@ -1,5 +1,5 @@
 import { models, Models } from './models';
-import { QueryTypes } from 'sequelize';
+import { QueryTypes, Op } from 'sequelize';
 
 export class Controller {
     models: Models;
@@ -152,6 +152,54 @@ export class Controller {
 
     async endTurn(tokens: number[], tiles: any, letters: any, extraTiles: any) {
 
+        const { player } = await this.models.Player.findOne({
+            attributes: [['id', 'player']],
+            where: {
+                turn: true
+            }
+        });
+
+        // Checks how many tiles are used to form the word. 
+        const tilesUsed = letters.filter((tile: any) => {
+            return tile.some((letter: any) => letter.hasOwnProperty('selected')
+                                    || letter.hasOwnProperty('used'));
+        }).map((tile: any) => tile[0].tile);
+
+        // Award an extra tile if the word spanned
+        // 3 or more tiles. 
+        if (tilesUsed.length >= 3) {
+
+            let sql = 'SELECT DISTINCT tile FROM ExtraTile';
+            const numExtraTiles = (await this.models.sequelize.query(sql, {
+                type: QueryTypes.SELECT
+            })).length;
+            sql = 'SELECT DISTINCT tile FROM AvailableTile';
+            const numAvailableTiles = (await this.models.sequelize.query(sql, {
+                type: QueryTypes.SELECT
+            })).length;
+
+            const extraTile = await this.models.AvailableTile.findAll({
+                where: {
+                    tile: numAvailableTiles
+                }
+            });
+
+            extraTiles.push(extraTile.map((letter: any) => {
+                return {
+                    player: player,
+                    tile: letter.tile,
+                    letter: letter.letter,
+                    index: letter.index
+                };
+            }));
+
+            await this.models.AvailableTile.destroy({
+                where: {
+                    tile: numAvailableTiles
+                }
+            });
+        }
+
         // Update turn and tokens
         await Promise.all((await this.models.Player.findAll())
             .map(async (player: any, index: number) => {
@@ -169,7 +217,7 @@ export class Controller {
         );
         
         await this.models.sequelize.query(
-            'DELETE FROM ExtraTile', {
+            `DELETE FROM ExtraTile WHERE player=${player}`, {
                 type: QueryTypes.DELETE
             }
         );
@@ -211,17 +259,14 @@ export class Controller {
         }));
 
         // Update extra tiles
-        await Promise.all(extraTiles.map(async (extraTile: any) => {
-            await Promise.all(extraTile.map(async (tile: any) => {
-                await Promise.all(tile.map(async (letter: any) => {
-                    await this.models.ExtraTile.create({
-                        id: letter.id,
-                        player: letter.player,
-                        tile: letter.tile,
-                        letter: letter.letter,
-                        index: letter.index
-                    });
-                }));
+        await Promise.all(extraTiles.map(async (tile: any) => {
+            await Promise.all(tile.map(async (letter: any) => {
+                await this.models.ExtraTile.create({
+                    player: letter.player,
+                    tile: letter.tile,
+                    letter: letter.letter,
+                    index: letter.index
+                });
             }));
         }));
 
@@ -233,7 +278,20 @@ export class Controller {
             });
         }));
 
-        return { status: 200, result: { newLetters } };
+        const sql = `SELECT DISTINCT tile FROM ExtraTile WHERE
+                     player <> ${player}`;
+        const distinctTiles = await this.models.sequelize.query(sql, {
+            type: QueryTypes.SELECT
+        });
+        const newExtraTiles: any = await Promise.all(distinctTiles.map(async (tile: any) => {
+            return await this.models.ExtraTile.findAll({
+                where: {
+                    tile: tile.tile
+                }
+            });
+        }));
+
+        return { status: 200, result: { newLetters, newExtraTiles } };
     }
 }
 
