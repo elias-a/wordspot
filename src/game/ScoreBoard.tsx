@@ -3,7 +3,7 @@ import Score from './Score';
 import Turn from './Turn';
 import ExtraTile from './ExtraTile';
 import BlankTile from './BlankTile';
-import { useStyles } from './styles';
+import { useStyles } from '../styles';
 import { Container } from '@material-ui/core';
 import { Button } from '@material-ui/core';
 

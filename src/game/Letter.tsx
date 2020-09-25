@@ -1,5 +1,5 @@
 import React from 'react';
-import { useStyles } from './styles';
+import { useStyles } from '../styles';
 import { Button } from '@material-ui/core';
 
 function Letter(props) {

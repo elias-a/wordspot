@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { useStyles } from './styles';
+import { useStyles } from '../styles';
 import { useDrag } from 'react-dnd';
 import Letter from './Letter';
 

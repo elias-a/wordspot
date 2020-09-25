@@ -6,7 +6,7 @@ import {
     TableRow,
     TableCell 
 } from '@material-ui/core';
-import { useStyles } from './styles';
+import { useStyles } from '../styles';
 
 function Score({ players, tokens }) {
     const styles = useStyles();

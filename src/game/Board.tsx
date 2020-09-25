@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useStyles } from './styles';
+import { useStyles } from '../styles';
 import Tile from './Tile';
 import BlankTile from './BlankTile';
 import EmptyTile from './EmptyTile';

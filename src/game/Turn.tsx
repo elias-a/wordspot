@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@material-ui/core';
-import { useStyles } from './styles';
+import { useStyles } from '../styles';
 
 function Turn({ turn, endTurn, disabled }) {
     const styles = useStyles();

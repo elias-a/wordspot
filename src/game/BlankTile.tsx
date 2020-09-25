@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { useStyles } from './styles';
+import { useStyles } from '../styles';
 import { useDrop } from 'react-dnd';
 
 function BlankTile({ 

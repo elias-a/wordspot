@@ -14,7 +14,7 @@ import {
 } from '@material-ui/core';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { useStyles } from './styles';
+import { useStyles } from '../styles';
 
 function Game() {
     const [layout, setLayout] = useState([]);
