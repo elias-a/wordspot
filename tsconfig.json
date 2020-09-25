@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "jsx": "react",
         "target": "esnext",
         "moduleResolution": "node",
         "allowJs": true,
@@ -9,6 +10,7 @@
         "esModuleInterop": true
     },
     "include": [
-        "api"
+        "api",
+        "src"
     ]
 }
