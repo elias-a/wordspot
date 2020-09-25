@@ -33,6 +33,8 @@ function Game() {
     const [confirm, setConfirm] = useState(false);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(true);
+    const [disabled, setDisabled] = useState(true);
+    const currPlayer = 1; // localStorage.getItem('player');
     const styles = useStyles();
 
     const width = (100 / numCols - 1).toString() + '%';
@@ -51,13 +53,15 @@ function Game() {
             const players = res.data.players;
             setPlayers(players);
             
-            const turn = players[0].turn ? true : false;
-            setTurn(turn);
+            const currTurn = players[0].turn ? true : false;
+            setTurn(currTurn);
 
             const tokens = [players[0].tokens, players[1].tokens];
             setTokens(tokens);
 
             setError("");
+
+            currTurn && currPlayer === 1 ? setDisabled(false) : setDisabled(true);
         }).catch(err => {
             setError(err);
         }).then(() => {
@@ -217,6 +221,7 @@ function Game() {
             setCurrExtraTiles(res.data.newExtraTiles);
             setMoveMade(false);
             setTurn(!turn);
+            setDisabled(!disabled);
         }).catch(err => {
             setError(err);
         }).then(() => {
@@ -294,6 +299,7 @@ function Game() {
                     <Grid container className={styles.game}>
                         <Grid item xs={8}>
                             <Board 
+                                disabled={disabled}
                                 turn={turn}
                                 layout={layout}
                                 width={width}
@@ -307,6 +313,7 @@ function Game() {
                         </Grid>
                         <Grid item xs={4}>
                             <ScoreBoard 
+                                disabled={disabled}
                                 players={players} 
                                 tokens={tokens}
                                 turn={turn} 

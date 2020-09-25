@@ -6,6 +6,7 @@ import EmptyTile from './EmptyTile';
 import ExtraTile from './ExtraTile';
 
 function Board({ 
+    disabled,
     turn,
     layout, 
     width,
@@ -32,7 +33,7 @@ function Board({
                     placeToken={placeToken} 
                     width={width}
                     height={height}
-                    disabled={false}
+                    disabled={disabled}
                 />;
             } else if (spot.key === 1) {
                 return <BlankTile 

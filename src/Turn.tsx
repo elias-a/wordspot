@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from '@material-ui/core';
 import { useStyles } from './styles';
 
-function Turn({ turn, endTurn }) {
+function Turn({ turn, endTurn, disabled }) {
     const styles = useStyles();
 
     return (
@@ -12,6 +12,7 @@ function Turn({ turn, endTurn }) {
             <Button
                 className={styles.button}
                 onClick={endTurn}
+                disabled={disabled}
             >
                 End Turn
             </Button>

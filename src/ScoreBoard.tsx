@@ -8,6 +8,7 @@ import { Container } from '@material-ui/core';
 import { Button } from '@material-ui/core';
 
 function ScoreBoard({ 
+    disabled,
     players, 
     tokens, 
     turn, 
@@ -19,8 +20,10 @@ function ScoreBoard({
     moveTile 
 }) {
     const currPlayer = turn ? players[0].name : players[1].name;
-    const disabled = extraTiles.length ? false : true;
+    const addTileDisabled = extraTiles.length ? false : true;
     const styles = useStyles();
+
+    console.log(disabled)
 
     // Convert width and height to pixels.
     // Assumes the width and height of the board is 800px.
@@ -60,11 +63,11 @@ function ScoreBoard({
             <Button
                 className={styles.button}
                 onClick={addTile}
-                disabled={disabled}
+                disabled={addTileDisabled || disabled}
             >
                 Add Tile
             </Button>
-            <Turn turn={currPlayer} endTurn={endTurn} />
+            <Turn turn={currPlayer} endTurn={endTurn} disabled={disabled} />
         </Container>
     );
 }
