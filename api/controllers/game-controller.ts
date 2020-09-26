@@ -1,4 +1,4 @@
-import { models, Models } from './models';
+import { models, Models } from '../models/game-models';
 import { QueryTypes, Op } from 'sequelize';
 
 export class Controller {

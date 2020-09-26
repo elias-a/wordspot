@@ -1,29 +1,49 @@
 import Router from 'koa-router';
-import { controller, Controller } from './controller';
+import { 
+    controller as gameController, 
+    Controller as GameController
+} from './controllers/game-controller';
+import {
+    controller as authController,
+    Controller as AuthController 
+} from './controllers/auth-controller';
 
 export class Api {
     router: Router;
-    controller: Controller;
+    gameController: GameController;
+    authController: AuthController;
 
-    constructor(controller: Controller) {
+    constructor(gameController: GameController, authController: AuthController) {
         this.router = new Router({
             prefix: '/api'
         });
-        this.controller = controller;
+        this.gameController = gameController;
+        this.authController = authController;
+
+        // Game routes 
 
         this.router.get('/get-game-details', async (ctx) => {
-            const { status, result } = await this.controller.getGameDetails();
+            const { status, result } = await this.gameController.getGameDetails();
             ctx.status = status;
             ctx.body = result;
         });
 
         this.router.post('/end-turn', async (ctx) => {
             const { tokens, tiles, letters, extraTiles } = ctx.request.body;
-            const { status, result } = await this.controller.endTurn(tokens, tiles, letters, extraTiles);
+            const { status, result } = await this.gameController.endTurn(tokens, tiles, letters, extraTiles);
+            ctx.status = status;
+            ctx.body = result;
+        });
+
+        // Authentication routes
+
+        this.router.post('/login', async (ctx) => {
+            const { username, password } = ctx.request.body;
+            const { status, result } = await this.authController.login(username, password);
             ctx.status = status;
             ctx.body = result;
         });
     }
 }
 
-export const api = new Api(controller);
+export const api = new Api(gameController, authController);
