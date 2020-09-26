@@ -4,6 +4,7 @@ import {
     TextField,
     Button
 } from '@material-ui/core';
+import { Alert } from '@material-ui/lab';
 import { useStyles } from '../styles';
 
 const INITIAL_USER = {
@@ -14,6 +15,7 @@ const INITIAL_USER = {
 function Login() {
     const [user, setUser] = useState(INITIAL_USER);
     const [disabled, setDisabled] = useState(true);
+    const [error, setError] = useState("");
     const styles = useStyles();
 
     useEffect(() => {
@@ -27,11 +29,20 @@ function Login() {
     }
 
     const handleSubmit = () => {
-
+        axios.post('/api/login', user).then(res => {
+            if (res.data.status) {
+                localStorage.setItem('token', res.data.token);
+                localStorage.setItem('player', res.data.player);
+                setError("");
+            } else {
+                setError(res.data.error);
+            }
+        });
     }
 
     return (
         <div>
+            {error ? <Alert severity="error">{error}</Alert> : <></>}
             <TextField 
                 id="username" 
                 label="Username" 

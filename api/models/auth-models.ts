@@ -1,4 +1,5 @@
 import { Sequelize, DataTypes } from 'sequelize';
+import bcrypt from 'bcrypt';
 
 export class Models {
     sequelize: Sequelize;
@@ -41,11 +42,11 @@ export class Models {
         if (!(await this.User.findAll()).length) {
             await this.User.create({
                 username: 'player1',
-                password: 'testing1'
+                password: bcrypt.hashSync('testing1', 10)
             });
             await this.User.create({
                 username: 'player2',
-                password: 'testing2'
+                password: bcrypt.hashSync('testing2', 10)
             });
         }
     }
