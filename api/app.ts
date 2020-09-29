@@ -3,8 +3,9 @@ import path from 'path';
 import serve from 'koa-static';
 import bodyParser from 'koa-bodyparser';
 import { Api } from './api';
+import { Routes } from './routes';
 
-export function App(api: Api): Koa {
+export function App(api: Api, routes: Routes): Koa {
     const app = new Koa();
 
     app.use(bodyParser());
@@ -18,6 +19,7 @@ export function App(api: Api): Koa {
         }
     });
 
+    app.use(routes.router.routes()).use(routes.router.allowedMethods());
     app.use(api.router.routes()).use(api.router.allowedMethods());
     app.use(serve(path.join(__dirname, '../web')));
 

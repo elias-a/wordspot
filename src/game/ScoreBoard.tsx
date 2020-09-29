@@ -23,8 +23,6 @@ function ScoreBoard({
     const addTileDisabled = extraTiles.length ? false : true;
     const styles = useStyles();
 
-    console.log(disabled)
-
     // Convert width and height to pixels.
     // Assumes the width and height of the board is 800px.
     width = (800 * parseFloat(width) / 100).toString() + 'px';
