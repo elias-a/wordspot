@@ -1,6 +1,45 @@
 import { makeStyles } from '@material-ui/core/styles';
 
 export const useStyles = makeStyles({
+    container: {
+        width: '100vw',
+        height: '100vh',
+        backgroundImage: `url(${"../static/wordspot.jpg"})`,
+        backgroundSize: 'cover',
+        border: '1px solid #fff'
+    },
+    login: {
+        backgroundColor: '#fff',
+        width: '30vw',
+        height: '50vh',
+        marginLeft: '35vw',
+        marginTop: '25vh',
+        borderRadius: '5px',
+        position: 'relative',
+        fontFamily: 'Times New Roman'
+    },
+    header: {
+        fontFamily: 'Times New Roman',
+        textAlign: 'center'
+    },
+    input: {
+        width: '60%',
+        margin: 'auto',
+        marginTop: '10%'
+    },
+    submit: {
+        width: '60%',
+        marginLeft: '20%',
+        background: 'linear-gradient(45deg, #80aaff 30%, #4d88ff 90%)',
+        border: 0,
+        borderRadius: 3,
+        boxShadow: '0 3px 5px 2px rgba(255, 105, 135, 0.3)',
+        color: '#fff',
+        height: 48, 
+        position: 'absolute',
+        bottom: '5%'
+    },
+
     game: {
         width: '800px',
         height: '800px'
@@ -54,6 +93,6 @@ export const useStyles = makeStyles({
         width: '100%',
         padding: '0 30px',
         margin: '20px auto',
-        display: 'block',
+        display: 'block'
     }
 });

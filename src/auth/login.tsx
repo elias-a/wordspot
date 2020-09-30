@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
+    Grid,
+    Box,
     TextField,
-    Button
+    Button,
+    Typography
 } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 import { useStyles } from '../styles';
@@ -41,33 +44,43 @@ function Login() {
     }
 
     return (
-        <div>
+        <Grid className={styles.container}>
+        <Box className={styles.login}>
+            <Typography variant="h3" className={styles.header}>
+                {"Wordspot"}
+            </Typography>
             {error ? <Alert severity="error">{error}</Alert> : <></>}
-            <TextField 
-                id="username" 
-                label="Username" 
-                value={user.username}
-                variant="outlined" 
-                required
-                onChange={handleChange}
-            />
-            <TextField 
-                id="password" 
-                type="password"
-                label="Password" 
-                value={user.password}
-                variant="outlined" 
-                required
-                onChange={handleChange}
-            />
+            <div className={styles.input}>
+                <TextField 
+                    id="username" 
+                    label="Username" 
+                    value={user.username}
+                    variant="outlined" 
+                    required
+                    fullWidth
+                    onChange={handleChange}
+                />
+            </div>
+            <div className={styles.input}>
+                <TextField 
+                    id="password" 
+                    type="password"
+                    label="Password" 
+                    value={user.password}
+                    variant="outlined" 
+                    required
+                    fullWidth
+                    onChange={handleChange}
+                />
+            </div>
             <Button
-                className={styles.button}
+                className={styles.submit}
                 disabled={disabled}
                 onClick={handleSubmit}
             >
                 {"Login"}
             </Button>
-        </div>
+        </Box></Grid>
     );
 }
 
