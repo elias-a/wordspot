@@ -4,7 +4,9 @@ import {
   Switch, 
   Route
 } from 'react-router-dom';
+import { ThemeProvider } from '@material-ui/core/styles';
 import { AuthContext } from './context';
+import { theme } from './theme';
 import PrivateRoute from './PrivateRoute';
 import Login from './auth/Login';
 import Game from './game/Game';
@@ -19,14 +21,16 @@ function App() {
     };
 
     return (
-      <AuthContext.Provider value={{ authToken, setAuthToken: setToken }}>
-        <BrowserRouter>
-          <Switch>
-            <Route exact path='/login' component={Login} />
-            <PrivateRoute exact path='/' component={Game} />
-          </Switch>
-        </BrowserRouter>
-      </AuthContext.Provider>
+      <ThemeProvider theme={theme}>
+        <AuthContext.Provider value={{ authToken, setAuthToken: setToken }}>
+          <BrowserRouter>
+            <Switch>
+              <Route exact path='/login' component={Login} />
+              <PrivateRoute exact path='/' component={Game} />
+            </Switch>
+          </BrowserRouter>
+        </AuthContext.Provider>
+      </ThemeProvider>
     );
 }
 

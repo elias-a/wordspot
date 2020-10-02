@@ -13,6 +13,11 @@ function Menu() {
 
     return (
         <div className={styles.navBar}>
+            <p
+                className={styles.logo}
+            >
+                Wordspot
+            </p>
             <button 
                 className={styles.logout}
                 onClick={logout}

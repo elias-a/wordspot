@@ -1,35 +1,28 @@
 import React from 'react';
-import { 
-    Table, 
-    TableHead, 
-    TableBody, 
-    TableRow,
-    TableCell 
-} from '@material-ui/core';
 import { useStyles } from '../styles';
 
 function Score({ players, tokens }) {
     const styles = useStyles();
 
     return (
-      <Table>
-          <TableHead>
-            <TableRow>
-                <TableCell align="center">Player</TableCell>
-                <TableCell align="center">Tokens</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-              <TableRow>
-                <TableCell align="center">{players[0].name}</TableCell>
-                <TableCell align="center">{tokens[0]}</TableCell>
-              </TableRow>
-              <TableRow>
-                  <TableCell align="center">{players[1].name}</TableCell>
-                  <TableCell align="center">{tokens[1]}</TableCell>
-              </TableRow>
-          </TableBody>     
-      </Table>
+      <table className={styles.scoreTable}>
+          <thead>
+            <tr>
+                <td className={styles.scoreTable} align="center">Player</td>
+                <td className={styles.scoreTable} align="center">Tokens</td>
+            </tr>
+          </thead>
+          <tbody>
+              <tr>
+                <td className={styles.scoreTable} align="center">{players[0].name}</td>
+                <td className={styles.scoreTable} align="center">{tokens[0]}</td>
+              </tr>
+              <tr>
+                  <td className={styles.scoreTable} align="center">{players[1].name}</td>
+                  <td className={styles.scoreTable} align="center">{tokens[1]}</td>
+              </tr>
+          </tbody>     
+      </table>
     );
 }
 

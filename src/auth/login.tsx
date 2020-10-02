@@ -71,6 +71,9 @@ function Login() {
                         required
                         fullWidth
                         onChange={handleChange}
+                        inputProps={{
+                            autoComplete: 'off'
+                        }}
                     />
                 </div>
                 <div className={styles.input}>
@@ -83,6 +86,9 @@ function Login() {
                         required
                         fullWidth
                         onChange={handleChange}
+                        inputProps={{
+                            autoComplete: 'off'
+                        }}
                     />
                 </div>
                 <Button

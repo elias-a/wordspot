@@ -1,6 +1,6 @@
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, createStyles } from '@material-ui/core/styles';
 
-export const useStyles = makeStyles({
+export const useStyles = makeStyles((theme) => createStyles({
     container: {
         width: '100vw',
         height: '100vh',
@@ -11,17 +11,18 @@ export const useStyles = makeStyles({
         left: 0
     },
     login: {
-        backgroundColor: '#fff',
+        color: theme.palette.secondary.main,
+        backgroundColor: theme.palette.primary.contrastText,
         width: '30vw',
         height: '50vh',
         marginLeft: '35vw',
         marginTop: '25vh',
         borderRadius: '5px',
         position: 'relative',
-        fontFamily: 'Times New Roman'
+        fontFamily: theme.typography.fontFamily
     },
     header: {
-        fontFamily: 'Times New Roman',
+        fontFamily: theme.typography.fontFamily,
         textAlign: 'center'
     },
     input: {
@@ -32,7 +33,7 @@ export const useStyles = makeStyles({
     submit: {
         width: '60%',
         marginLeft: '20%',
-        background: 'linear-gradient(45deg, #80aaff 30%, #4d88ff 90%)',
+        backgroundColor: '#A52A2A',
         border: 0,
         borderRadius: 3,
         boxShadow: '0 3px 5px 2px rgba(255, 105, 135, 0.3)',
@@ -48,12 +49,24 @@ export const useStyles = makeStyles({
         left: 0,
         width: '100vw',
         height: '10vh',
-        backgroundColor: '#C19A6B',
-        color: '#ffffdd',
-        fontFamily: 'Times New Roman',
+        backgroundColor: theme.palette.primary.contrastText,
+        color: theme.palette.secondary.main,
+        //backgroundColor: theme.palette.secondary.main,
+        //color: theme.palette.secondary.contrastText,
+        fontFamily: theme.typography.fontFamily,
+    },
+    logo: {
+        display: 'inline-block',
+        height: '10vh',
+        margin: 0,
+        float: 'left',
+        fontSize: '50px',
     },
     logout: {
-        float: 'right'
+        float: 'right',
+        height: '6vh',
+        marginTop: '2vh',
+        marginRight: '1vw'
     },
 
     gameLayout: {
@@ -61,7 +74,8 @@ export const useStyles = makeStyles({
         height: '90vh',
         position: 'absolute',
         top: '10vh',
-        left: 0
+        left: 0,
+        backgroundColor: theme.palette.primary.contrastText
     },
     game: {
         width: '100%',
@@ -82,48 +96,59 @@ export const useStyles = makeStyles({
     tile: {
         display: 'inline-block',
         verticalAlign: 'top',
-        border: '1px solid #000'
+        border: '1px solid ' + theme.palette.secondary.contrastText,
+        backgroundColor: theme.palette.primary.main
     },
     blankTile: {
         display: 'inline-block',
         verticalAlign: 'top',
-        border: '1px solid #fff'
+        border: '1px solid ' + theme.palette.primary.contrastText
     },
     emptyTile: {
         display: 'inline-block',
         verticalAlign: 'top',
-        border: '1px solid #fff'
+        border: '1px solid ' + theme.palette.primary.contrastText
     },
     letter: {
+        color: '#fff',
         display: 'inline-block',
         padding: 0,
         margin: 0
     },
     letterClicked: {
+        color: '#fff',
         display: 'inline-block',
-        background: 'linear-gradient(45deg, #d8e5ff 30%, #ccddff 90%)'
+        backgroundColor: theme.palette.secondary.main
     },
     letterSelected: {
+        color: '#fff',
         display: 'inline-block',
-        background: 'linear-gradient(45deg, #80aaff 30%, #4d88ff 90%)'
+        backgroundColor: theme.palette.secondary.main
     },
     letterUsed: {
+        color: '#fff',
         display: 'inline-block',
-        background: 'linear-gradient(45deg, #a6c3ff 30%, #b2ccff 90%)'
+        backgroundColor: theme.palette.primary.light
+    },
+
+    scoreTable: {
+        color: theme.palette.primary.contrastText
     },
     turn: {
+        color: theme.palette.secondary.contrastText,
         textAlign: 'center'
     },
+
     button: {
-        background: 'linear-gradient(45deg, #80aaff 30%, #4d88ff 90%)',
+        backgroundColor: theme.palette.secondary.light,
         border: 0,
         borderRadius: 3,
         boxShadow: '0 3px 5px 2px rgba(255, 105, 135, 0.3)',
-        color: '#fff',
+        color: theme.palette.secondary.contrastText,
         height: 48, 
         width: '100%',
         padding: '0 30px',
         margin: '20px auto',
         display: 'block'
     }
-});
+}));

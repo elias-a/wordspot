@@ -5,7 +5,6 @@ import ScoreBoard from './ScoreBoard';
 import axios from 'axios';
 import { cloneDeep } from 'lodash';
 import { 
-    Grid, 
     Button,
     Dialog,
     DialogTitle,
@@ -35,7 +34,7 @@ function Game() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(true);
     const [disabled, setDisabled] = useState(true);
-    const currPlayer = localStorage.getItem('player');
+    const currPlayer = 'Player 1'; //localStorage.getItem('player');
     const styles = useStyles();
 
     const width = (100 / numCols - 1).toString() + '%';
