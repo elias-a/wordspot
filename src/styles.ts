@@ -42,11 +42,25 @@ export const useStyles = makeStyles({
         bottom: '5%'
     },
 
-    gameLayout: {
-        width: '100vw',
-        height: '100vh',
+    navBar: {
         position: 'absolute',
         top: 0,
+        left: 0,
+        width: '100vw',
+        height: '10vh',
+        backgroundColor: '#C19A6B',
+        color: '#ffffdd',
+        fontFamily: 'Times New Roman',
+    },
+    logout: {
+        float: 'right'
+    },
+
+    gameLayout: {
+        width: '100vw',
+        height: '90vh',
+        position: 'absolute',
+        top: '10vh',
         left: 0
     },
     game: {

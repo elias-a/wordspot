@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Menu from './Menu';
 import Board from './Board';
 import ScoreBoard from './ScoreBoard';
 import axios from 'axios';
@@ -16,7 +17,7 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useStyles } from '../styles';
 
-function Game(props) {
+function Game() {
     const [layout, setLayout] = useState([]);
     const [tiles, setTiles] = useState([]);
     const [numRows, setNumRows] = useState(0);
@@ -294,6 +295,7 @@ function Game(props) {
 
     return (
         <DndProvider backend={HTML5Backend}>
+            <Menu />
             <div className={styles.gameLayout}>
                 {!loading ? 
                     <div className={styles.game}>

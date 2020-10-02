@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react';
 
 export const AuthContext = createContext({
-    authTokens: '', setAuthTokens: (t: string) => { return; }
+    authToken: '', setAuthToken: (t: string) => { return; }
 });
 
 export function useAuth() {

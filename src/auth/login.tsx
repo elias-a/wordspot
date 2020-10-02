@@ -22,7 +22,7 @@ function Login() {
     const [loggedIn, setLoggedIn] = useState(false);
     const [disabled, setDisabled] = useState(true);
     const [error, setError] = useState("");
-    const { setAuthTokens } = useAuth();
+    const { setAuthToken } = useAuth();
     const styles = useStyles();
 
     useEffect(() => {
@@ -38,7 +38,7 @@ function Login() {
     const handleSubmit = () => {
         axios.post('/api/login', user).then(res => {
             if (res.data.status) {
-                setAuthTokens(res.data.token);
+                setAuthToken(res.data.token);
                 setLoggedIn(true);
                 localStorage.setItem('player', res.data.player);
                 setError("");

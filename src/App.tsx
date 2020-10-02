@@ -10,16 +10,16 @@ import Login from './auth/Login';
 import Game from './game/Game';
 
 function App() {
-    const existingTokens = localStorage.getItem('token');
-    const [authTokens, setAuthTokens] = useState(existingTokens);
+    const existingToken = localStorage.getItem('token');
+    const [authToken, setAuthToken] = useState(existingToken);
 
-    const setTokens = (token: string) => {
+    const setToken = (token: string) => {
       localStorage.setItem('token', token);
-      setAuthTokens(token);
+      setAuthToken(token);
     };
 
     return (
-      <AuthContext.Provider value={{ authTokens, setAuthTokens: setTokens }}>
+      <AuthContext.Provider value={{ authToken, setAuthToken: setToken }}>
         <BrowserRouter>
           <Switch>
             <Route exact path='/login' component={Login} />
