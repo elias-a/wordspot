@@ -16,7 +16,7 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useStyles } from '../styles';
 
-function Game() {
+function Game(props) {
     const [layout, setLayout] = useState([]);
     const [tiles, setTiles] = useState([]);
     const [numRows, setNumRows] = useState(0);
@@ -34,7 +34,7 @@ function Game() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(true);
     const [disabled, setDisabled] = useState(true);
-    const currPlayer = 1; // localStorage.getItem('player');
+    const currPlayer = localStorage.getItem('player');
     const styles = useStyles();
 
     const width = (100 / numCols - 1).toString() + '%';
@@ -61,7 +61,7 @@ function Game() {
 
             setError("");
 
-            currTurn && currPlayer === 1 ? setDisabled(false) : setDisabled(true);
+            currTurn && currPlayer === players[0].name ? setDisabled(false) : setDisabled(true);
         }).catch(err => {
             setError(err);
         }).then(() => {
@@ -294,10 +294,10 @@ function Game() {
 
     return (
         <DndProvider backend={HTML5Backend}>
-            <div>
+            <div className={styles.gameLayout}>
                 {!loading ? 
-                    <Grid container className={styles.game}>
-                        <Grid item xs={8}>
+                    <div className={styles.game}>
+                        <div className={styles.board}>
                             <Board 
                                 disabled={disabled}
                                 turn={turn}
@@ -310,8 +310,8 @@ function Game() {
                                 placeToken={placeToken} 
                                 moveTile={moveTile}
                             />
-                        </Grid>
-                        <Grid item xs={4}>
+                        </div>
+                        <div className={styles.scoreBoard}>
                             <ScoreBoard 
                                 disabled={disabled}
                                 players={players} 
@@ -324,8 +324,8 @@ function Game() {
                                 endTurn={updateBoard} 
                                 moveTile={moveTile}
                             />
-                        </Grid>
-                    </Grid> : 
+                        </div>
+                    </div> : 
                     <p>Loading...</p>
                 }
             </div>

@@ -6,7 +6,9 @@ export const useStyles = makeStyles({
         height: '100vh',
         backgroundImage: `url(${"../static/wordspot.jpg"})`,
         backgroundSize: 'cover',
-        border: '1px solid #fff'
+        position: 'absolute',
+        top: 0,
+        left: 0
     },
     login: {
         backgroundColor: '#fff',
@@ -40,13 +42,28 @@ export const useStyles = makeStyles({
         bottom: '5%'
     },
 
-    game: {
-        width: '800px',
-        height: '800px'
+    gameLayout: {
+        width: '100vw',
+        height: '100vh',
+        position: 'absolute',
+        top: 0,
+        left: 0
     },
-    board: {
+    game: {
         width: '100%',
         height: '100%'
+    },
+    board: {
+        width: '75%',
+        height: '100%',
+        display: 'inline-block'
+    },
+    scoreBoard: {
+        width: '24%',
+        height: '100%',
+        display: 'inline-block',
+        margin: 0,
+        verticalAlign: 'top'
     },
     tile: {
         display: 'inline-block',

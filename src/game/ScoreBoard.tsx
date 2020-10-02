@@ -4,7 +4,6 @@ import Turn from './Turn';
 import ExtraTile from './ExtraTile';
 import BlankTile from './BlankTile';
 import { useStyles } from '../styles';
-import { Container } from '@material-ui/core';
 import { Button } from '@material-ui/core';
 
 function ScoreBoard({ 
@@ -29,7 +28,7 @@ function ScoreBoard({
     height = (800 * parseFloat(height) / 100).toString() + 'px';
 
     return (
-        <Container>
+        <React.Fragment>
             <Score players={players} tokens={tokens} />
              {extraTiles.map((extraTile, index: number) => {
                 if (extraTile.length > 0) {
@@ -66,7 +65,7 @@ function ScoreBoard({
                 Add Tile
             </Button>
             <Turn turn={currPlayer} endTurn={endTurn} disabled={disabled} />
-        </Container>
+        </React.Fragment>
     );
 }
 

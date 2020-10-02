@@ -77,11 +77,11 @@ function Board({
     }, [letters, addTileFlag, turn, extraTile]);
 
     return (
-        <div className={styles.board}>
+        <React.Fragment>
             {layout.map((_spot, index: number) => {
                 return board[index];
             })}
-        </div>
+        </React.Fragment>
     );
 }
 
