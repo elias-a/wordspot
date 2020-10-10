@@ -33,7 +33,10 @@ export const useStyles = makeStyles((theme) => createStyles({
     submit: {
         width: '60%',
         marginLeft: '20%',
-        backgroundColor: '#A52A2A',
+        backgroundColor: '#993300',
+        "&:hover": {
+            backgroundColor: '#993300'
+        },
         border: 0,
         borderRadius: 3,
         boxShadow: '0 3px 5px 2px rgba(255, 105, 135, 0.3)',
@@ -59,6 +62,7 @@ export const useStyles = makeStyles((theme) => createStyles({
         display: 'inline-block',
         height: '10vh',
         margin: 0,
+        paddingLeft: '1vw',
         float: 'left',
         fontSize: '50px',
     },
@@ -66,7 +70,15 @@ export const useStyles = makeStyles((theme) => createStyles({
         float: 'right',
         height: '6vh',
         marginTop: '2vh',
-        marginRight: '1vw'
+        marginRight: '1vw',
+        backgroundColor: '#993300',
+        "&:hover": {
+            backgroundColor: '#993300'
+        },
+        border: 0,
+        borderRadius: 3,
+        boxShadow: '0 3px 5px 2px rgba(255, 105, 135, 0.3)',
+        color: '#fff'
     },
 
     gameLayout: {
@@ -87,10 +99,12 @@ export const useStyles = makeStyles((theme) => createStyles({
         display: 'inline-block'
     },
     scoreBoard: {
+        backgroundColor: theme.palette.secondary.main, 
         width: '24%',
-        height: '100%',
+        height: '70%',
         display: 'inline-block',
         margin: 0,
+        marginTop: '10vh',
         verticalAlign: 'top'
     },
     tile: {
@@ -113,7 +127,10 @@ export const useStyles = makeStyles((theme) => createStyles({
         color: '#fff',
         display: 'inline-block',
         padding: 0,
-        margin: 0
+        margin: 0,
+        "&:hover": {
+            backgroundColor: theme.palette.secondary.main
+        }
     },
     letterClicked: {
         color: '#fff',
@@ -132,21 +149,36 @@ export const useStyles = makeStyles((theme) => createStyles({
     },
 
     scoreTable: {
-        color: theme.palette.primary.contrastText
+        width: '100%',
+        borderBottom: '1px solid #fff',
+        borderCollapse: 'collapse'
+    },
+    tableCell: {
+        color: '#fff',
+        width: '50%',
+        height: '40px', 
+        margin: 0,
+        padding: 0,
+        textAlign: 'center',
+        borderBottom: '1px solid #fff',
+        borderCollapse: 'collapse'
     },
     turn: {
-        color: theme.palette.secondary.contrastText,
+        color: '#fff',
         textAlign: 'center'
     },
 
     button: {
-        backgroundColor: theme.palette.secondary.light,
+        backgroundColor: '#993300',
+        "&:hover": {
+            backgroundColor: '#993300'
+        },
         border: 0,
         borderRadius: 3,
-        boxShadow: '0 3px 5px 2px rgba(255, 105, 135, 0.3)',
-        color: theme.palette.secondary.contrastText,
+        //boxShadow: '0 3px 5px 2px rgba(255, 105, 135, 0.3)',
+        color: '#fff',
         height: 48, 
-        width: '100%',
+        width: '70%',
         padding: '0 30px',
         margin: '20px auto',
         display: 'block'

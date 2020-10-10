@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '@material-ui/core';
 import { useAuth } from '../context';
 import { useStyles } from '../styles';
 
@@ -18,12 +19,12 @@ function Menu() {
             >
                 Wordspot
             </p>
-            <button 
+            <Button 
                 className={styles.logout}
                 onClick={logout}
             >
                 Logout
-            </button>
+            </Button>
         </div>
     );
 }

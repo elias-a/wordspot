@@ -1,7 +1,5 @@
 import { createMuiTheme } from '@material-ui/core/styles';
 
-//'#c19a6b'
-
 export const theme = createMuiTheme({
   palette: {
     primary: {

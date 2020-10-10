@@ -8,18 +8,18 @@ function Score({ players, tokens }) {
       <table className={styles.scoreTable}>
           <thead>
             <tr>
-                <td className={styles.scoreTable} align="center">Player</td>
-                <td className={styles.scoreTable} align="center">Tokens</td>
+                <th className={styles.tableCell}>Player</th>
+                <th className={styles.tableCell}>Tokens</th>
             </tr>
           </thead>
           <tbody>
               <tr>
-                <td className={styles.scoreTable} align="center">{players[0].name}</td>
-                <td className={styles.scoreTable} align="center">{tokens[0]}</td>
+                <td className={styles.tableCell}>{players[0].name}</td>
+                <td className={styles.tableCell}>{tokens[0]}</td>
               </tr>
               <tr>
-                  <td className={styles.scoreTable} align="center">{players[1].name}</td>
-                  <td className={styles.scoreTable} align="center">{tokens[1]}</td>
+                  <td className={styles.tableCell}>{players[1].name}</td>
+                  <td className={styles.tableCell}>{tokens[1]}</td>
               </tr>
           </tbody>     
       </table>
