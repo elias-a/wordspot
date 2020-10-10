@@ -34,7 +34,7 @@ function Game() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(true);
     const [disabled, setDisabled] = useState(true);
-    const currPlayer = 'Player 1'; //localStorage.getItem('player');
+    const [player, setPlayer] = useState(localStorage.getItem('player'));
     const styles = useStyles();
 
     const width = (100 / numCols - 1).toString() + '%';
@@ -59,9 +59,14 @@ function Game() {
             const tokens = [players[0].tokens, players[1].tokens];
             setTokens(tokens);
 
-            setError("");
 
-            currTurn && currPlayer === players[0].name ? setDisabled(false) : setDisabled(true);
+            const currPlayer = localStorage.getItem('player');   
+            setPlayer(currPlayer);         
+            currTurn && currPlayer === players[0].name ||
+                !currTurn && currPlayer === players[1].name ? 
+                setDisabled(false) : setDisabled(true);
+
+            setError("");
         }).catch(err => {
             setError(err);
         }).then(() => {

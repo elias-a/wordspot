@@ -106,13 +106,13 @@ export class Models {
             });
 
             await this.Player.create({
-                name: "Player 1",
+                name: "player1",
                 game: game,
                 turn: true,
                 tokens: 26
             });
             await this.Player.create({
-                name: "Player 2",
+                name: "player2",
                 game: game,
                 turn: false,
                 tokens: 25
