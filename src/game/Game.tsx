@@ -41,7 +41,9 @@ function Game() {
     const height = (100 / numRows - 1).toString() + '%';
 
     useEffect(() => {
-        axios.get('/api/get-game-details').then(res => {
+        const currPlayer = localStorage.getItem('player');   
+
+        axios.post('/api/get-game-details', { player: currPlayer }).then(res => {
             setLayout(res.data.layout);
             setTiles(res.data.tiles);
             setNumRows(res.data.numRows);
@@ -59,7 +61,6 @@ function Game() {
             const tokens = [players[0].tokens, players[1].tokens];
             setTokens(tokens);
 
-            const currPlayer = localStorage.getItem('player');   
             setPlayer(currPlayer);         
             currTurn && currPlayer === players[0].name ||
                 !currTurn && currPlayer === players[1].name ? 

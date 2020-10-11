@@ -43,20 +43,23 @@ export class Controller {
         else return false;
     }
 
-    async getGameDetails() {
+    async getGameDetails(player: string) {
         const { game } = await this.models.Game.findOne({
             attributes: [['id', 'game']]
         });
+
         const players = await this.models.Player.findAll({
             where: {
                 game: game
             }
         });
+
         const tiles = await this.models.Tile.findAll({
             where: {
                 game: game
             }
         });
+
         const letters = await Promise.all(tiles.map(async (tile: any) => {
             return await this.models.Letter.findAll({
                 where: {
@@ -64,7 +67,13 @@ export class Controller {
                 }
             });
         }));
-        const playerId = players[0].turn ? players[0].id : players[1].id;
+        
+        const { playerId } = await this.models.Player.findOne({
+            attributes: [['id', 'playerId']],
+            where: {
+                name: player
+            }
+        });
         const sql = `SELECT DISTINCT tile FROM ExtraTile WHERE
                      player=${playerId}`;
         const distinctTiles = await this.models.sequelize.query(sql, {
@@ -279,7 +288,7 @@ export class Controller {
         }));
 
         const sql = `SELECT DISTINCT tile FROM ExtraTile WHERE
-                     player <> ${player}`;
+                     player=${player}`;
         const distinctTiles = await this.models.sequelize.query(sql, {
             type: QueryTypes.SELECT
         });

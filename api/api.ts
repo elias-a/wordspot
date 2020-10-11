@@ -22,8 +22,9 @@ export class Api {
 
         // Game routes 
 
-        this.router.get('/get-game-details', async (ctx) => {
-            const { status, result } = await this.gameController.getGameDetails();
+        this.router.post('/get-game-details', async (ctx) => {
+            const { player } = ctx.request.body;
+            const { status, result } = await this.gameController.getGameDetails(player);
             ctx.status = status;
             ctx.body = result;
         });
