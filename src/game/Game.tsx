@@ -59,7 +59,6 @@ function Game() {
             const tokens = [players[0].tokens, players[1].tokens];
             setTokens(tokens);
 
-
             const currPlayer = localStorage.getItem('player');   
             setPlayer(currPlayer);         
             currTurn && currPlayer === players[0].name ||
@@ -303,20 +302,6 @@ function Game() {
             <div className={styles.gameLayout}>
                 {!loading ? 
                     <div className={styles.game}>
-                        <div className={styles.board}>
-                            <Board 
-                                disabled={disabled}
-                                turn={turn}
-                                layout={layout}
-                                width={width}
-                                height={height}
-                                addTileFlag={addTileFlag}
-                                letters={letters}
-                                extraTile={boardExtraTiles}
-                                placeToken={placeToken} 
-                                moveTile={moveTile}
-                            />
-                        </div>
                         <div className={styles.scoreBoard}>
                             <ScoreBoard 
                                 disabled={disabled}
@@ -328,6 +313,20 @@ function Game() {
                                 extraTiles={currExtraTiles}
                                 addTile={addTile}
                                 endTurn={updateBoard} 
+                                moveTile={moveTile}
+                            />
+                        </div>
+                        <div className={styles.board}>
+                            <Board 
+                                disabled={disabled}
+                                turn={turn}
+                                layout={layout}
+                                width={width}
+                                height={height}
+                                addTileFlag={addTileFlag}
+                                letters={letters}
+                                extraTile={boardExtraTiles}
+                                placeToken={placeToken} 
                                 moveTile={moveTile}
                             />
                         </div>

@@ -11,7 +11,7 @@ export const useStyles = makeStyles((theme) => createStyles({
         left: 0
     },
     login: {
-        color: theme.palette.secondary.main,
+        color: '#3b2f21',
         backgroundColor: theme.palette.primary.contrastText,
         width: '30vw',
         height: '50vh',
@@ -53,10 +53,8 @@ export const useStyles = makeStyles((theme) => createStyles({
         width: '100vw',
         height: '10vh',
         backgroundColor: theme.palette.primary.contrastText,
-        color: theme.palette.secondary.main,
-        //backgroundColor: theme.palette.secondary.main,
-        //color: theme.palette.secondary.contrastText,
-        fontFamily: theme.typography.fontFamily,
+        color: '#3b2f21',
+        fontFamily: theme.typography.fontFamily
     },
     logo: {
         display: 'inline-block',
@@ -94,16 +92,16 @@ export const useStyles = makeStyles((theme) => createStyles({
         height: '100%'
     },
     board: {
-        width: '75%',
+        width: '80%',
         height: '100%',
         display: 'inline-block'
     },
     scoreBoard: {
-        backgroundColor: theme.palette.secondary.main, 
-        width: '24%',
+        backgroundColor: '#3b2f21', 
+        width: '18vw',
         height: '70%',
         display: 'inline-block',
-        margin: 0,
+        margin: '0 1vw',
         marginTop: '10vh',
         verticalAlign: 'top'
     },
@@ -135,17 +133,26 @@ export const useStyles = makeStyles((theme) => createStyles({
     letterClicked: {
         color: '#fff',
         display: 'inline-block',
-        backgroundColor: theme.palette.secondary.main
+        backgroundColor: '#4b3c2a',
+        "&:hover": {
+            backgroundColor: theme.palette.secondary.main
+        }
     },
     letterSelected: {
         color: '#fff',
         display: 'inline-block',
-        backgroundColor: theme.palette.secondary.main
+        backgroundColor: theme.palette.secondary.main,
+        "&:hover": {
+            backgroundColor: theme.palette.secondary.main
+        }
     },
     letterUsed: {
         color: '#fff',
         display: 'inline-block',
-        backgroundColor: theme.palette.primary.light
+        backgroundColor: theme.palette.secondary.main,
+        "&:hover": {
+            backgroundColor: theme.palette.secondary.main
+        }
     },
 
     scoreTable: {
@@ -175,7 +182,6 @@ export const useStyles = makeStyles((theme) => createStyles({
         },
         border: 0,
         borderRadius: 3,
-        //boxShadow: '0 3px 5px 2px rgba(255, 105, 135, 0.3)',
         color: '#fff',
         height: 48, 
         width: '70%',
