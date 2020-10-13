@@ -10,6 +10,7 @@ function ExtraTile({
     width, 
     height,
     disabled,
+    canDrag,
     placeToken
 }) {
     const ref = useRef(null);
@@ -23,7 +24,10 @@ function ExtraTile({
         },
         collect: monitor => ({
             isDragging: monitor.isDragging()
-        })
+        }),
+        canDrag: () => {
+            return canDrag;
+        }
     });
 
     drag(ref);

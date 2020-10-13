@@ -312,6 +312,7 @@ function Game() {
                                 width={width}
                                 height={height}
                                 extraTiles={currExtraTiles}
+                                addTileFlag={addTileFlag}
                                 addTile={addTile}
                                 endTurn={updateBoard} 
                                 moveTile={moveTile}

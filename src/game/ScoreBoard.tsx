@@ -14,6 +14,7 @@ function ScoreBoard({
     width,
     height,
     extraTiles, 
+    addTileFlag,
     addTile, 
     endTurn, 
     moveTile 
@@ -42,6 +43,7 @@ function ScoreBoard({
                             width={width}
                             height={height}
                             disabled={true}
+                            canDrag={addTileFlag && !disabled}
                             placeToken={() => {}}
                         />;
                     } else {

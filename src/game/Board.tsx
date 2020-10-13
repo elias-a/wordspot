@@ -65,6 +65,7 @@ function Board({
                     width={width}
                     height={height}
                     disabled={false}
+                    canDrag={true}
                     placeToken={placeToken} 
                 />;
             } else {
