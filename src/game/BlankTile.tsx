@@ -13,6 +13,14 @@ function BlankTile({
 }) {
     const ref = useRef(null);
     const styles = useStyles();
+    let style;
+    if (addTileFlag) {
+        style = styles.tile;
+    } else if (id < 0) {
+        style = styles.blankTileScore;
+    } else {
+        style = styles.blankTile;
+    }
 
     const [, drop] = useDrop({
         accept: 'ExtraTile',
@@ -42,7 +50,7 @@ function BlankTile({
 
     return (
         <div 
-            className={addTileFlag ? styles.tile : styles.blankTile } 
+            className={style} 
             style={{ width: width, height: height }}
             ref={ref}
         ></div>

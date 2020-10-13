@@ -14,6 +14,7 @@ function ExtraTile({
 }) {
     const ref = useRef(null);
     const styles = useStyles();
+    const style = tileId < 0 ? styles.extraTile : styles.tile;
 
     const [, drag] = useDrag({
         item: { 
@@ -29,8 +30,8 @@ function ExtraTile({
 
     return (
         <div 
-            className={styles.tile} 
-            style={{ width: width, height: height }} 
+            className={style} 
+            style={{ width: width, height: height }}
             ref={ref}
         >
             {letters.map((letter, index: number) => {

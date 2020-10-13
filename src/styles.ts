@@ -99,11 +99,13 @@ export const useStyles = makeStyles((theme) => createStyles({
     scoreBoard: {
         backgroundColor: '#3b2f21', 
         width: '18vw',
-        height: '70%',
+        minWidth: '200px', 
+        height: '80%',
         display: 'inline-block',
         margin: '0 1vw',
         marginTop: '10vh',
-        verticalAlign: 'top'
+        verticalAlign: 'top',
+        overflow: 'hidden'
     },
     tile: {
         display: 'inline-block',
@@ -173,6 +175,28 @@ export const useStyles = makeStyles((theme) => createStyles({
     turn: {
         color: '#fff',
         textAlign: 'center'
+    },
+    extraTileContainer: {
+        minHeight: '150px',
+        maxHeight: '150px',
+        overflowX: 'hidden',
+        overflowY: 'auto'
+    },
+    extraTile: {
+        display: 'inline-block',
+        verticalAlign: 'top',
+        border: '1px solid ' + theme.palette.secondary.contrastText,
+        backgroundColor: theme.palette.primary.main,
+        marginTop: '5px',
+        marginLeft: '40px'
+    },
+    blankTileScore: {
+        display: 'inline-block',
+        verticalAlign: 'top',
+        border: '1px solid ' + theme.palette.primary.contrastText,
+        backgroundColor: theme.palette.primary.main,
+        marginTop: '5px',
+        marginLeft: '40px'
     },
 
     button: {

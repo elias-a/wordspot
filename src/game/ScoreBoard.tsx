@@ -22,41 +22,43 @@ function ScoreBoard({
     const addTileDisabled = extraTiles.length ? false : true;
     const styles = useStyles();
 
-    // Convert width and height to pixels.
-    // Assumes the width and height of the board is 800px.
-    width = (800 * parseFloat(width) / 100).toString() + 'px';
-    height = (800 * parseFloat(height) / 100).toString() + 'px';
+    width = '125px';
+    height = '125px';
 
     return (
         <React.Fragment>
             <Score players={players} tokens={tokens} />
-             {extraTiles.map((extraTile, index: number) => {
-                if (extraTile.length > 0) {
-                    // Note that the `clicked` prop of each element of 
-                    // extraTile is undefined. 
-                    return <ExtraTile 
+            <div className={styles.extraTileContainer}>
+                {extraTiles.map((extraTile, index: number) => {
+                    if (extraTile.length > 0) {
+                        // Note that the `clicked` prop of each element of 
+                        // extraTile is undefined. 
+                        // Negative tileId indicates this extra
+                        // tile is on the scoreboard.
+                        return <ExtraTile 
                             id={index}
-                            tileId={index}
+                            tileId={-index-1}
                             letters={extraTile}
                             width={width}
                             height={height}
                             disabled={true}
                             placeToken={() => {}}
                         />;
-                } else {
-                    // Negative id indicates this blank
-                    // tile is on the scoreboard. 
-                    return <BlankTile 
+                    } else {
+                        // Negative id indicates this blank
+                        // tile is on the scoreboard. 
+                        return <BlankTile 
                             id={-index-1}
                             row={null} 
                             col={null} 
                             moveTile={moveTile}
-                            addTileFlag={true}
+                            addTileFlag={false}
                             width={width} 
                             height={height}
                         />;
-                }
-            })}
+                    }
+                })}
+            </div>
             <Button
                 className={styles.button}
                 onClick={addTile}
