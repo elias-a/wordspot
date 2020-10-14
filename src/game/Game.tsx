@@ -34,6 +34,7 @@ function Game() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(true);
     const [disabled, setDisabled] = useState(true);
+    const [winner, setWinner] = useState("");
     const [player, setPlayer] = useState(localStorage.getItem('player'));
     const styles = useStyles();
 
@@ -201,6 +202,16 @@ function Game() {
             return;
         }
 
+        if (turn && !tokens[0]) { 
+            setWinner(players[0].name);
+            setLoading(false);
+            return;
+        } else if (!turn && !tokens[1]) {
+            setWinner(players[1].name);
+            setLoading(false);
+            return;
+        }
+
         const newTokens = cloneDeep(tokens);
         if (!moveMade) {
             if (turn) {
@@ -364,7 +375,17 @@ function Game() {
                             End turn
                         </Button>
                     </DialogActions>
-                </Dialog>}
+                </Dialog>
+            }
+            {winner && 
+                <Dialog
+                    open={winner ? true : false}
+                >
+                    <DialogTitle>
+                        {`${winner} wins!`}
+                    </DialogTitle>
+                </Dialog>
+            }
         </DndProvider>
     );
 }
