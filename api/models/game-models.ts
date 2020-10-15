@@ -280,5 +280,6 @@ export const models = new Models(new Sequelize({
     storage: 'wordspot.db',
     query: {
         raw: true
-    }
+    },
+    logging: false
 }));

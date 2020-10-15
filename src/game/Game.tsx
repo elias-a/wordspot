@@ -282,12 +282,23 @@ function Game() {
             setTiles(newTiles);
     
             let newTile = boardExtraTiles.map((letter, index: number) => {
-                return {
-                    id: 4 * letters.length + 1 + index,
-                    clicked: 0,
-                    index: index,
-                    tile: letters.length + 1,
-                    letter: letter.letter
+                if (letter.hasOwnProperty('selected')) {
+                    return {
+                        id: 4 * letters.length + 1 + index,
+                        clicked: 0,
+                        index: index,
+                        tile: letters.length + 1,
+                        letter: letter.letter,
+                        selected: true
+                    }
+                } else {
+                    return {
+                        id: 4 * letters.length + 1 + index,
+                        clicked: 0,
+                        index: index,
+                        tile: letters.length + 1,
+                        letter: letter.letter
+                    }
                 }
             });
             newLetters.splice(newLayout[spot].index, 0, newTile);
