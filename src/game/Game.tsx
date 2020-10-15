@@ -194,7 +194,7 @@ function Game() {
         setAddTileFlag(!addTileFlag);
     }
 
-    const endTurn = (endTurn: boolean) => {
+    const updateBoard = (endTurn: boolean) => {
         setLoading(true);
         setConfirm(false);
         if (!endTurn) {
@@ -202,61 +202,6 @@ function Game() {
             return;
         }
 
-        if (turn && !tokens[0]) { 
-            setWinner(players[0].name);
-            setLoading(false);
-            return;
-        } else if (!turn && !tokens[1]) {
-            setWinner(players[1].name);
-            setLoading(false);
-            return;
-        }
-
-        const newTokens = cloneDeep(tokens);
-        if (!moveMade) {
-            if (turn) {
-                newTokens[0] += 2;
-            } else {
-                newTokens[1] += 2;
-            }
-
-            setTokens(newTokens);
-        }
-
-        const updatedData = { 
-            tokens: newTokens,
-            tiles, 
-            letters,
-            extraTiles,
-        };
-
-        axios.post('/api/end-turn', updatedData).then(res => {
-            setError("");
-            setLetters(res.data.newLetters);
-            setExtraTiles(res.data.newExtraTiles);
-            setCurrExtraTiles(res.data.newExtraTiles);
-            setMoveMade(false);
-            setTurn(!turn);
-            setDisabled(!disabled);
-        }).catch(err => {
-            setError(err);
-        }).then(() => {
-            setLoading(false);
-        });
-    }
-
-    function updateBoard() {
-        setAddTileFlag(false);
-
-        // Checks if any tokens have been placed. 
-        const anySelected = letters.map(tile => {
-            return tile.some(letter => letter.hasOwnProperty('selected'));
-        }).some(tile => tile === true);
-
-        if (anySelected) {
-            setMoveMade(true);
-        }
-            
         let newLayout = cloneDeep(layout);
         let newTiles = cloneDeep(tiles);
         let newLetters = cloneDeep(letters);
@@ -316,6 +261,61 @@ function Game() {
         setExtraTiles(newExtraTiles);
         setCurrExtraTiles(newExtraTiles);
 
+        if (turn && !tokens[0]) { 
+            setWinner(players[0].name);
+            setLoading(false);
+            return;
+        } else if (!turn && !tokens[1]) {
+            setWinner(players[1].name);
+            setLoading(false);
+            return;
+        }
+
+        const newTokens = cloneDeep(tokens);
+        if (!moveMade) {
+            if (turn) {
+                newTokens[0] += 2;
+            } else {
+                newTokens[1] += 2;
+            }
+
+            setTokens(newTokens);
+        }
+
+        const updatedData = { 
+            tokens: newTokens,
+            tiles, 
+            letters,
+            extraTiles,
+        };
+
+        axios.post('/api/end-turn', updatedData).then(res => {
+            setError("");
+            setLetters(res.data.newLetters);
+            setExtraTiles(res.data.newExtraTiles);
+            setCurrExtraTiles(res.data.newExtraTiles);
+            setMoveMade(false);
+            setTurn(!turn);
+            setDisabled(!disabled);
+        }).catch(err => {
+            setError(err);
+        }).then(() => {
+            setLoading(false);
+        });
+    }
+
+    function endTurn() {
+        setAddTileFlag(false);
+
+        // Checks if any tokens have been placed. 
+        const anySelected = letters.map(tile => {
+            return tile.some(letter => letter.hasOwnProperty('selected'));
+        }).some(tile => tile === true);
+
+        if (anySelected) {
+            setMoveMade(true);
+        }
+        
         setConfirm(true);
     }
 
@@ -336,7 +336,7 @@ function Game() {
                                 extraTiles={currExtraTiles}
                                 addTileFlag={addTileFlag}
                                 addTile={addTile}
-                                endTurn={updateBoard} 
+                                endTurn={endTurn} 
                                 moveTile={moveTile}
                             />
                         </div>
@@ -374,13 +374,13 @@ function Game() {
                     }
                     <DialogActions>
                         <Button 
-                            onClick={() => endTurn(false)} 
+                            onClick={() => updateBoard(false)} 
                             color="primary"
                         >
                             Do not end turn
                         </Button>
                         <Button 
-                            onClick={() => endTurn(true)} 
+                            onClick={() => updateBoard(true)} 
                             color="primary" 
                         >
                             End turn
