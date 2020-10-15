@@ -214,7 +214,6 @@ function Game() {
             for (let i = spot + 1; i < newLayout.length; ++i) {
                 ++newLayout[i].index;
             }
-            setLayout(newLayout);
     
             const game = tiles[0].game;
             let t = {
@@ -224,7 +223,6 @@ function Game() {
               game: game
             };
             newTiles.splice(newLayout[spot].index, 0, t);
-            setTiles(newTiles);
     
             let newTile = boardExtraTiles.map((letter, index: number) => {
                 if (letter.hasOwnProperty('selected')) {
@@ -247,19 +245,12 @@ function Game() {
                 }
             });
             newLetters.splice(newLayout[spot].index, 0, newTile);
-            setLetters(newLetters);
             
             const extraTileIndex = currExtraTiles.findIndex(tile => 
                 tile.length === 0
             );
             newExtraTiles.splice(extraTileIndex, 1);
         }
-
-        setLayout(newLayout);
-        setTiles(newTiles);
-        setLetters(newLetters);
-        setExtraTiles(newExtraTiles);
-        setCurrExtraTiles(newExtraTiles);
 
         if (turn && !tokens[0]) { 
             setWinner(players[0].name);
@@ -284,16 +275,20 @@ function Game() {
 
         const updatedData = { 
             tokens: newTokens,
-            tiles, 
-            letters,
-            extraTiles,
+            tiles: newTiles, 
+            letters: newLetters,
+            extraTiles: newExtraTiles
         };
 
         axios.post('/api/end-turn', updatedData).then(res => {
             setError("");
+
             setLetters(res.data.newLetters);
             setExtraTiles(res.data.newExtraTiles);
             setCurrExtraTiles(res.data.newExtraTiles);
+            setLayout(newLayout);
+            setTiles(newTiles);
+
             setMoveMade(false);
             setTurn(!turn);
             setDisabled(!disabled);
