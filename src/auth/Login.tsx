@@ -40,6 +40,7 @@ function Login() {
             if (res.data.status) {
                 setAuthToken(res.data.token);
                 setLoggedIn(true);
+                localStorage.setItem('token', res.data.token);
                 localStorage.setItem('player', res.data.player);
                 setError("");
             } else {

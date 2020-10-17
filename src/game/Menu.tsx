@@ -9,6 +9,7 @@ function Menu() {
 
     const logout = () => {
         localStorage.setItem('token', '');
+        localStorage.setItem('player', '');
         setAuthToken('');
     };
 
