@@ -36,15 +36,18 @@ function Game() {
     const [disabled, setDisabled] = useState(true);
     const [winner, setWinner] = useState("");
     const [player, setPlayer] = useState(localStorage.getItem('player'));
+    const game = location.pathname.slice(location.pathname.lastIndexOf('/') + 1);
     const styles = useStyles();
 
     const width = (100 / numCols - 1).toString() + '%';
     const height = (100 / numRows - 1).toString() + '%';
 
     useEffect(() => {
-        const currPlayer = localStorage.getItem('player');   
+        const currPlayer = localStorage.getItem('player');
+        const path = location.pathname;
+        const game = path.slice(path.lastIndexOf('/') + 1);
 
-        axios.post('/api/get-game-details', { player: currPlayer }).then(res => {
+        axios.post('/api/get-game-details', { player: currPlayer, game }).then(res => {
             setLayout(res.data.layout);
             setTiles(res.data.tiles);
             setNumRows(res.data.numRows);
@@ -141,7 +144,6 @@ function Game() {
 
         // Remove extra tile from its current place on the board
         const spot = newLayout.findIndex(spot => spot.key === 4);
-        let extraTileLetters = [];
         if (spot >= 0) {
             let newTokens = cloneDeep(tokens);
             const numSelected = newBoardExtraTiles.filter(letter => 
@@ -155,31 +157,31 @@ function Game() {
 
             const extraTileId = newBoardExtraTiles[0].id;
             newLayout[spot].key = 1;
-            extraTileLetters = newBoardExtraTiles
-                .map((letter, index: number) => {
-                    return {
-                        player: turn ? 1 : 0,
-                        tile: extraTileId,
-                        letter: letter.letter,
-                        index: index
-                    };
-                });
+            
+            const letters = newBoardExtraTiles
+                .map(letter => {
+                    return letter.letter;
+                }).join('');
+            const newExtraTile = {
+                player: turn ? 1 : 0,
+                letters: letters
+            };
 
             // Add extra tile back to player's stash
-            newExtraTiles.splice(extraTileId, 1, extraTileLetters);
+            newExtraTiles.splice(extraTileId, 1, newExtraTile);
             newBoardExtraTiles = [];
         }
 
         if (blankTileIndex >= 0) {
             const tile = newLayout.findIndex(spot => spot.row === hoverRow && spot.col === hoverCol);
             newLayout[tile].key = 4;
-    
+            
             // Remove extra tile from player's stash
-            const extraTile = newExtraTiles.splice(extraTileIndex, 1, [])[0];
-            newBoardExtraTiles = extraTile.map(letter => {
+            const extraTile = newExtraTiles.splice(extraTileIndex, 1, {})[0];
+            newBoardExtraTiles = extraTile.letters.split('').map(letter => {
                 return {
                     id: extraTileIndex,
-                    letter: letter.letter,
+                    letter: letter,
                     clicked: false
                 };
             });
@@ -215,17 +217,14 @@ function Game() {
                 ++newLayout[i].index;
             }
     
-            const game = tiles[0].game;
-            let t = {
-              id: tiles.length + 1,
-              row: newLayout[spot].row,
-              column: newLayout[spot].col,
-              game: game
-            };
-            newTiles.splice(newLayout[spot].index, 0, t);
-    
+            let extraLetters = '';
+            let extraClicked = '';
             let newTile = boardExtraTiles.map((letter, index: number) => {
+                extraLetters += letter.letter;
+                
                 if (letter.hasOwnProperty('selected')) {
+                    extraClicked += '1';
+
                     return {
                         id: 4 * letters.length + 1 + index,
                         clicked: 0,
@@ -235,6 +234,8 @@ function Game() {
                         selected: true
                     }
                 } else {
+                    extraClicked += '0';
+
                     return {
                         id: 4 * letters.length + 1 + index,
                         clicked: 0,
@@ -246,6 +247,17 @@ function Game() {
             });
             newLetters.splice(newLayout[spot].index, 0, newTile);
             
+            const game = tiles[0].game;
+            let t = {
+              id: tiles.length + 1,
+              row: newLayout[spot].row,
+              column: newLayout[spot].col,
+              game: game,
+              letters: extraLetters,
+              clicked: extraClicked
+            };
+            newTiles.splice(newLayout[spot].index, 0, t);
+
             const extraTileIndex = currExtraTiles.findIndex(tile => 
                 tile.length === 0
             );
@@ -274,6 +286,8 @@ function Game() {
         }
 
         const updatedData = { 
+            game,
+            player,
             tokens: newTokens,
             tiles: newTiles, 
             letters: newLetters,
@@ -304,6 +318,7 @@ function Game() {
 
         // Checks if any tokens have been placed. 
         const anySelected = letters.map(tile => {
+            // TODO: Check 'used' as well
             return tile.some(letter => letter.hasOwnProperty('selected'));
         }).some(tile => tile === true);
 

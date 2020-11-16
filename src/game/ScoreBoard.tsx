@@ -31,7 +31,17 @@ function ScoreBoard({
             <Score players={players} tokens={tokens} />
             <div className={styles.extraTileContainer}>
                 {extraTiles.map((extraTile, index: number) => {
-                    if (extraTile.length > 0) {
+                    if (extraTile.hasOwnProperty('letters')) {
+                        const letters = extraTile.letters.split('')
+                            .map((letter: string, j: number) => {
+                                return {
+                                    tile: -index-1,
+                                    letter: letter,
+                                    clicked: 0,
+                                    index: j
+                                };
+                            });
+
                         // Note that the `clicked` prop of each element of 
                         // extraTile is undefined. 
                         // Negative tileId indicates this extra
@@ -39,7 +49,7 @@ function ScoreBoard({
                         return <ExtraTile 
                             id={index}
                             tileId={-index-1}
-                            letters={extraTile}
+                            letters={letters}
                             width={width}
                             height={height}
                             disabled={true}

@@ -1,5 +1,19 @@
-import { models, Models } from '../models/game-models';
+import { models, Models } from '../models/models';
 import { QueryTypes, Op } from 'sequelize';
+
+const tilesSet = [
+    "SGPU", "HEAS", "XAIY",
+    "LIEL", "RNAD", "OPPE",
+    "CAKI", "TSOS", "MIAP",
+    "PLAE", "ZEYA", "ENRI",
+    "ILFL", "OSOT", "WOAT",
+    "GNSA", "STHA", "IRTE",
+    "CEKA", "VEIH", "NTOA",
+    "EDER", "THEC", "DLEY",
+    "ATIR", "VNSA", "ETND",
+    "AJNO", "LRIG", "MORG",
+    "RAIB", "BOUT"
+];
 
 export class Controller {
     models: Models;
@@ -8,6 +22,87 @@ export class Controller {
         this.models = models;
     }
     
+    async getGames(player: string) {
+        const games = await this.models.Game.findAll();
+
+        return { status: 200, result: {
+                games
+            }
+        }
+    }
+
+    async startGame(player1: string) {
+
+        // The name of the game is the current time in Epoch seconds
+        const game = Math.round(Date.now() / 1000).toString();
+        const gameId = parseInt(game);
+
+        // Later, player2 should be accepted as a parameter
+        const { player2 } = await this.models.User.findOne({
+            attributes: [['id', 'player2']],
+            where: {
+                username: {
+                    [Op.not]: player1
+                }
+            }
+        });
+
+        player1 = (await this.models.User.findOne({
+            where: {
+                username: player1
+            }
+        })).id;
+
+        // Create game
+        await this.models.Game.create({
+            id: gameId,
+            name: game
+        });
+
+        // Create players
+        await this.models.Player.create({
+            name: player1,
+            game: gameId,
+            turn: true,
+            tokens: 26
+        });
+        await this.models.Player.create({
+            name: player2,
+            game: gameId,
+            turn: false,
+            tokens: 25
+        });
+
+        const shuffledTiles = tilesSet.sort(() => Math.random() - 0.5);
+        const tiles = shuffledTiles.slice(0, 16);
+        const availableTiles = shuffledTiles.slice(16);
+
+        // Create tiles 
+        await Promise.all(tiles.map(async (tile, i) => {
+            await this.models.Tile.create({
+                game: gameId,
+                row: Math.floor(i / 4),
+                column: i % 4,
+                letters: tile,
+                clicked: '0000'
+            });
+        }));
+
+        // Create available tiles
+        await Promise.all(availableTiles.map(async (tile, i) => {
+            await this.models.AvailableTile.create({
+                game: gameId,
+                letters: tile
+            });
+        }));
+
+        return {
+            status: 200, result: {
+                game
+            }
+        }
+    }
+
     // Helper function to check if location is a valid 
     // spot to add a tile. 
     async checkNeighbors(row: number, col: number): Promise<boolean> {
@@ -43,12 +138,25 @@ export class Controller {
         else return false;
     }
 
-    async getGameDetails(player: string) {
-        const { game } = await this.models.Game.findOne({
-            attributes: [['id', 'game']]
+    async getGameDetails(player: string, game: string) {
+        const gameObj = await this.models.Game.findOne({
+            where: {
+                name: game
+            }
+        });
+        
+        if (gameObj === null) {
+            return { status: 404, result: {} };
+        }
+
+        const { playerId } = await this.models.User.findOne({
+            attributes: [['id', 'playerId']],
+            where: {
+                username: player
+            }
         });
 
-        const players = await this.models.Player.findAll({
+        let players = await this.models.Player.findAll({
             where: {
                 game: game
             }
@@ -59,36 +167,25 @@ export class Controller {
                 game: game
             }
         });
+        
+        const letters = tiles.map((tile: any, i: number) => {
+            const l = tile.letters.split('');
+            const clicked: string[] = tile.clicked.split('');
+            return l.map((letter: string, j: number) => {
+                return {
+                    id: i * 4 + j,
+                    letter: letter,
+                    tile: i + 1,
+                    index: j,
+                    clicked: parseInt(clicked[j])
+                };
+            });
+        });
 
-        const letters = await Promise.all(tiles.map(async (tile: any) => {
-            return await this.models.Letter.findAll({
-                where: {
-                    tile: tile.id
-                }
-            });
-        }));
-        
-        const { playerId } = await this.models.Player.findOne({
-            attributes: [['id', 'playerId']],
+        const extraTiles = await this.models.ExtraTile.findAll({
             where: {
-                name: player
+                player: playerId
             }
-        });
-        const sql = `SELECT DISTINCT tile FROM ExtraTile WHERE
-                     player=${playerId}`;
-        const distinctTiles = await this.models.sequelize.query(sql, {
-            type: QueryTypes.SELECT
-        });
-        let extraTiles: any = await Promise.all(distinctTiles.map(async (tile: any) => {
-            return await this.models.ExtraTile.findAll({
-                where: {
-                    tile: tile.tile
-                }
-            });
-        }));
-        
-        extraTiles = extraTiles.map((playerTiles: any) => {
-            return playerTiles.filter((tile: any) => tile.length !== 0);
         });
 
         const maxRow = await this.models.Tile.max('row');
@@ -147,24 +244,35 @@ export class Controller {
             }
         }
 
+        await Promise.all(players.map(async (player: any) => {
+            const { name } = await this.models.User.findOne({
+                attributes: [['username', 'name']],
+                where: {
+                    id: player.name
+                }
+            });
+
+            player.name = name;
+        }));
+        
         return { status: 200, result: { 
-                players: players, 
-                letters: letters,
-                layout: layout,
-                tiles: tiles,
+                players, 
+                layout,
+                letters,
+                tiles,
                 numRows: maxRow - minRow + 3,
                 numCols: maxCol - minCol + 3,
-                extraTiles: extraTiles
+                extraTiles
             } 
         };
     }
 
-    async endTurn(tokens: number[], tiles: any, letters: any, extraTiles: any) {
-
-        const { player } = await this.models.Player.findOne({
-            attributes: [['id', 'player']],
+    async endTurn(game: string, player: string, tokens: number[], tiles: any, letters: any, extraTiles: any) {
+        
+        const { playerId } = await this.models.User.findOne({
+            attributes: [['id', 'playerId']],
             where: {
-                turn: true
+                username: player
             }
         });
 
@@ -177,41 +285,34 @@ export class Controller {
         // Award an extra tile if the word spanned
         // 3 or more tiles. 
         if (tilesUsed.length >= 3) {
-
-            let sql = 'SELECT DISTINCT tile FROM ExtraTile';
-            const numExtraTiles = (await this.models.sequelize.query(sql, {
-                type: QueryTypes.SELECT
-            })).length;
-            sql = 'SELECT DISTINCT tile FROM AvailableTile';
-            const numAvailableTiles = (await this.models.sequelize.query(sql, {
-                type: QueryTypes.SELECT
-            })).length;
-
-            const extraTile = await this.models.AvailableTile.findAll({
+            const availableTiles = await this.models.AvailableTile.findAll({
                 where: {
-                    tile: numAvailableTiles
+                    game: game
                 }
             });
+            
+            const availableTile = availableTiles[availableTiles.length - 1];
+            const extraTile = {
+                id: availableTile.id,
+                player: playerId,
+                letters: availableTile.letters
+            };
 
-            extraTiles.push(extraTile.map((letter: any) => {
-                return {
-                    player: player,
-                    tile: letter.tile,
-                    letter: letter.letter,
-                    index: letter.index
-                };
-            }));
+            extraTiles.push(extraTile);
 
             await this.models.AvailableTile.destroy({
                 where: {
-                    tile: numAvailableTiles
+                    id: availableTile.id
                 }
             });
         }
-
+                
         // Update turn and tokens
-        await Promise.all((await this.models.Player.findAll())
-            .map(async (player: any, index: number) => {
+        await Promise.all((await this.models.Player.findAll({
+            where: {
+                game: game
+            }
+        })).map(async (player: any, index: number) => {
                 const turn = player.turn ? 0 : 1;
 
                 await this.models.Player.update({
@@ -224,14 +325,9 @@ export class Controller {
                 });
             })
         );
-        
+
         await this.models.sequelize.query(
-            `DELETE FROM ExtraTile WHERE player=${player}`, {
-                type: QueryTypes.DELETE
-            }
-        );
-        await this.models.sequelize.query(
-            'DELETE FROM Letter', {
+            `DELETE FROM ExtraTile WHERE player=${playerId}`, {
                 type: QueryTypes.DELETE
             }
         );
@@ -240,65 +336,59 @@ export class Controller {
                 type: QueryTypes.DELETE
             }
         );
-        
+
         // Update tiles 
-        await Promise.all(tiles.map(async (tile: any) => {
+        await Promise.all(tiles.map(async (tile: any, i: number) => {
+            const l = tile.letters.split('');
+            const clicked = l.map((letter: any, j: number) => {
+                return letters[i][j].hasOwnProperty('selected') 
+                    || letters[i][j].clicked
+                    ? '1' : '0';
+            }).join('');
+
             await this.models.Tile.create({
                 id: tile.id,
+                game: tile.game,
                 row: tile.row,
                 column: tile.column,
-                game: tile.game
+                letters: tile.letters,
+                clicked: clicked
             });
         }));
-
-        // Update letters
-        await Promise.all(letters.map(async (tile: any) => {
-            await Promise.all(tile.map(async (letter: any) => {
-                const clicked = letter.hasOwnProperty('selected') 
-                    || letter.clicked
-                    ? true : false;
-                await this.models.Letter.create({
-                    id: letter.id,
-                    letter: letter.letter,
-                    tile: letter.tile,
-                    index: letter.index,
-                    clicked: clicked
-                });
-            }));
-        }));
-
+        
         // Update extra tiles
         await Promise.all(extraTiles.map(async (tile: any) => {
-            await Promise.all(tile.map(async (letter: any) => {
-                await this.models.ExtraTile.create({
-                    player: letter.player,
-                    tile: letter.tile,
-                    letter: letter.letter,
-                    index: letter.index
-                });
-            }));
-        }));
-
-        const newLetters = await Promise.all(tiles.map(async (tile: any) => {
-            return await this.models.Letter.findAll({
-                where: {
-                    tile: tile.id
-                }
+            await this.models.ExtraTile.create({
+                player: tile.player,
+                letters: tile.letters,
             });
         }));
 
-        const sql = `SELECT DISTINCT tile FROM ExtraTile WHERE
-                     player=${player}`;
-        const distinctTiles = await this.models.sequelize.query(sql, {
-            type: QueryTypes.SELECT
+        const newTiles = await this.models.Tile.findAll({
+            where: {
+                game: game
+            }
         });
-        const newExtraTiles: any = await Promise.all(distinctTiles.map(async (tile: any) => {
-            return await this.models.ExtraTile.findAll({
-                where: {
-                    tile: tile.tile
-                }
+
+        const newLetters = newTiles.map((tile: any, i: number) => {
+            const l = tile.letters.split('');
+            const clicked = tile.clicked.split('');
+            return l.map((letter: string, j: number) => {
+                return {
+                    id: i * 4 + j,
+                    letter: letter,
+                    tile: i + 1,
+                    index: j,
+                    clicked: parseInt(clicked[j])
+                };
             });
-        }));
+        });
+
+        const newExtraTiles = await this.models.ExtraTile.findAll({
+            where: {
+                player: playerId
+            }
+        });
 
         return { status: 200, result: { newLetters, newExtraTiles } };
     }

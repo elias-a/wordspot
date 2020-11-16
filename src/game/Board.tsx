@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useStyles } from '../styles';
 import Tile from './Tile';
 import BlankTile from './BlankTile';
 import EmptyTile from './EmptyTile';
@@ -18,7 +17,6 @@ function Board({
     moveTile
 }) {
     const [board, setBoard] = useState([]);
-    const styles = useStyles();
 
     useEffect(() => {
         let blankIndex = 0;

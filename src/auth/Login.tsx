@@ -53,7 +53,7 @@ function Login() {
     }
 
     if (loggedIn) {
-        return <Redirect to="/" />;
+        return <Redirect to="/dashboard" />;
     }
 
     return (

@@ -79,6 +79,15 @@ export const useStyles = makeStyles((theme) => createStyles({
         color: '#fff'
     },
 
+    dashboardLayout: {
+        width: '100vw',
+        height: '90vh',
+        position: 'absolute',
+        top: '10vh',
+        left: 0,
+        backgroundColor: theme.palette.primary.contrastText
+    },
+
     gameLayout: {
         width: '100vw',
         height: '90vh',

@@ -1,4 +1,4 @@
-import { models, Models } from '../models/auth-models';
+import { models, Models } from '../models/models';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';

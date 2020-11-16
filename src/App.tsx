@@ -10,6 +10,7 @@ import { theme } from './theme';
 import PrivateRoute from './PrivateRoute';
 import Login from './auth/Login';
 import Game from './game/Game';
+import Dashboard from './Dashboard';
 
 function App() {
     const existingToken = localStorage.getItem('token');
@@ -26,7 +27,8 @@ function App() {
           <BrowserRouter>
             <Switch>
               <Route exact path='/login' component={Login} />
-              <PrivateRoute exact path='/' component={Game} />
+              <PrivateRoute exact path='/dashboard' component={Dashboard} />
+              <PrivateRoute exact path='/game/:id' component={Game} />
             </Switch>
           </BrowserRouter>
         </AuthContext.Provider>

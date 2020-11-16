@@ -22,16 +22,31 @@ export class Api {
 
         // Game routes 
 
-        this.router.post('/get-game-details', async (ctx) => {
+        this.router.post('/get-games', async (ctx) => {
             const { player } = ctx.request.body;
-            const { status, result } = await this.gameController.getGameDetails(player);
+            const { status, result } = await this.gameController.getGames(player);
+            ctx.status = status;
+            ctx.body = result;
+        });
+
+        this.router.post('/start-game', async (ctx) => {
+            const { player } = ctx.request.body;
+            const { status, result } = await this.gameController.startGame(player);
+            ctx.status = status;
+            ctx.body = result;
+        });
+
+        this.router.post('/get-game-details', async (ctx) => {
+            const { player, game } = ctx.request.body;
+            const { status, result } = await this.gameController.getGameDetails(player, game);
+            
             ctx.status = status;
             ctx.body = result;
         });
 
         this.router.post('/end-turn', async (ctx) => {
-            const { tokens, tiles, letters, extraTiles } = ctx.request.body;
-            const { status, result } = await this.gameController.endTurn(tokens, tiles, letters, extraTiles);
+            const { game, player, tokens, tiles, letters, extraTiles } = ctx.request.body;
+            const { status, result } = await this.gameController.endTurn(game, player, tokens, tiles, letters, extraTiles);
             ctx.status = status;
             ctx.body = result;
         });

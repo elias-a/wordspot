@@ -3,3 +3,4 @@ node_modules
 web/bundle.js
 dist
 *.db
+*.csv
