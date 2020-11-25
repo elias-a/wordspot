@@ -26,10 +26,12 @@ function Dashboard() {
         });
     }
 
-    /*if (game !== '') {
+    // TODO: Display game metrics on dashboard
+
+    if (game !== '') {
         const path = '/game/' + game;
-        return <Redirect to={path} />;
-    }*/
+        return <Redirect push to={path} />;
+    }
 
     return (
         <React.Fragment>
