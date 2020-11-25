@@ -36,24 +36,26 @@ function Dashboard() {
             <Menu />
             <div className={styles.dashboardLayout}>
                 <Button
-                    className={styles.button}
+                    className={styles.startGameBtn}
                     onClick={startGame}
                 >
                     Start New Game
                 </Button>
 
-                <ul>
+                <div className={styles.gamesList}>
+                    <h3>Games</h3>
                     {games.map(game => {
                         return (
                             <Link
                                 key={game.id}
                                 href={"/game/" + game.name}
+                                className={styles.gameLink}
                             >
-                                {game.name}
+                                {game.date}
                             </Link>
                         );
                     })}
-                </ul>
+                </div>
             </div>
         </React.Fragment>
     );

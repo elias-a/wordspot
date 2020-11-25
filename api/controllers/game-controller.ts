@@ -22,8 +22,33 @@ export class Controller {
         this.models = models;
     }
     
-    async getGames(player: string) {
-        const games = await this.models.Game.findAll();
+    async getGames(username: string) {
+        const { playerId } = await this.models.User.findOne({
+            attributes: [['id', 'playerId']],
+            where: {
+                username: username
+             }
+        });
+        let games = await this.models.Player.findAll({
+            attributes: [['game', 'name']],
+            where: {
+                name: playerId
+            },
+            order: [
+                ['id', 'DESC']
+            ]
+        });
+
+        games = games.map((game: any, idx: number) => {
+            const dateObj = new Date(game.name*1000);
+            const date = dateObj.toLocaleString();
+
+            return {
+                id: idx, 
+                name: game.name,
+                date: date
+            }
+        });
 
         return { status: 200, result: {
                 games

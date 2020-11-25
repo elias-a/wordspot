@@ -87,6 +87,28 @@ export const useStyles = makeStyles((theme) => createStyles({
         left: 0,
         backgroundColor: theme.palette.primary.contrastText
     },
+    startGameBtn: {
+        backgroundColor: '#993300',
+        "&:hover": {
+            backgroundColor: '#993300'
+        },
+        border: 0,
+        borderRadius: 3,
+        color: '#fff',
+        height: 48, 
+        width: '40%',
+        padding: '0 30px',
+        margin: '20px auto',
+        display: 'block'
+    },
+    gamesList: {
+        width: '40%',
+        margin: '20px auto'
+    },
+    gameLink: {
+        display: 'block',
+        margin: '30px auto'
+    },
 
     gameLayout: {
         width: '100vw',
