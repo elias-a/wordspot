@@ -174,7 +174,7 @@ export class Models {
             player: {
                 type: DataTypes.INTEGER,
                 references: {
-                    model: 'player',
+                    model: 'Player',
                     key: 'id'
                 }
             },

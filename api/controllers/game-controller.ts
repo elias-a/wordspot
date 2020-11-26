@@ -207,10 +207,17 @@ export class Controller {
             return { status: 404, result: {} };
         }
 
-        const { playerId } = await this.models.User.findOne({
+        const { userId } = await this.models.User.findOne({
+            attributes: [['id', 'userId']],
+            where: {
+                username: player 
+            }
+        });
+        const { playerId } = await this.models.Player.findOne({
             attributes: [['id', 'playerId']],
             where: {
-                username: player
+                game: game,
+                name: userId
             }
         });
 
@@ -327,10 +334,17 @@ export class Controller {
 
     async endTurn(game: string, player: string, tokens: number[], tiles: any, letters: any, extraTiles: any) {
         
-        const { playerId } = await this.models.User.findOne({
+        const { userId } = await this.models.User.findOne({
+            attributes: [['id', 'userId']],
+            where: {
+                username: player 
+            }
+        });
+        const { playerId } = await this.models.Player.findOne({
             attributes: [['id', 'playerId']],
             where: {
-                username: player
+                game: game,
+                name: userId
             }
         });
 
@@ -366,7 +380,7 @@ export class Controller {
                 }
             });
         }
-                
+        
         // Update turn and tokens
         await Promise.all((await this.models.Player.findAll({
             where: {
@@ -392,7 +406,7 @@ export class Controller {
             }
         );
         await this.models.sequelize.query(
-            'DELETE FROM Tile', {
+            `DELETE FROM Tile WHERE game=${game}`, {
                 type: QueryTypes.DELETE
             }
         );
@@ -419,7 +433,7 @@ export class Controller {
         // Update extra tiles
         await Promise.all(extraTiles.map(async (tile: any) => {
             await this.models.ExtraTile.create({
-                player: tile.player,
+                player: playerId,
                 letters: tile.letters,
             });
         }));
