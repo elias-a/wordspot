@@ -10,14 +10,19 @@ import { useStyles } from './styles';
 function Dashboard() {
     const [game, setGame] = useState('');
     const [games, setGames] = useState([]);
-    const player = localStorage.getItem('player');
+    const [player, setPlayer] = useState('');
     const styles = useStyles();
 
     useEffect(() => {
-        axios.post('/api/get-games', { player }).then(res => {
-            setGames(res.data.games);
-        });
-    }, []);
+        const p = localStorage.getItem('player');
+        if (p !== '') {
+            setPlayer(p);
+
+            axios.post('/api/get-games', { player: p }).then(res => {
+                setGames(res.data.games);
+            });
+        }
+    }, [localStorage.getItem('player')]);
 
     const startGame = () => {
         axios.post('/api/start-game', { player }).then(res => {

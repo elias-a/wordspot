@@ -264,7 +264,7 @@ function Game() {
             newExtraTiles.splice(extraTileIndex, 1);
         }
 
-        if (turn && !tokens[0]) { 
+        /*if (turn && !tokens[0]) { 
             setWinner(players[0].name);
             setLoading(false);
             return;
@@ -272,7 +272,7 @@ function Game() {
             setWinner(players[1].name);
             setLoading(false);
             return;
-        }
+        }*/
 
         const newTokens = cloneDeep(tokens);
         if (!moveMade) {
@@ -305,6 +305,7 @@ function Game() {
 
             setMoveMade(false);
             setTurn(!turn);
+            setWinner(winner);
             setDisabled(!disabled);
         }).catch(err => {
             setError(err);

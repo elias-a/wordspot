@@ -334,6 +334,8 @@ export class Controller {
             }
         });
 
+        
+
         // Checks how many tiles are used to form the word. 
         const tilesUsed = letters.filter((tile: any) => {
             return tile.some((letter: any) => letter.hasOwnProperty('selected')
@@ -448,7 +450,14 @@ export class Controller {
             }
         });
 
-        return { status: 200, result: { newLetters, newExtraTiles } };
+        return { 
+            status: 200, 
+            result: { 
+                newLetters, 
+                newExtraTiles,
+                winner: ""
+            } 
+        };
     }
 }
 
