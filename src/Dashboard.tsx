@@ -46,6 +46,12 @@ function Dashboard() {
                     {games.map(game => {
                         const turn = game.turn 
                             ? 'Your turn!' : ''
+                        let outcome = null;
+                        if (game.outcome !== '') {
+                            outcome = game.outcome === 'won' 
+                                ? <div>You won!</div> 
+                                : <div>You lost!</div>
+                        }
 
                         return (
                             <a
@@ -60,8 +66,11 @@ function Dashboard() {
                                     {turn}
                                 </div>
                                 <div>
-                                    {game.players[0] + ' vs. ' + game.players[1]}
+                                    {game.players[0] 
+                                        + ' vs. ' 
+                                        + game.players[1]}
                                 </div>
+                                {outcome}
                             </a>
                         );
                     })}

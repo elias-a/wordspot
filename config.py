@@ -29,6 +29,7 @@ c.execute("""CREATE TABLE IF NOT EXISTS Player (
     game INTEGER,
     turn TINYINT(1),
     tokens INTEGER,
+    winner TINYINT(1),
     PRIMARY KEY (id),
     FOREIGN KEY (name) REFERENCES User(id),
     FOREIGN KEY (game) REFERENCES Game(id)

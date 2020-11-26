@@ -93,6 +93,9 @@ export class Models {
             },
             tokens: {
                 type: DataTypes.INTEGER
+            },
+            winner: {
+                type: DataTypes.BOOLEAN
             }
         }, {
             tableName: 'Player',

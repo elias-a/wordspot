@@ -39,6 +39,7 @@ export class Controller {
             ]
         });
 
+        let outcome = '';
         games = await Promise.all(games
             .map(async (game: any, idx: number) => {
                 const dateObj = new Date(game.game*1000);
@@ -57,6 +58,13 @@ export class Controller {
                                 }
                             });
 
+                            player.name === playerId
+                                && player.winner === 1
+                                ? outcome = 'won' : null;
+                            player.name !== playerId
+                                && player.winner === 1
+                                ? outcome = 'lost' : null;
+
                             return user.username;
                         })
                     );
@@ -67,7 +75,8 @@ export class Controller {
                     game: game.game,
                     date: date,
                     turn: game.turn,
-                    players: players
+                    players: players,
+                    outcome: outcome
                 }
             })
         );
@@ -111,13 +120,15 @@ export class Controller {
             name: player1,
             game: gameId,
             turn: true,
-            tokens: 26
+            tokens: 26,
+            winner: false
         });
         await this.models.Player.create({
             name: player2,
             game: gameId,
             turn: false,
-            tokens: 25
+            tokens: 25,
+            winner: false
         });
 
         const shuffledTiles = tilesSet.sort(() => Math.random() - 0.5);
