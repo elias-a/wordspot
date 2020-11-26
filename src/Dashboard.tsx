@@ -5,6 +5,7 @@ import {
     Button
 } from '@material-ui/core';
 import Menu from './game/Menu';
+import { formatApostrophe } from './helpers';
 import { useStyles } from './styles';
 
 function Dashboard() {
@@ -49,8 +50,15 @@ function Dashboard() {
                 <div className={styles.gamesList}>
                     <h3>Games</h3>
                     {games.map(game => {
+                        const otherPlayer = 
+                            player === game.players[0] 
+                                ? game.players[1]
+                                : game.players[0];
+
                         const turn = game.turn 
-                            ? 'Your turn!' : ''
+                            ? 'Your turn!' 
+                            : formatApostrophe(otherPlayer) + ' turn!';
+                            
                         let outcome = null;
                         if (game.outcome !== '') {
                             outcome = game.outcome === 'won' 
