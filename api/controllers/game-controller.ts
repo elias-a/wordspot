@@ -30,7 +30,7 @@ export class Controller {
              }
         });
         let games = await this.models.Player.findAll({
-            attributes: [['game', 'name']],
+            attributes: ['game', 'turn'],
             where: {
                 name: playerId
             },
@@ -39,16 +39,38 @@ export class Controller {
             ]
         });
 
-        games = games.map((game: any, idx: number) => {
-            const dateObj = new Date(game.name*1000);
-            const date = dateObj.toLocaleString();
+        games = await Promise.all(games
+            .map(async (game: any, idx: number) => {
+                const dateObj = new Date(game.game*1000);
+                const date = dateObj.toLocaleString();
 
-            return {
-                id: idx, 
-                name: game.name,
-                date: date
-            }
-        });
+                const players = await this.models.Player.findAll({
+                    where: {
+                        game: parseInt(game.game)
+                    }
+                }).then(async (game: any) => {
+                    return await Promise.all(game
+                        .map(async (player: any) => {
+                            const user = await this.models.User.findOne({
+                                where: {
+                                    id: player.name
+                                }
+                            });
+
+                            return user.username;
+                        })
+                    );
+                });
+
+                return {
+                    id: idx, 
+                    game: game.game,
+                    date: date,
+                    turn: game.turn,
+                    players: players
+                }
+            })
+        );
 
         return { status: 200, result: {
                 games

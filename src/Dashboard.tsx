@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Redirect } from 'react-router-dom';
 import axios from 'axios';
 import { 
-    Button,
-    Link
+    Button
 } from '@material-ui/core';
 import Menu from './game/Menu';
 import { useStyles } from './styles';
@@ -26,8 +25,6 @@ function Dashboard() {
         });
     }
 
-    // TODO: Display game metrics on dashboard
-
     if (game !== '') {
         const path = '/game/' + game;
         return <Redirect push to={path} />;
@@ -47,14 +44,25 @@ function Dashboard() {
                 <div className={styles.gamesList}>
                     <h3>Games</h3>
                     {games.map(game => {
+                        const turn = game.turn 
+                            ? 'Your turn!' : ''
+
                         return (
-                            <Link
+                            <a
                                 key={game.id}
-                                href={"/game/" + game.name}
+                                href={"/game/" + game.game}
                                 className={styles.gameLink}
                             >
-                                {game.date}
-                            </Link>
+                                <div>
+                                    {game.date}
+                                </div>
+                                <div>
+                                    {turn}
+                                </div>
+                                <div>
+                                    {game.players[0] + ' vs. ' + game.players[1]}
+                                </div>
+                            </a>
                         );
                     })}
                 </div>

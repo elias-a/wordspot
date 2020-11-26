@@ -89,7 +89,7 @@ export const useStyles = makeStyles((theme) => createStyles({
     },
     startGameBtn: {
         backgroundColor: '#993300',
-        "&:hover": {
+        '&:hover': {
             backgroundColor: '#993300'
         },
         border: 0,
@@ -106,8 +106,17 @@ export const useStyles = makeStyles((theme) => createStyles({
         margin: '20px auto'
     },
     gameLink: {
+        height: '80px',
         display: 'block',
-        margin: '30px auto'
+        margin: '30px auto',
+        border: '1px solid #000',
+        borderRadius: '3',
+        color: 'black',
+        textDecoration: 'none',
+        '&:visited': {
+            textDecoration: 'none',
+            color: 'black'
+        }
     },
 
     gameLayout: {
