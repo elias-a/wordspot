@@ -23,6 +23,12 @@ export class Controller {
     }
     
     async getGames(username: string) {
+        const { userId } = await this.models.User.findOne({
+            attributes: [['id', 'userId']],
+            where: {
+                username: username 
+            }
+        });
         const { playerId } = await this.models.User.findOne({
             attributes: [['id', 'playerId']],
             where: {
@@ -39,15 +45,15 @@ export class Controller {
             ]
         });
 
-        let outcome = '';
         games = await Promise.all(games
             .map(async (game: any, idx: number) => {
+                let outcome = '';
                 const dateObj = new Date(game.game*1000);
                 const date = dateObj.toLocaleString();
 
                 const players = await this.models.Player.findAll({
                     where: {
-                        game: parseInt(game.game)
+                        game: game.game
                     }
                 }).then(async (game: any) => {
                     return await Promise.all(game
@@ -58,18 +64,19 @@ export class Controller {
                                 }
                             });
 
-                            player.name === playerId
-                                && player.winner === 1
-                                ? outcome = 'won' : null;
-                            player.name !== playerId
-                                && player.winner === 1
-                                ? outcome = 'lost' : null;
+                            if (player.winner === 1) {
+                                if (player.name === userId) {
+                                    outcome = 'won';
+                                } else if (player.name !== userId) {
+                                    outcome = 'lost';
+                                }
+                            }
 
                             return user.username;
                         })
                     );
                 });
-
+                
                 return {
                     id: idx, 
                     game: game.game,
@@ -309,6 +316,7 @@ export class Controller {
             }
         }
 
+        let outcome = '';
         await Promise.all(players.map(async (player: any) => {
             const { name } = await this.models.User.findOne({
                 attributes: [['username', 'name']],
@@ -316,6 +324,13 @@ export class Controller {
                     id: player.name
                 }
             });
+
+            player.name === userId
+                && player.winner === 1
+                ? outcome = 'won' : null;
+            player.name !== userId
+                && player.winner === 1
+                ? outcome = 'lost' : null;
 
             player.name = name;
         }));
@@ -327,12 +342,13 @@ export class Controller {
                 tiles,
                 numRows: maxRow - minRow + 3,
                 numCols: maxCol - minCol + 3,
-                extraTiles
+                extraTiles,
+                outcome
             } 
         };
     }
 
-    async endTurn(game: string, player: string, tokens: number[], tiles: any, letters: any, extraTiles: any) {
+    async endTurn(game: string, player: string, tokens: number[], tiles: any, letters: any, extraTiles: any, turn: boolean) {
         
         const { userId } = await this.models.User.findOne({
             attributes: [['id', 'userId']],
@@ -346,9 +362,7 @@ export class Controller {
                 game: game,
                 name: userId
             }
-        });
-
-        
+        });        
 
         // Checks how many tiles are used to form the word. 
         const tilesUsed = letters.filter((tile: any) => {
@@ -463,13 +477,50 @@ export class Controller {
                 player: playerId
             }
         });
+        
+        const { otherPlayer } = await this.models.Player.findOne({
+            where: {
+                game: game,
+                name: {
+                    [Op.not]: userId
+                }  
+            }
+        }).then(async (player: any) => {
+            return await this.models.User.findOne({
+                attributes: [['username', 'otherPlayer']],
+                where: {
+                    id: player.name
+                }
+            });
+        });
+
+        const winner = 
+            turn && !tokens[0] || !turn && !tokens[1]
+                ? player : '';
+
+        let outcome = '';
+        if (winner === player) {
+            outcome = 'won';
+        } else if (winner === otherPlayer) {
+            outcome = 'lost';
+        } 
+
+        if (outcome !== '') {
+            await this.models.Player.update({
+                winner: 1
+            }, {
+                where: {
+                    id: playerId
+                }
+            });
+        }
 
         return { 
             status: 200, 
             result: { 
                 newLetters, 
                 newExtraTiles,
-                winner: ""
+                outcome
             } 
         };
     }

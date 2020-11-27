@@ -31,10 +31,10 @@ function Game() {
     const [addTileFlag, setAddTileFlag] = useState(false);
     const [moveMade, setMoveMade] = useState(false);
     const [confirm, setConfirm] = useState(false);
-    const [error, setError] = useState("");
+    const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
     const [disabled, setDisabled] = useState(true);
-    const [winner, setWinner] = useState("");
+    const [outcome, setOutcome] = useState('');
     const [player, setPlayer] = useState(localStorage.getItem('player'));
     const game = location.pathname.slice(location.pathname.lastIndexOf('/') + 1);
     const styles = useStyles();
@@ -55,6 +55,7 @@ function Game() {
             setLetters(res.data.letters);
             setExtraTiles(res.data.extraTiles);
             setCurrExtraTiles(res.data.extraTiles);
+            setOutcome(res.data.outcome);
 
             const players = res.data.players;
             setPlayers(players);
@@ -264,16 +265,6 @@ function Game() {
             newExtraTiles.splice(extraTileIndex, 1);
         }
 
-        /*if (turn && !tokens[0]) { 
-            setWinner(players[0].name);
-            setLoading(false);
-            return;
-        } else if (!turn && !tokens[1]) {
-            setWinner(players[1].name);
-            setLoading(false);
-            return;
-        }*/
-
         const newTokens = cloneDeep(tokens);
         if (!moveMade) {
             if (turn) {
@@ -291,7 +282,8 @@ function Game() {
             tokens: newTokens,
             tiles: newTiles, 
             letters: newLetters,
-            extraTiles: newExtraTiles
+            extraTiles: newExtraTiles,
+            turn
         };
 
         axios.post('/api/end-turn', updatedData).then(res => {
@@ -302,10 +294,10 @@ function Game() {
             setCurrExtraTiles(res.data.newExtraTiles);
             setLayout(newLayout);
             setTiles(newTiles);
+            setOutcome(res.data.outcome);
 
             setMoveMade(false);
             setTurn(!turn);
-            setWinner(winner);
             setDisabled(!disabled);
         }).catch(err => {
             setError(err);
@@ -399,12 +391,12 @@ function Game() {
                     </DialogActions>
                 </Dialog>
             }
-            {winner && 
+            {(outcome === 'won' || outcome === 'lost') && 
                 <Dialog
-                    open={winner ? true : false}
+                    open={outcome ? true : false}
                 >
                     <DialogTitle>
-                        {`${winner} wins!`}
+                        {`You ${outcome}!`}
                     </DialogTitle>
                 </Dialog>
             }

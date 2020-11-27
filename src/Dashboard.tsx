@@ -40,6 +40,9 @@ function Dashboard() {
         <React.Fragment>
             <Menu />
             <div className={styles.dashboardLayout}>
+                <div className={styles.gamesList}>
+                    <h2>{`Hello, ${player}!`}</h2>
+                </div>
                 <Button
                     className={styles.startGameBtn}
                     onClick={startGame}
@@ -55,13 +58,12 @@ function Dashboard() {
                                 ? game.players[1]
                                 : game.players[0];
 
-                        const turn = game.turn 
-                            ? 'Your turn!' 
-                            : formatApostrophe(otherPlayer) + ' turn!';
-                            
-                        let outcome = null;
+                        let turn = game.turn 
+                            ? <div>{'Your turn!'}</div>
+                            : <div>{formatApostrophe(otherPlayer) + ' turn!'}</div>;
+                        
                         if (game.outcome !== '') {
-                            outcome = game.outcome === 'won' 
+                            turn = game.outcome === 'won' 
                                 ? <div>You won!</div> 
                                 : <div>You lost!</div>
                         }
@@ -75,15 +77,12 @@ function Dashboard() {
                                 <div>
                                     {game.date}
                                 </div>
-                                <div>
-                                    {turn}
-                                </div>
+                                {turn}
                                 <div>
                                     {game.players[0] 
                                         + ' vs. ' 
                                         + game.players[1]}
                                 </div>
-                                {outcome}
                             </a>
                         );
                     })}
