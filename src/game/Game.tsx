@@ -35,12 +35,11 @@ function Game() {
     const [loading, setLoading] = useState(true);
     const [disabled, setDisabled] = useState(true);
     const [outcome, setOutcome] = useState('');
+    const [width, setWidth] = useState('');
+    const [height, setHeight] = useState('');
     const [player, setPlayer] = useState(localStorage.getItem('player'));
     const game = location.pathname.slice(location.pathname.lastIndexOf('/') + 1);
     const styles = useStyles();
-
-    const width = (100 / numCols - 1).toString() + '%';
-    const height = (100 / numRows - 1).toString() + '%';
 
     useEffect(() => {
         const currPlayer = localStorage.getItem('player');
@@ -52,6 +51,8 @@ function Game() {
             setTiles(res.data.tiles);
             setNumRows(res.data.numRows);
             setNumCols(res.data.numCols);
+            setWidth((100 / res.data.numCols - 1).toString() + '%');
+            setHeight((100 / res.data.numRows - 1).toString() + '%');
             setLetters(res.data.letters);
             setExtraTiles(res.data.extraTiles);
             setCurrExtraTiles(res.data.extraTiles);
@@ -295,6 +296,8 @@ function Game() {
             setCurrExtraTiles(res.data.newExtraTiles);
             setTiles(newTiles);
             setOutcome(res.data.outcome);
+            setWidth(res.data.width);
+            setHeight(res.data.height);
 
             setMoveMade(false);
             setTurn(!turn);

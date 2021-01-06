@@ -628,13 +628,20 @@ export class Controller {
             });
         }
 
+        const numRows = maxRow - minRow + 3;
+        const numCols = maxCol - minCol + 3;
+        const width = (100 / numCols - 1).toString() + '%';
+        const height = (100 / numRows - 1).toString() + '%';
+
         return { 
             status: 200, 
             result: { 
                 newLayout,
                 newLetters, 
                 newExtraTiles,
-                outcome
+                outcome,
+                width,
+                height
             } 
         };
     }
