@@ -1,5 +1,5 @@
 import { models, Models } from '../models/models';
-import { QueryTypes, Op } from 'sequelize';
+import { QueryTypes, Op, fn, col } from 'sequelize';
 
 const tilesSet = [
     "SGPU", "HEAS", "XAIY",
@@ -170,9 +170,10 @@ export class Controller {
 
     // Helper function to check if location is a valid 
     // spot to add a tile. 
-    async checkNeighbors(row: number, col: number): Promise<boolean> {
+    async checkNeighbors(game: number, row: number, col: number): Promise<boolean> {
         const right = await this.models.Tile.findOne({
             where: {
+                game: game,
                 row: row,
                 column: col + 1
             }
@@ -180,6 +181,7 @@ export class Controller {
 
         const left = await this.models.Tile.findOne({
             where: {
+                game: game,
                 row: row,
                 column: col - 1
             }
@@ -187,6 +189,7 @@ export class Controller {
 
         const above = await this.models.Tile.findOne({
             where: {
+                game: game,
                 row: row + 1,
                 column: col
             }
@@ -194,6 +197,7 @@ export class Controller {
 
         const below = await this.models.Tile.findOne({
             where: {
+                game: game,
                 row: row - 1,
                 column: col
             }
@@ -260,11 +264,37 @@ export class Controller {
             }
         });
 
-        const maxRow = await this.models.Tile.max('row');
-        const maxCol = await this.models.Tile.max('column');
-        const minRow = await this.models.Tile.min('row');
-        const minCol = await this.models.Tile.min('column');
+        const { maxRow } = await this.models.Tile.findOne({
+            attributes: [[fn('max', col('row')), 'maxRow']],
+            where: {
+                game: game
+            }
+        });
+        const { maxCol } = await this.models.Tile.findOne({
+            attributes: [[fn('max', col('column')), 'maxCol']],
+            where: {
+                game: game
+            }
+        });
+        const { minRow } = await this.models.Tile.findOne({
+            attributes: [[fn('min', col('row')), 'minRow']],
+            where: {
+                game: game
+            }
+        });
+        const { minCol } = await this.models.Tile.findOne({
+            attributes: [[fn('min', col('column')), 'minCol']],
+            where: {
+                game: game
+            }
+        });
 
+        const { minTile } = await this.models.Tile.findOne({
+            attributes: [[fn('min', col('id')), 'minTile']],
+            where: {
+                game: game
+            }
+        });
         let index = 0;
         let layout: { 
             key: number, 
@@ -276,6 +306,7 @@ export class Controller {
             for (let col = minCol - 1; col <= maxCol + 1; ++col) {
                 const tile = await this.models.Tile.findOne({
                     where: {
+                        game: game,
                         row: row,
                         column: col
                     }
@@ -292,10 +323,10 @@ export class Controller {
                         row: row,
                         col: col,
                         index: index++,
-                        tile: tile.id
+                        tile: tile.id - minTile + 1
                     });
                 }
-                else if (await this.checkNeighbors(row, col)) {
+                else if (await this.checkNeighbors(parseInt(game), row, col)) {
                     layout.push({
                         key: 1,
                         row: row,
@@ -435,7 +466,6 @@ export class Controller {
             }).join('');
 
             await this.models.Tile.create({
-                id: tile.id,
                 game: tile.game,
                 row: tile.row,
                 column: tile.column,
@@ -451,6 +481,89 @@ export class Controller {
                 letters: tile.letters,
             });
         }));
+
+        const { maxRow } = await this.models.Tile.findOne({
+            attributes: [[fn('max', col('row')), 'maxRow']],
+            where: {
+                game: game
+            }
+        });
+        const { maxCol } = await this.models.Tile.findOne({
+            attributes: [[fn('max', col('column')), 'maxCol']],
+            where: {
+                game: game
+            }
+        });
+        const { minRow } = await this.models.Tile.findOne({
+            attributes: [[fn('min', col('row')), 'minRow']],
+            where: {
+                game: game
+            }
+        });
+        const { minCol } = await this.models.Tile.findOne({
+            attributes: [[fn('min', col('column')), 'minCol']],
+            where: {
+                game: game
+            }
+        });
+
+        const { minTile } = await this.models.Tile.findOne({
+            attributes: [[fn('min', col('id')), 'minTile']],
+            where: {
+                game: game
+            }
+        });
+        let index = 0;
+        let newLayout: { 
+            key: number, 
+            row: number, 
+            col: number, 
+            index: number, 
+            tile: number | null }[] = [];
+        for (let row = minRow - 1; row <= maxRow + 1; ++row) {
+            for (let col = minCol - 1; col <= maxCol + 1; ++col) {
+                const tile = await this.models.Tile.findOne({
+                    where: {
+                        game: game,
+                        row: row,
+                        column: col
+                    }
+                });
+
+                // 4: Extra tile is currently added here
+                // 2: tile
+                // 1: valid spot to add tile
+                // 0: placeholder spot
+
+                if (tile) {
+                    newLayout.push({
+                        key: 2,
+                        row: row,
+                        col: col,
+                        index: index++,
+                        tile: tile.id - minTile + 1
+                    });
+                }
+                else if (await this.checkNeighbors(parseInt(game), row, col)) {
+                    newLayout.push({
+                        key: 1,
+                        row: row,
+                        col: col,
+                        index: index,
+                        tile: null
+                    });
+                }
+                else {
+                    newLayout.push({
+                        key: 0,
+                        row: row,
+                        col: col,
+                        index: index,
+                        tile: null
+                    });
+                }
+            }
+        }
 
         const newTiles = await this.models.Tile.findAll({
             where: {
@@ -518,6 +631,7 @@ export class Controller {
         return { 
             status: 200, 
             result: { 
+                newLayout,
                 newLetters, 
                 newExtraTiles,
                 outcome

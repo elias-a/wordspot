@@ -289,10 +289,10 @@ function Game() {
         axios.post('/api/end-turn', updatedData).then(res => {
             setError("");
 
+            setLayout(res.data.newLayout);
             setLetters(res.data.newLetters);
             setExtraTiles(res.data.newExtraTiles);
             setCurrExtraTiles(res.data.newExtraTiles);
-            setLayout(newLayout);
             setTiles(newTiles);
             setOutcome(res.data.outcome);
 
