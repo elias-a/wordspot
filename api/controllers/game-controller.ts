@@ -48,8 +48,7 @@ export class Controller {
         games = await Promise.all(games
             .map(async (game: any, idx: number) => {
                 let outcome = '';
-                const dateObj = new Date(game.game*1000);
-                const date = dateObj.toLocaleString();
+                const date = new Date(game.game*1000).toLocaleDateString("en-US");
 
                 const players = await this.models.Player.findAll({
                     where: {

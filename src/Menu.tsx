@@ -1,7 +1,8 @@
 import React from 'react';
 import { Button } from '@material-ui/core';
-import { useAuth } from '../context';
-import { useStyles } from '../styles';
+import { useAuth } from './context';
+import { useStyles } from './styles';
+import logo from './assets/wordspot-logo.png';
 
 function Menu() {
     const { setAuthToken } = useAuth();
@@ -15,11 +16,17 @@ function Menu() {
 
     return (
         <div className={styles.navBar}>
-            <p
-                className={styles.logo}
-            >
-                Wordspot
-            </p>
+            <a href="/">
+                <img 
+                    src={logo} 
+                    alt="Wordspot" 
+                    style={{
+                        marginLeft: '1vw',
+                        height: '15vh'
+                    }}
+                />
+            </a>
+            
             <Button 
                 className={styles.logout}
                 onClick={logout}

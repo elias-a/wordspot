@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Menu from './Menu';
+import Menu from '../Menu';
 import Board from './Board';
 import ScoreBoard from './ScoreBoard';
 import axios from 'axios';
@@ -335,6 +335,7 @@ function Game() {
                             <ScoreBoard 
                                 disabled={disabled}
                                 players={players} 
+                                player={player}
                                 tokens={tokens}
                                 turn={turn} 
                                 width={width}
