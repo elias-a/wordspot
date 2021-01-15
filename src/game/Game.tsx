@@ -261,7 +261,7 @@ function Game() {
             newTiles.splice(newLayout[spot].index, 0, t);
 
             const extraTileIndex = currExtraTiles.findIndex(tile => 
-                tile.length === 0
+                Object.keys(tile).length === 0
             );
             newExtraTiles.splice(extraTileIndex, 1);
         }
