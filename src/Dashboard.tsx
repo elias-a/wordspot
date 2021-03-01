@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Redirect } from 'react-router-dom';
 import axios from 'axios';
-import { 
-    Button
-} from '@material-ui/core';
-import Menu from './game/Menu';
+import { Button, Card } from '@material-ui/core';
+import { Pagination } from '@material-ui/lab';
+import Menu from './Menu';
 import { formatApostrophe } from './helpers';
 import { useStyles } from './styles';
 
 function Dashboard() {
     const [game, setGame] = useState('');
     const [games, setGames] = useState([]);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [displayedGames, setDisplayedGames] = useState([]);
     const [player, setPlayer] = useState('');
     const styles = useStyles();
 
@@ -21,14 +23,25 @@ function Dashboard() {
 
             axios.post('/api/get-games', { player: p }).then(res => {
                 setGames(res.data.games);
+                setTotalPages(Math.ceil(res.data.games.length / 6));
+                setDisplayedGames(res.data.games.slice(0, 6));
             });
         }
     }, [localStorage.getItem('player')]);
+
+    useEffect(() => {
+        const start = 6 * (page - 1);
+        setDisplayedGames(games.slice(start, start + 6));
+    }, [page]);
 
     const startGame = () => {
         axios.post('/api/start-game', { player }).then(res => {
             setGame(res.data.game);
         });
+    }
+
+    const redirectToGame = (g: string) => {
+        setGame(g);
     }
 
     if (game !== '') {
@@ -40,52 +53,96 @@ function Dashboard() {
         <React.Fragment>
             <Menu />
             <div className={styles.dashboardLayout}>
-                <div className={styles.gamesList}>
-                    <h2>{`Hello, ${player}!`}</h2>
+                <div className={styles.statSection}>
+                    <h2
+                        style={{
+                            textAlign: 'center',
+                            fontSize: '40px',
+                            marginTop: '20px'
+                        }}
+                    >
+                        {`Welcome, ${player}!`}
+                    </h2>
+                    <Button
+                        className={styles.startGameBtn}
+                        onClick={startGame}
+                    >
+                        Start New Game
+                    </Button>
                 </div>
-                <Button
-                    className={styles.startGameBtn}
-                    onClick={startGame}
-                >
-                    Start New Game
-                </Button>
 
-                <div className={styles.gamesList}>
-                    <h3>Games</h3>
-                    {games.map(game => {
-                        const otherPlayer = 
-                            player === game.players[0] 
-                                ? game.players[1]
-                                : game.players[0];
+                <div className={styles.gameSection}>
+                    <h3 
+                        style={{
+                            width: '40%',
+                            textAlign: 'center',
+                            fontSize: '40px',
+                            marginTop: '20px',
+                            marginBottom: 0,
+                            display: 'inline-block'
+                        }}
+                    >
+                        Your Games
+                    </h3>
+                    <Pagination 
+                        variant="outlined"
+                        shape="rounded"
+                        count={totalPages}
+                        page={page}
+                        onChange={(_e, page) => setPage(page)}
+                        style={{
+                            marginTop: '20px',
+                            display: 'inline-block',
+                            float: 'right'
+                        }}
+                    />
 
-                        let turn = game.turn 
-                            ? <div>{'Your turn!'}</div>
-                            : <div>{formatApostrophe(otherPlayer) + ' turn!'}</div>;
-                        
-                        if (game.outcome !== '') {
-                            turn = game.outcome === 'won' 
-                                ? <div>You won!</div> 
-                                : <div>You lost!</div>
-                        }
+                    <div className={styles.gamesList}>
+                        {displayedGames.map(game => {
+                            const otherPlayer = 
+                                player === game.players[0] 
+                                    ? game.players[1]
+                                    : game.players[0];
 
-                        return (
-                            <a
-                                key={game.id}
-                                href={"/game/" + game.game}
-                                className={styles.gameLink}
-                            >
-                                <div>
-                                    {game.date}
-                                </div>
-                                {turn}
-                                <div>
-                                    {game.players[0] 
-                                        + ' vs. ' 
-                                        + game.players[1]}
-                                </div>
-                            </a>
-                        );
-                    })}
+                            let turn = game.turn 
+                                ? <div>{'Your turn!'}</div>
+                                : <div>{formatApostrophe(otherPlayer) + ' turn!'}</div>;
+                            
+                            if (game.outcome !== '') {
+                                turn = game.outcome === 'won' 
+                                    ? <div>You won!</div> 
+                                    : <div>You lost!</div>
+                            }
+
+                            return (
+                                <Card
+                                    key={game.id}
+                                    className={styles.gameCard}
+                                >
+                                    <div className={styles.gameSummary}>
+                                        <p className={styles.summaryItem}>
+                                            {turn}
+                                        </p>
+                                        <p className={styles.summaryItem}>
+                                            {game.players[0] 
+                                                + ' vs. ' 
+                                                + game.players[1]}
+                                        </p>
+                                        <p className={styles.summaryItem}>
+                                            Game started: {game.date}
+                                        </p>
+                                    </div>
+
+                                    <Button
+                                        className={styles.gameBtn}
+                                        onClick={() => redirectToGame(game.game)}
+                                    >
+                                        Play Game
+                                    </Button>
+                                </Card>
+                            );
+                        })}
+                    </div>
                 </div>
             </div>
         </React.Fragment>

@@ -1,13 +1,32 @@
 import React from 'react';
 import { Button } from '@material-ui/core';
+import { formatApostrophe } from '../helpers';
 import { useStyles } from '../styles';
 
-function Turn({ turn, endTurn, disabled }) {
+function Turn({ players, player, turn, endTurn, disabled }) {
     const styles = useStyles();
+
+    let currTurn = null;
+    if (turn) {
+        currTurn = player === players[0].name
+            ? <h3 className={styles.turn}>
+                {'Your turn!'}
+            </h3> : <h3 className={styles.turn}>
+                {formatApostrophe(players[0].name) + ' turn!'}
+            </h3>;
+    } else {
+        currTurn = player === players[1].name 
+            ? <h3 className={styles.turn}>
+                {'Your turn!'}
+            </h3>
+            : <h3 className={styles.turn}>
+                {formatApostrophe(players[1].name) + ' turn!'}
+            </h3>;
+    }              
 
     return (
         <div>
-            <h3 className={styles.turn}>{turn}'s Turn!</h3>
+            {currTurn}
 
             <Button
                 className={styles.button}

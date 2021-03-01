@@ -51,7 +51,7 @@ export const useStyles = makeStyles((theme) => createStyles({
         top: 0,
         left: 0,
         width: '100vw',
-        height: '10vh',
+        height: '15vh',
         backgroundColor: theme.palette.primary.contrastText,
         color: '#3b2f21',
         fontFamily: theme.typography.fontFamily
@@ -67,7 +67,7 @@ export const useStyles = makeStyles((theme) => createStyles({
     logout: {
         float: 'right',
         height: '6vh',
-        marginTop: '2vh',
+        marginTop: '4.5vh',
         marginRight: '1vw',
         backgroundColor: '#993300',
         "&:hover": {
@@ -81,12 +81,30 @@ export const useStyles = makeStyles((theme) => createStyles({
 
     dashboardLayout: {
         width: '100vw',
-        height: '90vh',
+        height: '85vh',
         position: 'absolute',
-        top: '10vh',
+        top: '15vh',
         left: 0,
         backgroundColor: theme.palette.primary.contrastText
     },
+
+    statSection: {
+        width: '40vw',
+        height: '85vh',
+        position: 'absolute',
+        top: '0',
+        left: '0',
+        display: 'inline-block'
+    },
+    gameSection: {
+        width: '60vw',
+        height: '85vh',
+        position: 'absolute',
+        top: '0',
+        left: '40vw',
+        display: 'inline-block'
+    },
+
     startGameBtn: {
         backgroundColor: '#993300',
         '&:hover': {
@@ -95,35 +113,57 @@ export const useStyles = makeStyles((theme) => createStyles({
         border: 0,
         borderRadius: 3,
         color: '#fff',
+        fontSize: '30px',
         height: 48, 
-        width: '40%',
+        width: '30vw',
         padding: '0 30px',
-        margin: '20px auto',
+        margin: '0 auto',
         display: 'block'
     },
+    
     gamesList: {
-        width: '40%',
-        margin: '20px auto'
+        width: '60vw',
+        margin: 0
     },
-    gameLink: {
-        height: '80px',
-        display: 'block',
-        margin: '30px auto',
-        border: '1px solid #000',
-        borderRadius: '3',
-        color: 'black',
-        textDecoration: 'none',
-        '&:visited': {
-            textDecoration: 'none',
-            color: 'black'
-        }
+    gameCard: {
+        width: '220px',
+        height: '220px',
+        display: 'inline-block',
+        marginLeft: '2vw',
+        marginTop: '2vw',
+        color: '#fff',
+        backgroundColor: '#3b2f21'
+    },
+    gameSummary: {
+        width: '220px',
+        height: '150px',
+        display: 'inline-block',
+        fontSize: '20px',
+        textAlign: 'center',
+    },
+    summaryItem: {
+        margin: 0,
+        marginTop: '20px',
+    },
+    gameBtn: {
+        backgroundColor: '#993300',
+        '&:hover': {
+            backgroundColor: '#993300'
+        },
+        border: 0,
+        borderRadius: 3,
+        color: '#fff',
+        height: '50px', 
+        width: '200px',
+        margin: '10px 10px',
+        display: 'inline-block'
     },
 
     gameLayout: {
         width: '100vw',
-        height: '90vh',
+        height: '85vh',
         position: 'absolute',
-        top: '10vh',
+        top: '15vh',
         left: 0,
         backgroundColor: theme.palette.primary.contrastText
     },

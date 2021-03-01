@@ -9,6 +9,7 @@ import { Button } from '@material-ui/core';
 function ScoreBoard({ 
     disabled,
     players, 
+    player,
     tokens, 
     turn, 
     width,
@@ -78,7 +79,13 @@ function ScoreBoard({
             >
                 Add Tile
             </Button>
-            <Turn turn={currPlayer} endTurn={endTurn} disabled={disabled} />
+            <Turn 
+                players={players}
+                player={player}
+                turn={turn}
+                endTurn={endTurn} 
+                disabled={disabled} 
+            />
         </React.Fragment>
     );
 }
