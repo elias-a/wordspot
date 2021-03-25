@@ -11,6 +11,8 @@ import PrivateRoute from './PrivateRoute';
 import Login from './auth/Login';
 import Game from './game/Game';
 import Dashboard from './Dashboard';
+import NotFound from './NotFound';
+import { BASE_PATH } from '../config.js';
 
 function App() {
     const existingToken = localStorage.getItem('token');
@@ -24,11 +26,14 @@ function App() {
     return (
       <ThemeProvider theme={theme}>
         <AuthContext.Provider value={{ authToken, setAuthToken: setToken }}>
-          <BrowserRouter>
+          <BrowserRouter basename={`${BASE_PATH}`}>
             <Switch>
               <Route exact path='/login' component={Login} />
               <PrivateRoute exact path='/dashboard' component={Dashboard} />
               <PrivateRoute exact path='/game/:id' component={Game} />
+              <PrivateRoute exact path='/' component={Dashboard} />
+              <PrivateRoute exact path='/404' component={NotFound} />
+              <PrivateRoute component={NotFound} />
             </Switch>
           </BrowserRouter>
         </AuthContext.Provider>

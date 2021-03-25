@@ -2,7 +2,6 @@
   "name": "wordspot",
   "version": "0.1.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
     "bundle": "./cleanup; webpack --mode production",
     "build": "babel api --out-dir dist --extensions '.ts'",

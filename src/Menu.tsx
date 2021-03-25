@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '@material-ui/core';
 import { useAuth } from './context';
 import { useStyles } from './styles';
@@ -16,7 +17,7 @@ function Menu() {
 
     return (
         <div className={styles.navBar}>
-            <a href="/">
+            <Link to='/'>
                 <img 
                     src={logo} 
                     alt="Wordspot" 
@@ -25,7 +26,7 @@ function Menu() {
                         height: '15vh'
                     }}
                 />
-            </a>
+            </Link>
             
             <Button 
                 className={styles.logout}

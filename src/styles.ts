@@ -4,7 +4,7 @@ export const useStyles = makeStyles((theme) => createStyles({
     container: {
         width: '100vw',
         height: '100vh',
-        backgroundImage: `url(${"../static/wordspot.jpg"})`,
+        backgroundImage: `url(${"static/wordspot.jpg"})`,
         backgroundSize: 'cover',
         position: 'absolute',
         top: 0,
@@ -77,6 +77,18 @@ export const useStyles = makeStyles((theme) => createStyles({
         borderRadius: 3,
         boxShadow: '0 3px 5px 2px rgba(255, 105, 135, 0.3)',
         color: '#fff'
+    },
+
+    notFoundPage: {
+        width: '100vw',
+        height: '100vh',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        backgroundColor: theme.palette.primary.contrastText
+    },
+    notFoundMessage: {
+        marginLeft: '2vw'
     },
 
     dashboardLayout: {

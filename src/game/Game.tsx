@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import Menu from '../Menu';
 import Board from './Board';
 import ScoreBoard from './ScoreBoard';
-import axios from 'axios';
 import { cloneDeep } from 'lodash';
 import { 
     Button,
@@ -14,6 +13,7 @@ import {
 } from '@material-ui/core';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { getGameDetailsReq, endTurnReq } from '../api';
 import { useStyles } from '../styles';
 
 function Game() {
@@ -46,7 +46,7 @@ function Game() {
         const path = location.pathname;
         const game = path.slice(path.lastIndexOf('/') + 1);
 
-        axios.post('/api/get-game-details', { player: currPlayer, game }).then(res => {
+        getGameDetailsReq({ player: currPlayer, game }).then(res => {
             setLayout(res.data.layout);
             setTiles(res.data.tiles);
             setNumRows(res.data.numRows);
@@ -287,7 +287,7 @@ function Game() {
             turn
         };
 
-        axios.post('/api/end-turn', updatedData).then(res => {
+        endTurnReq(updatedData).then(res => {
             setError("");
 
             setLayout(res.data.newLayout);

@@ -1,11 +1,12 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { BASE_PATH } = require('./config.js');
 
 module.exports = {
     entry: './src/index.tsx',
     output: {
         path: path.join(__dirname, '/web'),
-        publicPath: '/',
+        publicPath: BASE_PATH,
         filename: 'bundle.js'
     },
     resolve: {

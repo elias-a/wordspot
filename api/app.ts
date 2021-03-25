@@ -26,7 +26,7 @@ export function App(api: Api, routes: Routes): Koa {
 
     app.use((ctx) => {
         ctx.type = 'html';
-        ctx.body = createReadStream(path.join(__dirname, '../web/404.html'));
+        ctx.body = createReadStream(path.join(__dirname, '../web/index.html'));
     });
 
     return app;

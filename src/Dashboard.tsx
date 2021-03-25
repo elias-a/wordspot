@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Redirect } from 'react-router-dom';
-import axios from 'axios';
 import { Button, Card } from '@material-ui/core';
 import { Pagination } from '@material-ui/lab';
 import Menu from './Menu';
 import { formatApostrophe } from './helpers';
+import { getGamesReq, startGameReq } from './api';
 import { useStyles } from './styles';
 
 function Dashboard() {
@@ -21,7 +21,7 @@ function Dashboard() {
         if (p !== '') {
             setPlayer(p);
 
-            axios.post('/api/get-games', { player: p }).then(res => {
+            getGamesReq({ player: p }).then(res => {
                 setGames(res.data.games);
                 setTotalPages(Math.ceil(res.data.games.length / 6));
                 setDisplayedGames(res.data.games.slice(0, 6));
@@ -35,7 +35,7 @@ function Dashboard() {
     }, [page]);
 
     const startGame = () => {
-        axios.post('/api/start-game', { player }).then(res => {
+        startGameReq({ player }).then(res => {
             setGame(res.data.game);
         });
     }

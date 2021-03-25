@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Redirect } from 'react-router-dom';
-import axios from 'axios';
 import {
     Grid,
     Box,
@@ -10,6 +9,7 @@ import {
 } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 import { useAuth } from '../context';
+import { loginReq } from '../api';
 import { useStyles } from '../styles';
 
 const INITIAL_USER = {
@@ -36,7 +36,7 @@ function Login() {
     }
 
     const handleSubmit = () => {
-        axios.post('/api/login', user).then(res => {
+        loginReq(user).then(res => {
             if (res.data.status) {
                 setAuthToken(res.data.token);
                 setLoggedIn(true);
@@ -53,7 +53,7 @@ function Login() {
     }
 
     if (loggedIn) {
-        return <Redirect to="/dashboard" />;
+        return <Redirect to="/" />;
     }
 
     return (

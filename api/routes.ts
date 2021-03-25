@@ -31,12 +31,13 @@ export class Routes {
             if (game !== null) {
                 ctx.body = createReadStream(path.join(__dirname, '../web/index.html'));
             } else {
-                ctx.body = createReadStream(path.join(__dirname, '../web/404.html'));
+                ctx.redirect('http://' + ctx.header.host + '/404');
             }
         });
 
         this.router.get('/', async (ctx) => {
-            ctx.redirect('/dashboard');
+            ctx.type = 'html';
+            ctx.body = createReadStream(path.join(__dirname, '../web/index.html'));
         });
     }
 }
