@@ -378,7 +378,7 @@ export class Controller {
         };
     }
 
-    async endTurn(game: string, player: string, tokens: number[], tiles: any, letters: any, extraTiles: any, turn: boolean) {
+    async endTurn(game: string, player: string, tokens: number[], tiles: any, letters: any, extraTiles: any, turn: boolean, moveMade: boolean) {
         
         const { userId } = await this.models.User.findOne({
             attributes: [['id', 'userId']],
@@ -393,6 +393,37 @@ export class Controller {
                 name: userId
             }
         });        
+
+        // If a move wasn't made, give the player 2 tokens and 
+        // an extra tile. 
+        if (!moveMade) {
+            if (turn) {
+                tokens[0] += 2;
+            } else {
+                tokens[1] += 2;
+            }
+
+            const availableTiles = await this.models.AvailableTile.findAll({
+                where: {
+                    game: game
+                }
+            });
+            
+            const availableTile = availableTiles[availableTiles.length - 1];
+            const extraTile = {
+                id: availableTile.id,
+                player: playerId,
+                letters: availableTile.letters
+            };
+
+            extraTiles.push(extraTile);
+
+            await this.models.AvailableTile.destroy({
+                where: {
+                    id: availableTile.id
+                }
+            });
+        }
 
         // Checks how many tiles are used to form the word. 
         const tilesUsed = letters.filter((tile: any) => {
@@ -638,6 +669,7 @@ export class Controller {
                 newLayout,
                 newLetters, 
                 newExtraTiles,
+                newTokens: tokens,
                 outcome,
                 width,
                 height

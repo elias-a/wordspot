@@ -45,8 +45,8 @@ export class Api {
         });
 
         this.router.post('/end-turn', async (ctx) => {
-            const { game, player, tokens, tiles, letters, extraTiles, turn } = ctx.request.body;
-            const { status, result } = await this.gameController.endTurn(game, player, tokens, tiles, letters, extraTiles, turn);
+            const { game, player, tokens, tiles, letters, extraTiles, turn, moveMade } = ctx.request.body;
+            const { status, result } = await this.gameController.endTurn(game, player, tokens, tiles, letters, extraTiles, turn, moveMade);
             ctx.status = status;
             ctx.body = result;
         });

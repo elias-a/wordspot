@@ -266,25 +266,15 @@ function Game() {
             newExtraTiles.splice(extraTileIndex, 1);
         }
 
-        const newTokens = cloneDeep(tokens);
-        if (!moveMade) {
-            if (turn) {
-                newTokens[0] += 2;
-            } else {
-                newTokens[1] += 2;
-            }
-
-            setTokens(newTokens);
-        }
-
         const updatedData = { 
             game,
             player,
-            tokens: newTokens,
+            tokens,
             tiles: newTiles, 
             letters: newLetters,
             extraTiles: newExtraTiles,
-            turn
+            turn,
+            moveMade
         };
 
         endTurnReq(updatedData).then(res => {
@@ -295,6 +285,7 @@ function Game() {
             setExtraTiles(res.data.newExtraTiles);
             setCurrExtraTiles(res.data.newExtraTiles);
             setTiles(newTiles);
+            setTokens(res.data.newTokens);
             setOutcome(res.data.outcome);
             setWidth(res.data.width);
             setHeight(res.data.height);
