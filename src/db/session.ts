@@ -1,32 +1,10 @@
 import { redirect } from "solid-start/server";
 import { createCookieSessionStorage } from "solid-start/session";
 import { db } from ".";
-type LoginForm = {
-  username: string;
-  password: string;
-};
-
-export async function register({ username, password }: LoginForm) {
-  return db.user.create({
-    data: { username: username, password },
-  });
-}
-
-export async function login({ username, password }: LoginForm) {
-  const user = await db.user.findUnique({ where: { username } });
-  if (!user) return null;
-  const isCorrectPassword = password === user.password;
-  if (!isCorrectPassword) return null;
-  return user;
-}
-
-const sessionSecret = import.meta.env.SESSION_SECRET;
 
 const storage = createCookieSessionStorage({
   cookie: {
     name: "RJ_session",
-    // secure doesn't work on localhost for Safari
-    // https://web.dev/when-to-use-local-https/
     secure: true,
     secrets: ["hello"],
     sameSite: "lax",
@@ -44,19 +22,6 @@ export async function getUserId(request: Request) {
   const session = await getUserSession(request);
   const userId = session.get("userId");
   if (!userId || typeof userId !== "string") return null;
-  return userId;
-}
-
-export async function requireUserId(
-  request: Request,
-  redirectTo: string = new URL(request.url).pathname
-) {
-  const session = await getUserSession(request);
-  const userId = session.get("userId");
-  if (!userId || typeof userId !== "string") {
-    const searchParams = new URLSearchParams([["redirectTo", redirectTo]]);
-    throw redirect(`/login?${searchParams}`);
-  }
   return userId;
 }
 
@@ -83,10 +48,28 @@ export async function logout(request: Request) {
   });
 }
 
-export async function createUserSession(userId: string, redirectTo: string) {
+export async function createUserSession() {
   const session = await storage.getSession();
-  session.set("userId", userId);
-  return redirect(redirectTo, {
+  session.set("unverifiedId", "123456");
+  return redirect("/verify", {
+    headers: {
+      "Set-Cookie": await storage.commitSession(session),
+    },
+  });
+}
+
+export async function getUnverifiedUser(request: Request) {
+  const session = await getUserSession(request);
+  const userId = session.get("unverifiedId");
+  if (!userId || typeof userId !== "string") return null;
+  return userId;
+}
+
+export async function login(request: Request) {
+  const session = await getUserSession(request);
+  session.set("unverifiedId", undefined);
+  session.set("userId", "0");
+  return redirect("/", {
     headers: {
       "Set-Cookie": await storage.commitSession(session),
     },

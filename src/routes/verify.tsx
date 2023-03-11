@@ -6,14 +6,11 @@ import {
   createServerData$,
   redirect,
 } from "solid-start/server";
-import { createUserSession, getUser } from "~/db/session";
-
-function validateName(name: unknown) {}
-function validatePhone(phone: unknown) {}
+import { getUnverifiedUser, login } from '~/db/session';
 
 export function routeData() {
   return createServerData$(async (_, { request }) => {
-    if (await getUser(request)) {
+    if (!(await getUnverifiedUser(request))) {
       throw redirect("/");
     }
     return {};
@@ -24,28 +21,25 @@ export default function Login() {
   const data = useRouteData<typeof routeData>();
   const params = useParams();
 
-  const [loggingIn, { Form }] = createServerAction$(async (form: FormData) => {
-    const name = form.get("name");
-    const phone = form.get("phone");
+  const [loggingIn, { Form }] = createServerAction$(async (form: FormData, { request }) => {
+    const code = form.get("code");
     const redirectTo = form.get("redirectTo") || "/";
     if (
-      typeof name !== "string" ||
-      typeof phone !== "string" ||
+      typeof code !== "string" ||
       typeof redirectTo !== "string"
     ) {
       throw new FormError(`Form not submitted correctly.`);
     }
 
-    const fields = { name, phone };
+    const fields = { code };
     const fieldErrors = {
-      name: validateName(name),
-      phone: validatePhone(phone),
+      code: false,
     };
     if (Object.values(fieldErrors).some(Boolean)) {
       throw new FormError("Fields invalid", { fieldErrors, fields });
     }
 
-    return createUserSession();
+    return login(request);
   });
 
   return (
@@ -58,25 +52,18 @@ export default function Login() {
           value={params.redirectTo ?? "/"}
         />
         <div>
-          <label for="name-input">Name</label>
-          <input name="name" placeholder="Name" />
+          <label for="code-input">Verification Code</label>
+          <input name="code" placeholder="Verification Code" />
         </div>
-        <Show when={loggingIn.error?.fieldErrors?.name}>
-          <p role="alert">{loggingIn.error.fieldErrors.name}</p>
-        </Show>
-        <div>
-          <label for="phone-input">Phone Number</label>
-          <input name="phone" placeholder="Phone Number" />
-        </div>
-        <Show when={loggingIn.error?.fieldErrors?.phone}>
-          <p role="alert">{loggingIn.error.fieldErrors.phone}</p>
+        <Show when={loggingIn.error?.fieldErrors?.code}>
+          <p role="alert">{loggingIn.error.fieldErrors.code}</p>
         </Show>
         <Show when={loggingIn.error}>
           <p role="alert" id="error-message">
             {loggingIn.error.message}
           </p>
         </Show>
-        <button type="submit">{data() ? "Login" : ""}</button>
+        <button type="submit">{data() ? "Log In" : ""}</button>
       </Form>
     </main>
   );
