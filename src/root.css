@@ -56,4 +56,61 @@ button {
   width: 100%;
 }
 
+.board {
+  width: 620px;
+  height: 620px;
+  border: 1px solid red;
+  display: inline-block;
+}
 
+.tile {
+  display: inline-block;
+  vertical-align: top;
+  border: 1px solid #000;
+  background-color: grey;
+  margin: 0;
+  padding: 0;
+}
+
+.placholderTile {
+  display: inline-block;
+  vertical-align: top;
+  border: 1px solid #000;
+  margin: 0;
+  padding: 0;
+}
+
+.emptyTile {
+  display: inline-block;
+  vertical-align: top;
+  border: 1px solid #000;
+  margin: 0;
+  padding: 0;
+}
+
+.letter {
+  color: #000;
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+  text-align: center;
+  border-radius: 0;
+}
+
+.letterClicked {
+  color: #fff;
+  display: inline-block;
+  background-color: #4b3c2a;
+}
+
+.letterSelected {
+  color: #fff;
+  display: inline-block;
+  background-color: grey;
+}
+
+.letterUsed {
+  color: #fff;
+  display: inline-block;
+  background-color: grey;
+}
