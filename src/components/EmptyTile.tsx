@@ -1,6 +1,8 @@
+import type { TileDimensions } from "~/db/game";
+
 type EmptyTileProps = {
-  width: string;
-  height: string;
+  dimensions: TileDimensions;
+
 };
 
 export default function EmptyTile(props: EmptyTileProps) {
@@ -8,10 +10,10 @@ export default function EmptyTile(props: EmptyTileProps) {
       <div
         class="emptyTile" 
         style={{
-          "min-width": props.width,
-          "max-width": props.width,
-          "min-height": props.height,
-          "max-height": props.height,
+          "min-width": `${props.dimensions.width}px`,
+          "max-width": `${props.dimensions.width}px`,
+          "min-height": `${props.dimensions.height}px`,
+          "max-height": `${props.dimensions.height}px`,
         }}
       >Blank</div>
   );

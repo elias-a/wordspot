@@ -1,9 +1,9 @@
 import { For } from "solid-js";
 import Letter from "~/components/Letter";
+import type { TileDimensions } from "~/db/game";
 
 type TileProps = {
-  width: string;
-  height: string;
+  dimensions: TileDimensions;
 };
 
 export default function Tile(props: TileProps) {
@@ -11,13 +11,15 @@ export default function Tile(props: TileProps) {
     <div
       class="tile"
       style={{
-        'min-width': props.width,
-        'max-width': props.width,
-        'min-height': props.height,
-        'max-height': props.height,
+        "min-width": `${props.dimensions.width}px`,
+        "max-width": `${props.dimensions.width}px`,
+        "min-height": `${props.dimensions.height}px`,
+        "max-height": `${props.dimensions.height}px`,
       }}
     >
-      <For each={[1, 2, 3, 4]}>{() => <Letter />}</For>
+      <For each={[1, 2, 3, 4]}>{() => {
+        return <Letter dimensions={props.dimensions} />;
+      }}</For>
     </div>
   );
 }

@@ -1,13 +1,18 @@
+import type { TileDimensions } from "~/db/game";
 
-export default function Letter(props) {
+type LetterProps = {
+  dimensions: TileDimensions;
+};
+
+export default function Letter(props: LetterProps) {
   return (
     <button
       class="letter"
       style={{
-        'min-width': '50px',
-        'max-width': '50px',
-        'min-height': '50px',
-        'max-height': '50px',
+        "min-width": `${props.dimensions.width / 2}px`,
+        "max-width": `${props.dimensions.width / 2}px`,
+        "min-height": `${props.dimensions.height / 2}px`,
+        "max-height": `${props.dimensions.height / 2}px`,
       }}
     >
       A

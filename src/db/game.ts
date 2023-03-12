@@ -1,4 +1,4 @@
-const tilesSet = [
+const TILES = [
   "SGPU", "HEAS", "XAIY",
   "LIEL", "RNAD", "OPPE",
   "CAKI", "TSOS", "MIAP",
@@ -12,12 +12,20 @@ const tilesSet = [
   "RAIB", "BOUT"
 ];
 
+export const BOARD_WIDTH = 900;
+export const BOARD_HEIGHT = 700;
+
 export type TileLocation = {
   key: number;
   row: number;
   col: number;
   index: number;
   tile: number | undefined;
+};
+
+export type TileDimensions = {
+  width: number;
+  height: number;
 };
 
 const INITIAL_BOARD_LAYOUT: TileLocation[] = [
@@ -70,36 +78,51 @@ async function createBoardLayout() {
       // 0: placeholder spot
 
       if (tile) {
-          layout.push({
-              key: 2,
-              row: row,
-              col: col,
-              index: index++,
-              tile: tile.tile,
-          });
+        layout.push({
+          key: 2,
+          row: row,
+          col: col,
+          index: index++,
+          tile: tile.tile,
+        });
       } else if (await checkNeighbors(row, col)) {
-          layout.push({
-              key: 1,
-              row: row,
-              col: col,
-              index: index,
-              tile: undefined,
-          });
+        layout.push({
+          key: 1,
+          row: row,
+          col: col,
+          index: index,
+          tile: undefined,
+        });
       } else {
-          layout.push({
-              key: 0,
-              row: row,
-              col: col,
-              index: index,
-              tile: undefined,
-          });
+        layout.push({
+          key: 0,
+          row: row,
+          col: col,
+          index: index,
+          tile: undefined,
+        });
       }
     }
   }
 
-  return layout;
+  return {
+    layout,
+    numRows: maxRow - minRow + 3,
+    numCols: maxColumn - minColumn + 3,
+  };
+}
+
+export function getTileDimensions(numRows: number, numCols: number) {
+  const dimensions: TileDimensions = {
+    width: BOARD_WIDTH / numCols - numCols,
+    height: BOARD_HEIGHT / numRows - numRows,
+  };
+  return dimensions;
 }
 
 export async function getBoardLayout() {
-  return createBoardLayout();
+  const { layout, numRows, numCols } = await createBoardLayout();
+  const dimensions = getTileDimensions(numRows, numCols);
+
+  return { layout, dimensions };
 }

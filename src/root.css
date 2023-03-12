@@ -57,8 +57,6 @@ button {
 }
 
 .board {
-  width: 620px;
-  height: 620px;
   border: 1px solid red;
   display: inline-block;
 }

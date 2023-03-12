@@ -1,31 +1,40 @@
-import { For, Switch, Match } from "solid-js";
+import { For, Switch, Match, createResource } from "solid-js";
 import Tile from "~/components/Tile";
 import PlaceholderTile from "~/components/PlaceholderTile";
 import EmptyTile from "~/components/EmptyTile";
-import type { TileLocation } from "~/db/game";
+import { BOARD_WIDTH, BOARD_HEIGHT } from "~/db/game";
+import type { TileLocation, TileDimensions } from "~/db/game";
 
 type BoardProps = {
-  layout: TileLocation[];
+  layout: {
+    layout: TileLocation[],
+    dimensions: TileDimensions,
+  };
 };
 
 export default function Board(props: BoardProps) {
-  const width = "100px";
-  const height = "100px";
-
   return (
-    <div class="board">
-      <For each={props.layout}>
+    <div
+      class="board"
+      style={{
+        "min-width": `${BOARD_WIDTH}px`,
+        "max-width": `${BOARD_WIDTH}px`,
+        "min-height": `${BOARD_HEIGHT}px`,
+        "max-height": `${BOARD_HEIGHT}px`,
+      }}
+    >
+      <For each={props.layout.layout}>
         {tile => {
           return (
             <Switch>
               <Match when={tile.key === 2}>
-                <Tile width={width} height={height} />
+                <Tile dimensions={props.layout.dimensions} />
               </Match>
               <Match when={tile.key === 1}>
-                <EmptyTile width={width} height={height} />
+                <EmptyTile dimensions={props.layout.dimensions} />
               </Match>
               <Match when={tile.key === 0}>
-                <PlaceholderTile width={width} height={height} />
+                <PlaceholderTile dimensions={props.layout.dimensions} />
               </Match>
             </Switch>
           );
