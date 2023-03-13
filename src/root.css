@@ -70,7 +70,15 @@ button {
   padding: 0;
 }
 
-.placholderTile {
+.placeholderTile {
+  display: inline-block;
+  vertical-align: top;
+  border: 1px solid #fff;
+  margin: 0;
+  padding: 0;
+}
+
+.emptyTile {
   display: inline-block;
   vertical-align: top;
   border: 1px solid #000;
@@ -78,7 +86,7 @@ button {
   padding: 0;
 }
 
-.emptyTile {
+.extraTile {
   display: inline-block;
   vertical-align: top;
   border: 1px solid #000;
@@ -111,4 +119,18 @@ button {
   color: #fff;
   display: inline-block;
   background-color: grey;
+}
+
+.user-area {
+  display: inline-block;
+  vertical-align: top;
+  min-width: 400px;
+  max-width: 400px;
+  min-height: 700px;
+  max-height: 700px;
+  border: 1px solid purple;
+}
+.extra-tiles-area {
+
+  border: 1px solid blue;
 }

@@ -26,12 +26,16 @@ export type Tile = {
 };
 
 export type TileLocation = {
+  id: number;
   key: number;
   row: number;
   col: number;
   index: number;
-  tile: Tile | undefined;
+  tile: Tile;
 };
+
+export type EmptyLocation = Omit<TileLocation, "tile">;
+type InitialTileLocation = Omit<TileLocation, "id">;
 
 export type TileDimensions = {
   width: number;
@@ -58,7 +62,7 @@ const INITIAL_TILES: Tile[] = [
   { id: 16, letters: TILES[16].split("").map((t, i) => { return { id: 64 + i, letter: t } }) },
 ];
 
-const INITIAL_BOARD_LAYOUT: TileLocation[] = [
+const INITIAL_BOARD_LAYOUT: InitialTileLocation[] = [
   { key: 2, row: 0, col: 0, index: 0, tile: INITIAL_TILES[0] },
   { key: 2, row: 0, col: 1, index: 1, tile: INITIAL_TILES[1] },
   { key: 2, row: 0, col: 2, index: 2, tile: INITIAL_TILES[2] },
@@ -89,6 +93,11 @@ async function checkNeighbors(row: number, col: number) {
   else return false;
 }
 
+export type LayoutMap = {
+  id: number;
+  isTile: boolean;
+};
+
 async function createBoardLayout() {
   const minRow = Math.min(...INITIAL_BOARD_LAYOUT.map(t => t.row));
   const maxRow = Math.max(...INITIAL_BOARD_LAYOUT.map(t => t.row));
@@ -96,6 +105,7 @@ async function createBoardLayout() {
   const maxColumn = Math.max(...INITIAL_BOARD_LAYOUT.map(t => t.col));
 
   const layout: TileLocation[] = [];
+  let layoutId = 0;
   let index = 0;
   for (let row = minRow - 1; row <= maxRow + 1; ++row) {
     for (let col = minColumn - 1; col <= maxColumn + 1; ++col) {
@@ -109,6 +119,7 @@ async function createBoardLayout() {
 
       if (tile) {
         layout.push({
+          id: layoutId++,
           key: 2,
           row: row,
           col: col,
@@ -117,6 +128,7 @@ async function createBoardLayout() {
         });
       } else if (await checkNeighbors(row, col)) {
         layout.push({
+          id: layoutId++,
           key: 1,
           row: row,
           col: col,
@@ -125,6 +137,7 @@ async function createBoardLayout() {
         });
       } else {
         layout.push({
+          id: layoutId++,
           key: 0,
           row: row,
           col: col,
@@ -142,7 +155,7 @@ async function createBoardLayout() {
   };
 }
 
-export function getTileDimensions(numRows: number, numCols: number) {
+function getTileDimensions(numRows: number, numCols: number) {
   const dimensions: TileDimensions = {
     width: BOARD_WIDTH / numCols - numCols,
     height: BOARD_HEIGHT / numRows - numRows,
@@ -150,9 +163,22 @@ export function getTileDimensions(numRows: number, numCols: number) {
   return dimensions;
 }
 
+export type UserData = {
+  extraTiles: Tile[];
+};
+
+function getUserData(): UserData {
+  const extraTiles: Tile[] = [
+    { id: 0, letters: TILES[20].split("").map((t, i) => { return { id: i, letter: t } }) }
+  ];
+
+  return { extraTiles };
+}
+
 export async function getBoardLayout() {
   const { layout, numRows, numCols } = await createBoardLayout();
   const dimensions = getTileDimensions(numRows, numCols);
+  const userData = getUserData();
 
-  return { layout, dimensions };
+  return { layout, dimensions, userData };
 }

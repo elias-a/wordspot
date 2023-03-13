@@ -3,6 +3,7 @@ lockfileVersion: 5.4
 specifiers:
   '@solidjs/meta': ^0.28.2
   '@solidjs/router': ^0.7.0
+  '@thisbeyond/solid-dnd': ^0.7.4
   '@types/babel__core': ^7.20.0
   '@types/debug': ^4.1.7
   '@types/node': ^18.11.18
@@ -19,6 +20,7 @@ specifiers:
 dependencies:
   '@solidjs/meta': 0.28.2_solid-js@1.6.13
   '@solidjs/router': 0.7.1_solid-js@1.6.13
+  '@thisbeyond/solid-dnd': 0.7.4_solid-js@1.6.13
   solid-js: 1.6.13
   solid-start: 0.2.23_rkkq6zg7qgu7px5m73pb6mgk6q
   undici: 5.20.0
@@ -1477,6 +1479,14 @@ packages:
       solid-js: ^1.5.3
     dependencies:
       solid-js: 1.6.13
+
+  /@thisbeyond/solid-dnd/0.7.4_solid-js@1.6.13:
+    resolution: {integrity: sha512-jgV9EtR3gAtVsILG8p1OAGrhHIgnK4W04YxpyLgJRCDKEFYQWuDrMdUe8F5Kc6pcVXlC4IMXr4cB8fS2Ut3/Ow==}
+    peerDependencies:
+      solid-js: ^1.5
+    dependencies:
+      solid-js: 1.6.13
+    dev: false
 
   /@types/babel__core/7.20.0:
     resolution: {integrity: sha512-+n8dL/9GWblDO0iU6eZAwEIJVr5DWigtle+Q6HLOrh/pdbXOhOtqzq8VPPE2zvNJzSKY4vH/z3iT3tn0A3ypiQ==}
