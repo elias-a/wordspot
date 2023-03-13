@@ -15,6 +15,7 @@ netlify
 .classpath
 *.launch
 .settings/
+.vscode
 
 # Temp
 gitignore

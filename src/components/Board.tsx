@@ -1,4 +1,4 @@
-import { For, Switch, Match, createResource } from "solid-js";
+import { For, Switch, Match, Setter } from "solid-js";
 import Tile from "~/components/Tile";
 import PlaceholderTile from "~/components/PlaceholderTile";
 import EmptyTile from "~/components/EmptyTile";
@@ -10,6 +10,8 @@ type BoardProps = {
     layout: TileLocation[],
     dimensions: TileDimensions,
   };
+  clicked: number[];
+  setClicked: Setter<number[]>;
 };
 
 export default function Board(props: BoardProps) {
@@ -28,7 +30,12 @@ export default function Board(props: BoardProps) {
           return (
             <Switch>
               <Match when={tile.key === 2}>
-                <Tile dimensions={props.layout.dimensions} />
+                <Tile
+                  tile={tile.tile}
+                  dimensions={props.layout.dimensions}
+                  clicked={props.clicked}
+                  setClicked={props.setClicked}
+                />
               </Match>
               <Match when={tile.key === 1}>
                 <EmptyTile dimensions={props.layout.dimensions} />

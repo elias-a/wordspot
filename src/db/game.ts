@@ -15,12 +15,22 @@ const TILES = [
 export const BOARD_WIDTH = 900;
 export const BOARD_HEIGHT = 700;
 
+export type Letter = {
+  id: number;
+  letter: string;
+};
+
+export type Tile = {
+  id: number;
+  letters: Letter[];
+};
+
 export type TileLocation = {
   key: number;
   row: number;
   col: number;
   index: number;
-  tile: number | undefined;
+  tile: Tile | undefined;
 };
 
 export type TileDimensions = {
@@ -28,24 +38,44 @@ export type TileDimensions = {
   height: number;
 };
 
+const INITIAL_TILES: Tile[] = [
+  { id: 0, letters: TILES[0].split("").map((t, i) => { return { id: i, letter: t } }) },
+  { id: 1, letters: TILES[1].split("").map((t, i) => { return { id: 4 + i, letter: t } }) },
+  { id: 2, letters: TILES[2].split("").map((t, i) => { return { id: 8 + i, letter: t } }) },
+  { id: 3, letters: TILES[3].split("").map((t, i) => { return { id: 12 + i, letter: t } }) },
+  { id: 4, letters: TILES[4].split("").map((t, i) => { return { id: 16 + i, letter: t } }) },
+  { id: 5, letters: TILES[5].split("").map((t, i) => { return { id: 20 + i, letter: t } }) },
+  { id: 6, letters: TILES[6].split("").map((t, i) => { return { id: 24 + i, letter: t } }) },
+  { id: 7, letters: TILES[7].split("").map((t, i) => { return { id: 28 + i, letter: t } }) },
+  { id: 8, letters: TILES[8].split("").map((t, i) => { return { id: 32 + i, letter: t } }) },
+  { id: 9, letters: TILES[9].split("").map((t, i) => { return { id: 36 + i, letter: t } }) },
+  { id: 10, letters: TILES[10].split("").map((t, i) => { return { id: 40 + i, letter: t } }) },
+  { id: 11, letters: TILES[11].split("").map((t, i) => { return { id: 44 + i, letter: t } }) },
+  { id: 12, letters: TILES[12].split("").map((t, i) => { return { id: 48 + i, letter: t } }) },
+  { id: 13, letters: TILES[13].split("").map((t, i) => { return { id: 52 + i, letter: t } }) },
+  { id: 14, letters: TILES[14].split("").map((t, i) => { return { id: 56 + i, letter: t } }) },
+  { id: 15, letters: TILES[15].split("").map((t, i) => { return { id: 60 + i, letter: t } }) },
+  { id: 16, letters: TILES[16].split("").map((t, i) => { return { id: 64 + i, letter: t } }) },
+];
+
 const INITIAL_BOARD_LAYOUT: TileLocation[] = [
-  { key: 2, row: 0, col: 0, index: 0, tile: 0 },
-  { key: 2, row: 0, col: 1, index: 1, tile: 1 },
-  { key: 2, row: 0, col: 2, index: 2, tile: 2 },
-  { key: 2, row: 0, col: 3, index: 3, tile: 3 },
-  { key: 2, row: 1, col: 0, index: 4, tile: 4 },
-  { key: 2, row: 1, col: 1, index: 5, tile: 5 },
-  { key: 2, row: 1, col: 2, index: 6, tile: 6 },
-  { key: 2, row: 1, col: 3, index: 7, tile: 7 },
-  { key: 2, row: 2, col: 0, index: 8, tile: 8 },
-  { key: 2, row: 2, col: 1, index: 9, tile: 9 },
-  { key: 2, row: 2, col: 2, index: 10, tile: 10 },
-  { key: 2, row: 2, col: 3, index: 11, tile: 11 },
-  { key: 2, row: 3, col: 0, index: 12, tile: 12 },
-  { key: 2, row: 3, col: 1, index: 13, tile: 13 },
-  { key: 2, row: 3, col: 2, index: 14, tile: 14 },
-  { key: 2, row: 3, col: 3, index: 15, tile: 15 },
-  { key: 2, row: 4, col: 3, index: 16, tile: 16 },
+  { key: 2, row: 0, col: 0, index: 0, tile: INITIAL_TILES[0] },
+  { key: 2, row: 0, col: 1, index: 1, tile: INITIAL_TILES[1] },
+  { key: 2, row: 0, col: 2, index: 2, tile: INITIAL_TILES[2] },
+  { key: 2, row: 0, col: 3, index: 3, tile: INITIAL_TILES[3] },
+  { key: 2, row: 1, col: 0, index: 4, tile: INITIAL_TILES[4] },
+  { key: 2, row: 1, col: 1, index: 5, tile: INITIAL_TILES[5] },
+  { key: 2, row: 1, col: 2, index: 6, tile: INITIAL_TILES[6] },
+  { key: 2, row: 1, col: 3, index: 7, tile: INITIAL_TILES[7] },
+  { key: 2, row: 2, col: 0, index: 8, tile: INITIAL_TILES[8] },
+  { key: 2, row: 2, col: 1, index: 9, tile: INITIAL_TILES[9] },
+  { key: 2, row: 2, col: 2, index: 10, tile: INITIAL_TILES[10] },
+  { key: 2, row: 2, col: 3, index: 11, tile: INITIAL_TILES[11] },
+  { key: 2, row: 3, col: 0, index: 12, tile: INITIAL_TILES[12] },
+  { key: 2, row: 3, col: 1, index: 13, tile: INITIAL_TILES[13] },
+  { key: 2, row: 3, col: 2, index: 14, tile: INITIAL_TILES[14] },
+  { key: 2, row: 3, col: 3, index: 15, tile: INITIAL_TILES[15] },
+  { key: 2, row: 4, col: 3, index: 16, tile: INITIAL_TILES[16] },
 ];
 
 // Checks if location is a valid spot to add a tile.

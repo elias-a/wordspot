@@ -1,9 +1,12 @@
-import { For } from "solid-js";
+import { For, Setter } from "solid-js";
 import Letter from "~/components/Letter";
-import type { TileDimensions } from "~/db/game";
+import type { TileDimensions, Tile } from "~/db/game";
 
 type TileProps = {
+  tile: Tile;
   dimensions: TileDimensions;
+  clicked: number[];
+  setClicked: Setter<number[]>;
 };
 
 export default function Tile(props: TileProps) {
@@ -17,8 +20,15 @@ export default function Tile(props: TileProps) {
         "max-height": `${props.dimensions.height}px`,
       }}
     >
-      <For each={[1, 2, 3, 4]}>{() => {
-        return <Letter dimensions={props.dimensions} />;
+      <For each={props.tile.letters}>{letter => {
+        return (
+          <Letter
+            letter={letter}
+            dimensions={props.dimensions}
+            clicked={props.clicked}
+            setClicked={props.setClicked}
+          />
+        );
       }}</For>
     </div>
   );
