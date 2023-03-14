@@ -15,6 +15,7 @@ specifiers:
   solid-start-node: ^0.2.19
   typescript: ^4.9.4
   undici: ^5.15.1
+  uuid: ^9.0.0
   vite: ^4.1.4
 
 dependencies:
@@ -24,6 +25,7 @@ dependencies:
   solid-js: 1.6.13
   solid-start: 0.2.23_rkkq6zg7qgu7px5m73pb6mgk6q
   undici: 5.20.0
+  uuid: 9.0.0
 
 devDependencies:
   '@types/babel__core': 7.20.0
@@ -2819,6 +2821,11 @@ packages:
   /utils-merge/1.0.1:
     resolution: {integrity: sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==}
     engines: {node: '>= 0.4.0'}
+
+  /uuid/9.0.0:
+    resolution: {integrity: sha512-MXcSTerfPa4uqyzStbRoTgt5XIe3x5+42+q1sDuy3R5MDk66URdLMOZe5aPX/SQd+kuYAh0FdP/pO28IkQyTeg==}
+    hasBin: true
+    dev: false
 
   /validate-html-nesting/1.2.1:
     resolution: {integrity: sha512-T1ab131NkP3BfXB7KUSgV7Rhu81R2id+L6NaJ7NypAAG5iV6gXnPpQE5RK1fvb+3JYsPTL+ihWna5sr5RN9gaQ==}

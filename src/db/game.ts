@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from "uuid";
+
 const TILES = [
   "SGPU", "HEAS", "XAIY",
   "LIEL", "RNAD", "OPPE",
@@ -15,32 +17,51 @@ const TILES = [
 export const BOARD_WIDTH = 900;
 export const BOARD_HEIGHT = 700;
 
-export type Letter = {
-  id: number;
-  letter: string;
-};
-
-export type Tile = {
-  id: number;
-  letters: Letter[];
-};
-
-export type TileLocation = {
-  id: number;
-  key: number;
+export type Location = {
+  id: string;
   row: number;
-  col: number;
-  index: number;
+  column: number;
   tile: Tile;
 };
 
-export type EmptyLocation = Omit<TileLocation, "tile">;
-type InitialTileLocation = Omit<TileLocation, "id">;
-
-export type TileDimensions = {
+export type Tile = {
+  id: string;
+  letters: Letter[];
   width: number;
   height: number;
 };
+
+export type Letter = {
+  id: string;
+  letter: string;
+};
+
+function setUpBoard() {
+  // Create 4x4 grid of tiles.
+  const tileOptions = [...TILES];
+  const tiles: Tile[] = [];
+  for (let i = 0; i < 16; i++) {
+    const randomIndex = Math.floor(Math.random() * tileOptions.length);
+    const tileLetters = tileOptions.splice(randomIndex, 1);
+
+    const letters = tileLetters[0].split("").map(letter => {
+      return {
+        id: uuidv4(),
+        letter: letter,
+      };
+    });
+
+    tiles.push({
+      id: uuidv4(),
+      letters: letters,
+      // length / (4 tiles + 2 empty tiles + 1 for padding)
+      width: BOARD_WIDTH / 7,
+      height: BOARD_HEIGHT / 7,
+    });
+  }
+
+  return tiles;
+}
 
 const INITIAL_TILES: Tile[] = [
   { id: 0, letters: TILES[0].split("").map((t, i) => { return { id: i, letter: t } }) },
@@ -92,11 +113,6 @@ async function checkNeighbors(row: number, col: number) {
   if (right || left || above || below) return true;
   else return false;
 }
-
-export type LayoutMap = {
-  id: number;
-  isTile: boolean;
-};
 
 async function createBoardLayout() {
   const minRow = Math.min(...INITIAL_BOARD_LAYOUT.map(t => t.row));
