@@ -56,57 +56,93 @@ button {
   width: 100%;
 }
 
+.game {
+  display: flex;
+  min-width: 100%;
+  max-width: 100%;
+  min-height: 100%;
+  max-height: 100%;
+  align-self: flex-end;
+}
+
 .board {
-  border: 1px solid red;
   display: inline-block;
+  flex-direction: column;
+  min-width: 900px;
+  max-width: 900px;
+  min-height: 700px;
+  max-height: 700px;
+  display: flex;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  min-width: 100%;
+  max-width: 100%;
 }
 
 .tile {
-  display: inline-block;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   vertical-align: top;
-  border: 1px solid #000;
-  background-color: grey;
-  margin: 0;
+  margin: 1px;
   padding: 0;
 }
 
-.placeholderTile {
-  display: inline-block;
-  vertical-align: top;
-  border: 1px solid #fff;
-  margin: 0;
-  padding: 0;
-}
-
-.emptyTile {
-  display: inline-block;
-  vertical-align: top;
-  border: 1px solid #000;
-  margin: 0;
-  padding: 0;
-}
-
-.extraTile {
-  display: inline-block;
-  vertical-align: top;
-  border: 1px solid #000;
+.letter-row {
+  flex: 1;
+  align-items: stretch;
+  min-width: 100%;
+  max-width: 100%;
   margin: 0;
   padding: 0;
 }
 
 .letter {
-  color: #000;
-  display: inline-block;
+  background-color: #785F43;
+  color: #fff;
+  display: flex;
   padding: 0;
   margin: 0;
-  text-align: center;
+  justify-content: center;
+  align-items: center;
   border-radius: 0;
+  font-size: 36px;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+.placeholder-tile {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  vertical-align: top;
+  margin: 1px;
+  padding: 0;
+  align-items: stretch;
+  border: 1px solid red;
+}
+
+.empty-tile {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  vertical-align: top;
+  margin: 1px;
+  padding: 0;
+  align-items: stretch;
+  border: 1px solid red;
 }
 
 .letterClicked {
   color: #fff;
   display: inline-block;
-  background-color: #4b3c2a;
+  background-color: #2b2218;
 }
 
 .letterSelected {
@@ -118,19 +154,33 @@ button {
 .letterUsed {
   color: #fff;
   display: inline-block;
-  background-color: grey;
+  background-color: #4b3c2a;
 }
 
 .user-area {
-  display: inline-block;
-  vertical-align: top;
-  min-width: 400px;
-  max-width: 400px;
+  display: flex;
+  flex: 2;
+  flex-direction: column;
   min-height: 700px;
   max-height: 700px;
-  border: 1px solid purple;
+  margin-left: 50px;
+  padding: 0;
 }
-.extra-tiles-area {
 
-  border: 1px solid blue;
+.extra-tiles-area {
+  display: flex;
+  flex: 1;
+  min-height: 200px;
+  max-height: 200px;
+}
+
+.extra-tile-container {
+  align-items: stretch;
+  min-width: 200px;
+  max-width: 200px;
+  min-height: 200px;
+  max-height: 200px;
+  padding-left: 10px;
+  padding-right: 10px;
+  margin: 0;
 }

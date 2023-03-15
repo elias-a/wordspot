@@ -14,9 +14,6 @@ const TILES = [
   "RAIB", "BOUT",
 ];
 
-export const BOARD_WIDTH = 900;
-export const BOARD_HEIGHT = 700;
-
 export type Layout = {
   id: string;
   rows: Row[];
@@ -27,27 +24,83 @@ export type Row = {
   tiles: Tile[];
 };
 
+export type TileType = "Tile" | "Empty" | "Placeholder";
+
 export type Tile = {
   id: string;
   letters: Letter[];
   row: number;
   column: number;
+  type: TileType;
 };
+
+export type ExtraTile = Omit<Tile, "row" | "column">;
 
 export type Letter = {
   id: string;
   letter: string;
+  isUsed: boolean;
 };
-
-export type TileType = "Tile" | "Empty" | "Placeholder";
 
 // TODO: Replace with data from database.
 const TEST_BOARD = setUpBoard();
+const EXTRA_TILES_USER1 = [
+  assignExtraTile("", ""),
+  assignExtraTile("", ""),
+];
 
 function setUpBoard() {
   // Create 4x4 grid of tiles.
   const tileOptions = [...TILES];
   const rows: Row[] = [];
+
+  // Row of placeholder, 4 empty, placeholder
+  const tiles: Tile[] = [
+    {
+      id: uuidv4(),
+      letters: [],
+      row: 0,
+      column: 0,
+      type: "Placeholder",
+    },
+    {
+      id: uuidv4(),
+      letters: [],
+      row: 0,
+      column: 1,
+      type: "Empty",
+    },
+    {
+      id: uuidv4(),
+      letters: [],
+      row: 0,
+      column: 2,
+      type: "Empty",
+    },
+    {
+      id: uuidv4(),
+      letters: [],
+      row: 0,
+      column: 3,
+      type: "Empty",
+    },
+    {
+      id: uuidv4(),
+      letters: [],
+      row: 0,
+      column: 4,
+      type: "Empty",
+    },
+    {
+      id: uuidv4(),
+      letters: [],
+      row: 0,
+      column: 5,
+      type: "Placeholder",
+    },
+  ]
+  rows.push({ id: uuidv4(), tiles });
+
   for (let i = 0; i < 4; i++) {
     const tiles: Tile[] = [];
 
@@ -59,6 +112,7 @@ function setUpBoard() {
         return {
           id: uuidv4(),
           letter: letter,
+          isUsed: false,
         };
       });
 
@@ -67,6 +121,7 @@ function setUpBoard() {
         letters: letters,
         row: i,
         column: j,
+        type: "Tile",
       });
     }
 
@@ -77,14 +132,21 @@ function setUpBoard() {
 }
 
 // Checks if location is a valid spot to add a tile.
-async function checkNeighbors(row: number, col: number) {
-  const right = INITIAL_BOARD_LAYOUT.find(t => t.row === row && t.col === col + 1);
-  const left = INITIAL_BOARD_LAYOUT.find(t => t.row === row && t.col === col - 1);
-  const above = INITIAL_BOARD_LAYOUT.find(t => t.row === row + 1 && t.col === col);
-  const below = INITIAL_BOARD_LAYOUT.find(t => t.row === row - 1 && t.col === col);
+function checkNeighbors(row: number, column: number, board: Row[]) {
+  board.forEach(r => {
+    r.tiles.forEach(tile => {
+      if (
+        tile.row === row && tile.column === column + 1 ||
+        tile.row === row && tile.column === column - 1 ||
+        tile.row === row + 1 && tile.column === column ||
+        tile.row === row - 1 && tile.column === column
+      ) {
+        return true;
+      }
+    });
+  });
 
-  if (right || left || above || below) return true;
-  else return false;
+  return false;
 }
 
 /*
@@ -101,7 +163,7 @@ TileLetterMap -> id: string; tileId: string; letterId: string;
 ExtraTile -> id: string; userId: string; tileId: string;
 */
 
-type TileLocation = Pick<Tile, "row" | "column">
+type TileLocation = Pick<Tile, "row" | "column">;
 
 async function getLocationOfTile(id: string): Promise<TileLocation | undefined> {
   TEST_BOARD.forEach(row => {
@@ -115,15 +177,35 @@ async function getLocationOfTile(id: string): Promise<TileLocation | undefined> 
   return undefined;
 }
 
-async function getTileAtLocation(row: number, column: number) {
+async function getTileAtLocation(row: number, column: number): Promise<Tile | undefined> {
+  TEST_BOARD.forEach(r => {
+    r.tiles.forEach(tile => {
+      if (tile.row === row && tile.column === column) {
+        return tile;
+      }
+    });
+  });
 
+  return undefined;
 }
 
-async function updateBoard(locationId: string, extraTileId: string) {
-  const minRow = TEST_BOARD[0].tiles[0].row;
-  const maxRow = TEST_BOARD[-1].tiles[0].row;
-  const minColumn = TEST_BOARD[0].tiles[0].column;
-  const maxColumn = TEST_BOARD[0].tiles[-1].column;
+async function getExtraTileLetters(id: string) {
+  const extraTile = EXTRA_TILES_USER1.find(tile => tile.id === id);
+  if (extraTile) {
+    return extraTile.letters;
+  } else {
+    return [];
+  }
+}
+
+async function updateBoard(locationId: string, extraTileId: string, board: Row[]) {
+  const minRow = board[0].tiles[0].row;
+  const maxRow = board[-1].tiles[0].row;
+  const minColumn = board[0].tiles[0].column;
+  const maxColumn = board[0].tiles[-1].column;
+
+  // Get extra tile letters.
+  const extraTileLetters = await getExtraTileLetters(extraTileId);
 
   // Get row and column of `locationId`.
   const locationTile = await getLocationOfTile(locationId);
@@ -138,11 +220,41 @@ async function updateBoard(locationId: string, extraTileId: string) {
     const tiles: Tile[] = [];
 
     for (let j = Math.min(minColumn, column - 1); j < Math.max(maxColumn, column + 1); j++) {
-      // Query database for tiles at (i, j).
-      // - If type of tile is Tile, push to `tiles`.
-      // - If (i, j) == (row, column), push to `tiles`.
-      // - If checkNeighbors(i, j) == true, push Empty to `tiles`.
-      // - If checkNeighbors(i, j) == false, push Placeholder to `tiles`.
+      const tileAtLocation = await getTileAtLocation(i, j);
+
+      if (tileAtLocation && i === row && j === column) {
+        tiles.push({
+          id: tileAtLocation.id,
+          letters: extraTileLetters,
+          row: i,
+          column: j,
+          type: "Tile",
+        });
+      } else if (tileAtLocation && tileAtLocation.type === "Tile") {
+        tiles.push({
+          id: tileAtLocation.id,
+          letters: tileAtLocation.letters,
+          row: i,
+          column: j,
+          type: "Tile",
+        });
+      } else if (checkNeighbors(i, j, board)) {
+        tiles.push({
+          id: tileAtLocation ? tileAtLocation.id : uuidv4(),
+          letters: [],
+          row: i,
+          column: j,
+          type: "Empty",
+        });
+      } else {
+        tiles.push({
+          id: tileAtLocation ? tileAtLocation.id : uuidv4(),
+          letters: [],
+          row: i,
+          column: j,
+          type: "Placeholder",
+        });
+      }
     }
 
     rows.push({ id: uuidv4(), tiles });
@@ -157,85 +269,30 @@ async function updateBoard(locationId: string, extraTileId: string) {
   
 }
 
-async function createLayout() {
-  const minIndex = TEST_BOARD[0].tiles[0].row;
-  const maxIndex = TEST_BOARD[-1].tiles[0].row;
+function assignExtraTile(gameId: string, userId: string): ExtraTile {
+  // Instead of this, check database for tiles available in the game.
+  const tileOptions = [...TILES];
+  const randomIndex = Math.floor(Math.random() * tileOptions.length);
+  const tileLetters = tileOptions.splice(randomIndex, 1);
 
-  const layout: Layout = {
+  const letters = tileLetters[0].split("").map(letter => {
+    return {
+      id: uuidv4(),
+      letter: letter,
+      isUsed: false,
+    };
+  });
+
+  return {
     id: uuidv4(),
-    rows: [],
-  }
-
-  let layoutId = 0;
-  let index = 0;
-  for (let row = minRow - 1; row <= maxRow + 1; ++row) {
-    for (let col = minColumn - 1; col <= maxColumn + 1; ++col) {
-      // Replace with DB call.
-      const tile = INITIAL_BOARD_LAYOUT.find(t => t.row === row && t.col === col);
-
-      // 4: Extra tile is currently added here
-      // 2: tile
-      // 1: valid spot to add tile
-      // 0: placeholder spot
-
-      if (tile) {
-        layout.push({
-          id: layoutId++,
-          key: 2,
-          row: row,
-          col: col,
-          index: index++,
-          tile: tile.tile,
-        });
-      } else if (await checkNeighbors(row, col)) {
-        layout.push({
-          id: layoutId++,
-          key: 1,
-          row: row,
-          col: col,
-          index: index,
-          tile: undefined,
-        });
-      } else {
-        layout.push({
-          id: layoutId++,
-          key: 0,
-          row: row,
-          col: col,
-          index: index,
-          tile: undefined,
-        });
-      }
-    }
-  }
-
-  return layout;
-}
-
-function getTileDimensions(numRows: number, numCols: number) {
-  const dimensions: TileDimensions = {
-    width: BOARD_WIDTH / numCols - numCols,
-    height: BOARD_HEIGHT / numRows - numRows,
+    letters: letters,
+    type: "Tile",
   };
-  return dimensions;
 }
 
-export type UserData = {
-  extraTiles: Tile[];
-};
-
-function getUserData(): UserData {
-  const extraTiles: Tile[] = [
-    { id: 0, letters: TILES[20].split("").map((t, i) => { return { id: i, letter: t } }) }
-  ];
-
-  return { extraTiles };
-}
-
-export async function getBoardLayout() {
-  const { layout, numRows, numCols } = await createBoardLayout();
-  const dimensions = getTileDimensions(numRows, numCols);
-  const userData = getUserData();
-
-  return { layout, dimensions, userData };
+export async function getGame() {
+  return {
+    board: TEST_BOARD,
+    extraTiles: EXTRA_TILES_USER1,
+  };
 }

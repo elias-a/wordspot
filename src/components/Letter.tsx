@@ -1,11 +1,11 @@
 import { Setter } from "solid-js";
-import type { TileDimensions, Letter } from "~/db/game";
+import type { Letter } from "~/db/game";
 
 type LetterProps = {
   letter: Letter;
-  dimensions: TileDimensions;
-  clicked: number[];
-  setClicked: Setter<number[]>;
+  clicked: string[];
+  setClicked: Setter<string[]>;
+  disabled: boolean;
 };
 
 export default function Letter(props: LetterProps) {
@@ -19,15 +19,15 @@ export default function Letter(props: LetterProps) {
 
   return (
     <button
-      class="letter"
-      style={{
-        "min-width": `${props.dimensions.width / 2}px`,
-        "max-width": `${props.dimensions.width / 2}px`,
-        "min-height": `${props.dimensions.height / 2}px`,
-        "max-height": `${props.dimensions.height / 2}px`,
-        "background-color": props.clicked.includes(props.letter.id) ? "red" : "yellow",
+      classList={{
+        letter: true,
+        letterUsed: props.letter.isUsed,
+        letterClicked: props.clicked.includes(props.letter.id),
+        letterSelected: props.letter.isUsed &&
+          props.clicked.includes(props.letter.id),
       }}
       onClick={handleClick}
+      disabled={props.disabled}
     >
       {props.letter.letter}
     </button>

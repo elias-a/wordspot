@@ -7,8 +7,9 @@ import {
   DragEventHandler,
 } from "@thisbeyond/solid-dnd";
 import Board from "~/components/Board";
-import UserArea from "~/components/UserArea";
-import { getBoardLayout } from "~/db/game";
+import User from "~/components/User";
+import NotFound from "../[...404]";
+import { getGame, Tile } from "~/db/game";
 
 declare module "solid-js" {
   namespace JSX {
@@ -21,22 +22,23 @@ declare module "solid-js" {
 
 export function routeData() {
   return createServerData$(async () => {
-    return await getBoardLayout();
+    return await getGame();
   });
 }
 
 export default function Game() {
-  const boardLayout = useRouteData<typeof routeData>();
-  const [clicked, setClicked] = createSignal<number[]>([], { equals: false });
-  const [extraTile, setExtraTile] = createSignal<[number, number]>([-1, -1]);
+  const game = useRouteData<typeof routeData>();
+  const [clicked, setClicked] = createSignal<string[]>([], { equals: false });
+  const [extraTile, setExtraTile] = createSignal<Tile>();
 
   const onDragEnd: DragEventHandler = ({ droppable }) => {
     if (droppable) {
-      const id = parseInt(droppable.id.toString())
-      if (id === 100000) {
-        setExtraTile([-1, -1]);
+      const id = droppable.id.toString();
+
+      if (id === "user-extra-tiles") {
+        setExtraTile(undefined);
       } else {
-        setExtraTile([id, 0]);
+        setExtraTile();
       }
     }
   };
@@ -44,26 +46,21 @@ export default function Game() {
   return (
     <DragDropProvider onDragEnd={onDragEnd}>
       <DragDropSensors />
-      <Show when={boardLayout()} fallback={<div>Loading...</div>} keyed>
-        {boardLayout => {
-          return (
-            <>
-              <Board
-                layout={boardLayout}
-                clicked={clicked()}
-                setClicked={setClicked}
-                extraTile={extraTile()}
-              />
-              <UserArea
-                dimensions={boardLayout.dimensions}
-                extraTiles={boardLayout.userData.extraTiles}
-                extraTile={extraTile()}
-                clicked={clicked()}
-                setClicked={setClicked}
-              />
-            </>
-          );
-        }}
+      <Show when={game()} fallback={<NotFound />}>
+        <div class="game">
+          <Board
+            board={game()!.board}
+            extraTile={extraTile()}
+            clicked={clicked()}
+            setClicked={setClicked}
+          />
+          <User
+            extraTiles={game()!.extraTiles}
+            extraTile={extraTile()}
+            clicked={clicked()}
+            setClicked={setClicked}
+          />
+        </div>
       </Show>
     </DragDropProvider>
   );

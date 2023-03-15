@@ -1,35 +1,28 @@
-import { For, Setter } from "solid-js";
-import Letter from "~/components/Letter";
-import type { TileDimensions, Tile } from "~/db/game";
+import { Setter } from "solid-js";
+import LetterRow from "~/components/LetterRow";
+import type { Letter } from "~/db/game";
 
 type TileProps = {
-  tile: Tile;
-  dimensions: TileDimensions;
-  clicked: number[];
-  setClicked: Setter<number[]>;
+  letters: Letter[];
+  clicked: string[];
+  setClicked: Setter<string[]>;
 };
 
 export default function Tile(props: TileProps) {
   return (
-    <div
-      class="tile"
-      style={{
-        "min-width": `${props.dimensions.width}px`,
-        "max-width": `${props.dimensions.width}px`,
-        "min-height": `${props.dimensions.height}px`,
-        "max-height": `${props.dimensions.height}px`,
-      }}
-    >
-      <For each={props.tile.letters}>{letter => {
-        return (
-          <Letter
-            letter={letter}
-            dimensions={props.dimensions}
-            clicked={props.clicked}
-            setClicked={props.setClicked}
-          />
-        );
-      }}</For>
+    <div class="tile">
+      <LetterRow
+        letters={[props.letters[0], props.letters[1]]}
+        clicked={props.clicked}
+        setClicked={props.setClicked}
+        disabled={false}
+      />
+      <LetterRow
+        letters={[props.letters[2], props.letters[3]]}
+        clicked={props.clicked}
+        setClicked={props.setClicked}
+        disabled={false}
+      />
     </div>
   );
 }
