@@ -11,24 +11,27 @@ const TILES = [
   "EDER", "THEC", "DLEY",
   "ATIR", "VNSA", "ETND",
   "AJNO", "LRIG", "MORG",
-  "RAIB", "BOUT"
+  "RAIB", "BOUT",
 ];
 
 export const BOARD_WIDTH = 900;
 export const BOARD_HEIGHT = 700;
 
-export type Location = {
+export type Layout = {
   id: string;
-  row: number;
-  column: number;
-  tile: Tile;
+  rows: Row[];
+};
+
+export type Row = {
+  id: string;
+  tiles: Tile[];
 };
 
 export type Tile = {
   id: string;
   letters: Letter[];
-  width: number;
-  height: number;
+  row: number;
+  column: number;
 };
 
 export type Letter = {
@@ -36,72 +39,42 @@ export type Letter = {
   letter: string;
 };
 
+export type TileType = "Tile" | "Empty" | "Placeholder";
+
+// TODO: Replace with data from database.
+const TEST_BOARD = setUpBoard();
+
 function setUpBoard() {
   // Create 4x4 grid of tiles.
   const tileOptions = [...TILES];
-  const tiles: Tile[] = [];
-  for (let i = 0; i < 16; i++) {
-    const randomIndex = Math.floor(Math.random() * tileOptions.length);
-    const tileLetters = tileOptions.splice(randomIndex, 1);
+  const rows: Row[] = [];
+  for (let i = 0; i < 4; i++) {
+    const tiles: Tile[] = [];
 
-    const letters = tileLetters[0].split("").map(letter => {
-      return {
+    for (let j = 0; j < 4; j++) {
+      const randomIndex = Math.floor(Math.random() * tileOptions.length);
+      const tileLetters = tileOptions.splice(randomIndex, 1);
+
+      const letters = tileLetters[0].split("").map(letter => {
+        return {
+          id: uuidv4(),
+          letter: letter,
+        };
+      });
+
+      tiles.push({
         id: uuidv4(),
-        letter: letter,
-      };
-    });
+        letters: letters,
+        row: i,
+        column: j,
+      });
+    }
 
-    tiles.push({
-      id: uuidv4(),
-      letters: letters,
-      // length / (4 tiles + 2 empty tiles + 1 for padding)
-      width: BOARD_WIDTH / 7,
-      height: BOARD_HEIGHT / 7,
-    });
+    rows.push({ id: uuidv4(), tiles });
   }
 
-  return tiles;
+  return rows;
 }
-
-const INITIAL_TILES: Tile[] = [
-  { id: 0, letters: TILES[0].split("").map((t, i) => { return { id: i, letter: t } }) },
-  { id: 1, letters: TILES[1].split("").map((t, i) => { return { id: 4 + i, letter: t } }) },
-  { id: 2, letters: TILES[2].split("").map((t, i) => { return { id: 8 + i, letter: t } }) },
-  { id: 3, letters: TILES[3].split("").map((t, i) => { return { id: 12 + i, letter: t } }) },
-  { id: 4, letters: TILES[4].split("").map((t, i) => { return { id: 16 + i, letter: t } }) },
-  { id: 5, letters: TILES[5].split("").map((t, i) => { return { id: 20 + i, letter: t } }) },
-  { id: 6, letters: TILES[6].split("").map((t, i) => { return { id: 24 + i, letter: t } }) },
-  { id: 7, letters: TILES[7].split("").map((t, i) => { return { id: 28 + i, letter: t } }) },
-  { id: 8, letters: TILES[8].split("").map((t, i) => { return { id: 32 + i, letter: t } }) },
-  { id: 9, letters: TILES[9].split("").map((t, i) => { return { id: 36 + i, letter: t } }) },
-  { id: 10, letters: TILES[10].split("").map((t, i) => { return { id: 40 + i, letter: t } }) },
-  { id: 11, letters: TILES[11].split("").map((t, i) => { return { id: 44 + i, letter: t } }) },
-  { id: 12, letters: TILES[12].split("").map((t, i) => { return { id: 48 + i, letter: t } }) },
-  { id: 13, letters: TILES[13].split("").map((t, i) => { return { id: 52 + i, letter: t } }) },
-  { id: 14, letters: TILES[14].split("").map((t, i) => { return { id: 56 + i, letter: t } }) },
-  { id: 15, letters: TILES[15].split("").map((t, i) => { return { id: 60 + i, letter: t } }) },
-  { id: 16, letters: TILES[16].split("").map((t, i) => { return { id: 64 + i, letter: t } }) },
-];
-
-const INITIAL_BOARD_LAYOUT: InitialTileLocation[] = [
-  { key: 2, row: 0, col: 0, index: 0, tile: INITIAL_TILES[0] },
-  { key: 2, row: 0, col: 1, index: 1, tile: INITIAL_TILES[1] },
-  { key: 2, row: 0, col: 2, index: 2, tile: INITIAL_TILES[2] },
-  { key: 2, row: 0, col: 3, index: 3, tile: INITIAL_TILES[3] },
-  { key: 2, row: 1, col: 0, index: 4, tile: INITIAL_TILES[4] },
-  { key: 2, row: 1, col: 1, index: 5, tile: INITIAL_TILES[5] },
-  { key: 2, row: 1, col: 2, index: 6, tile: INITIAL_TILES[6] },
-  { key: 2, row: 1, col: 3, index: 7, tile: INITIAL_TILES[7] },
-  { key: 2, row: 2, col: 0, index: 8, tile: INITIAL_TILES[8] },
-  { key: 2, row: 2, col: 1, index: 9, tile: INITIAL_TILES[9] },
-  { key: 2, row: 2, col: 2, index: 10, tile: INITIAL_TILES[10] },
-  { key: 2, row: 2, col: 3, index: 11, tile: INITIAL_TILES[11] },
-  { key: 2, row: 3, col: 0, index: 12, tile: INITIAL_TILES[12] },
-  { key: 2, row: 3, col: 1, index: 13, tile: INITIAL_TILES[13] },
-  { key: 2, row: 3, col: 2, index: 14, tile: INITIAL_TILES[14] },
-  { key: 2, row: 3, col: 3, index: 15, tile: INITIAL_TILES[15] },
-  { key: 2, row: 4, col: 3, index: 16, tile: INITIAL_TILES[16] },
-];
 
 // Checks if location is a valid spot to add a tile.
 async function checkNeighbors(row: number, col: number) {
@@ -114,13 +87,85 @@ async function checkNeighbors(row: number, col: number) {
   else return false;
 }
 
-async function createBoardLayout() {
-  const minRow = Math.min(...INITIAL_BOARD_LAYOUT.map(t => t.row));
-  const maxRow = Math.max(...INITIAL_BOARD_LAYOUT.map(t => t.row));
-  const minColumn = Math.min(...INITIAL_BOARD_LAYOUT.map(t => t.col));
-  const maxColumn = Math.max(...INITIAL_BOARD_LAYOUT.map(t => t.col));
+/*
+Database structure for Board:
 
-  const layout: TileLocation[] = [];
+Tile -> Letter
+
+Need gameId in each table
+
+Tile -> id: string; row: number; column: number; type: Tile | Empty | Placeholder | Extra
+Letter -> id: string; letter: string; isClicked: boolean;
+TileLetterMap -> id: string; tileId: string; letterId: string;
+
+ExtraTile -> id: string; userId: string; tileId: string;
+*/
+
+type TileLocation = Pick<Tile, "row" | "column">
+
+async function getLocationOfTile(id: string): Promise<TileLocation | undefined> {
+  TEST_BOARD.forEach(row => {
+    row.tiles.forEach(tile => {
+      if (tile.id === id) {
+        return { row: tile.row, column: tile.column };
+      }
+    });
+  });
+
+  return undefined;
+}
+
+async function getTileAtLocation(row: number, column: number) {
+
+}
+
+async function updateBoard(locationId: string, extraTileId: string) {
+  const minRow = TEST_BOARD[0].tiles[0].row;
+  const maxRow = TEST_BOARD[-1].tiles[0].row;
+  const minColumn = TEST_BOARD[0].tiles[0].column;
+  const maxColumn = TEST_BOARD[0].tiles[-1].column;
+
+  // Get row and column of `locationId`.
+  const locationTile = await getLocationOfTile(locationId);
+  if (!locationTile) {
+    throw new Error(``);
+  }
+
+  const { row, column } = locationTile;
+  // Iterate over board.
+  const rows: Row[] = [];
+  for (let i = Math.min(minRow, row - 1); i < Math.max(maxRow, row + 1); i++) {
+    const tiles: Tile[] = [];
+
+    for (let j = Math.min(minColumn, column - 1); j < Math.max(maxColumn, column + 1); j++) {
+      // Query database for tiles at (i, j).
+      // - If type of tile is Tile, push to `tiles`.
+      // - If (i, j) == (row, column), push to `tiles`.
+      // - If checkNeighbors(i, j) == true, push Empty to `tiles`.
+      // - If checkNeighbors(i, j) == false, push Placeholder to `tiles`.
+    }
+
+    rows.push({ id: uuidv4(), tiles });
+  }
+
+  // In database, update Tile at (row, col) from Extra -> Tile.
+  // Update the 4 entries in TileLetterMap where `tileId` = `extraTileId`.
+  // Change `tileId` to the ID of the Tile at (row, col). 
+  // Delete entries associated with `extraTileId`.
+
+
+  
+}
+
+async function createLayout() {
+  const minIndex = TEST_BOARD[0].tiles[0].row;
+  const maxIndex = TEST_BOARD[-1].tiles[0].row;
+
+  const layout: Layout = {
+    id: uuidv4(),
+    rows: [],
+  }
+
   let layoutId = 0;
   let index = 0;
   for (let row = minRow - 1; row <= maxRow + 1; ++row) {
@@ -164,11 +209,7 @@ async function createBoardLayout() {
     }
   }
 
-  return {
-    layout,
-    numRows: maxRow - minRow + 3,
-    numCols: maxColumn - minColumn + 3,
-  };
+  return layout;
 }
 
 function getTileDimensions(numRows: number, numCols: number) {
