@@ -55,7 +55,7 @@ function setUpBoard() {
   const rows: Row[] = [];
 
   // Row of placeholder, 4 empty, placeholder
-  const tiles: Tile[] = [
+  const firstRow: Tile[] = [
     {
       id: uuidv4(),
       letters: [],
@@ -99,12 +99,21 @@ function setUpBoard() {
       type: "Placeholder",
     },
   ]
-  rows.push({ id: uuidv4(), tiles });
+  rows.push({ id: uuidv4(), tiles: firstRow });
 
-  for (let i = 0; i < 4; i++) {
-    const tiles: Tile[] = [];
+  for (let i = 1; i < 5; i++) {
+    const tiles: Tile[] = [
+      // First column in the row
+      {
+        id: uuidv4(),
+        letters: [],
+        row: i,
+        column: 0,
+        type: "Empty",
+      },
+    ];
 
-    for (let j = 0; j < 4; j++) {
+    for (let j = 1; j < 5; j++) {
       const randomIndex = Math.floor(Math.random() * tileOptions.length);
       const tileLetters = tileOptions.splice(randomIndex, 1);
 
@@ -125,8 +134,64 @@ function setUpBoard() {
       });
     }
 
+    // Last column in the row
+    tiles.push({
+      id: uuidv4(),
+      letters: [],
+      row: i,
+      column: 5,
+      type: "Empty",
+    });
+    
     rows.push({ id: uuidv4(), tiles });
   }
+
+  // Row of placeholder, 4 empty, placeholder
+  const lastRow: Tile[] = [
+    {
+      id: uuidv4(),
+      letters: [],
+      row: 5,
+      column: 0,
+      type: "Placeholder",
+    },
+    {
+      id: uuidv4(),
+      letters: [],
+      row: 5,
+      column: 1,
+      type: "Empty",
+    },
+    {
+      id: uuidv4(),
+      letters: [],
+      row: 5,
+      column: 2,
+      type: "Empty",
+    },
+    {
+      id: uuidv4(),
+      letters: [],
+      row: 5,
+      column: 3,
+      type: "Empty",
+    },
+    {
+      id: uuidv4(),
+      letters: [],
+      row: 5,
+      column: 4,
+      type: "Empty",
+    },
+    {
+      id: uuidv4(),
+      letters: [],
+      row: 5,
+      column: 5,
+      type: "Placeholder",
+    },
+  ]
+  rows.push({ id: uuidv4(), tiles: lastRow });
 
   return rows;
 }

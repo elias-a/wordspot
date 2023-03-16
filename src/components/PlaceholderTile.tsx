@@ -1,3 +1,3 @@
 export default function PlaceholderTile() {
-  return <div class="placeholder-tile" />;
+  return <div class="filler-tile" />;
 }

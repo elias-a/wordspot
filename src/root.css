@@ -66,77 +66,59 @@ button {
 }
 
 .board {
-  display: inline-block;
-  flex-direction: column;
+  display: grid;
   min-width: 900px;
   max-width: 900px;
   min-height: 700px;
   max-height: 700px;
-  display: flex;
+  margin: 0;
+  padding: 0;
+  align-items: stretch;
+  grid-auto-rows: minmax(0, 1fr);
 }
 
 .row {
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
-  flex: 1;
   margin: 0;
   padding: 0;
-  min-width: 100%;
-  max-width: 100%;
+  display: grid;
+  grid-auto-flow: column;
+  justify-content: stretch;
+  align-items: stretch;
+  grid-auto-columns: minmax(0, 1fr);
 }
 
 .tile {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  vertical-align: top;
   margin: 1px;
   padding: 0;
+  display: grid;
+  align-items: stretch;
 }
 
 .letter-row {
-  flex: 1;
-  align-items: stretch;
-  min-width: 100%;
-  max-width: 100%;
   margin: 0;
   padding: 0;
 }
 
 .letter {
+  display: flex;
+  min-width: 50%;
+  max-width: 50%;
+  min-height: 100%;
+  max-height: 100%;
+  align-items: center;
+  justify-content: center;
   background-color: #785F43;
   color: #fff;
-  display: flex;
   padding: 0;
   margin: 0;
-  justify-content: center;
-  align-items: center;
   border-radius: 0;
-  font-size: 36px;
+  font-size: 26px;
   font-family: Georgia, 'Times New Roman', Times, serif;
 }
 
-.placeholder-tile {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  vertical-align: top;
+.filler-tile {
   margin: 1px;
   padding: 0;
-  align-items: stretch;
-  border: 1px solid red;
-}
-
-.empty-tile {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  vertical-align: top;
-  margin: 1px;
-  padding: 0;
-  align-items: stretch;
-  border: 1px solid red;
 }
 
 .letterClicked {
@@ -175,11 +157,13 @@ button {
 }
 
 .extra-tile-container {
+  display: grid;
   align-items: stretch;
-  min-width: 200px;
-  max-width: 200px;
-  min-height: 200px;
-  max-height: 200px;
+  align-items: stretch;
+  min-width: 150px;
+  max-width: 150px;
+  min-height: 150px;
+  max-height: 150px;
   padding-left: 10px;
   padding-right: 10px;
   margin: 0;

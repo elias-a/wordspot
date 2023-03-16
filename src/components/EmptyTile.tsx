@@ -7,5 +7,5 @@ type EmptyTileProps = {
 export default function EmptyTile(props: EmptyTileProps) {
   const droppable = createDroppable(props.id);
 
-  return <div use:droppable class="empty-tile" />;
+  return <div use:droppable class="filler-tile" />;
 }
