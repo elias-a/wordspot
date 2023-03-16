@@ -13,7 +13,7 @@ export default function ExtraTile(props: ExtraTileProps) {
   const draggable = createDraggable(props.tile.id);
 
   return (
-    <div use:draggable class="tile">
+    <div use:draggable id={props.tile.id} class="tile">
       <LetterRow
         letters={[props.tile.letters[0], props.tile.letters[1]]}
         clicked={props.clicked}

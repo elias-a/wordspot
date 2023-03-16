@@ -1,10 +1,10 @@
 import { For, Setter } from "solid-js";
 import RowComponent from "~/components/Row";
-import type { Row, Tile } from "~/db/game";
+import type { Row, ExtraTile } from "~/db/game";
 
 type BoardProps = {
   board: Row[];
-  extraTile: Tile | undefined;
+  extraTile: ExtraTile | undefined;
   clicked: string[]
   setClicked: Setter<string[]>;
 };

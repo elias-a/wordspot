@@ -14,11 +14,6 @@ const TILES = [
   "RAIB", "BOUT",
 ];
 
-export type Layout = {
-  id: string;
-  rows: Row[];
-};
-
 export type Row = {
   id: string;
   tiles: Tile[];
@@ -34,7 +29,7 @@ export type Tile = {
   type: TileType;
 };
 
-export type ExtraTile = Omit<Tile, "row" | "column">;
+export type ExtraTile = Omit<Tile, "row" | "column"> & { tileId: string };
 
 export type Letter = {
   id: string;
@@ -98,7 +93,7 @@ function setUpBoard() {
       column: 5,
       type: "Placeholder",
     },
-  ]
+  ];
   rows.push({ id: uuidv4(), tiles: firstRow });
 
   for (let i = 1; i < 5; i++) {
@@ -190,7 +185,7 @@ function setUpBoard() {
       column: 5,
       type: "Placeholder",
     },
-  ]
+  ];
   rows.push({ id: uuidv4(), tiles: lastRow });
 
   return rows;
@@ -352,6 +347,7 @@ function assignExtraTile(gameId: string, userId: string): ExtraTile {
     id: uuidv4(),
     letters: letters,
     type: "Tile",
+    tileId: "",
   };
 }
 

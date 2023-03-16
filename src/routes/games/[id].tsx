@@ -9,7 +9,7 @@ import {
 import Board from "~/components/Board";
 import User from "~/components/User";
 import NotFound from "../[...404]";
-import { getGame, Tile } from "~/db/game";
+import { getGame, Tile, ExtraTile } from "~/db/game";
 
 declare module "solid-js" {
   namespace JSX {
@@ -29,16 +29,28 @@ export function routeData() {
 export default function Game() {
   const game = useRouteData<typeof routeData>();
   const [clicked, setClicked] = createSignal<string[]>([], { equals: false });
-  const [extraTile, setExtraTile] = createSignal<Tile>();
+  const [extraTile, setExtraTile] = createSignal<ExtraTile>();
 
-  const onDragEnd: DragEventHandler = ({ droppable }) => {
-    if (droppable) {
-      const id = droppable.id.toString();
+  const onDragEnd: DragEventHandler = ({ draggable, droppable }) => {
+    if (draggable && droppable && game()) {
+      const draggableId = draggable.id.toString();
+      const droppableId = droppable.id.toString();
 
-      if (id === "user-extra-tiles") {
+      if (droppableId === "extra-tiles-area") {
         setExtraTile(undefined);
       } else {
-        setExtraTile();
+        const selectedExtraTile = game()!
+          .extraTiles.find(t => t.id === draggableId);
+        if (selectedExtraTile) {
+          setExtraTile({
+            ...selectedExtraTile,
+            row: 0,
+            column: 0,
+            tileId: droppableId,
+          });
+        } else {
+          setExtraTile(undefined);
+        }
       }
     }
   };
