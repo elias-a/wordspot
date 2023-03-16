@@ -1,4 +1,7 @@
+import mysql from "mysql2";
 import { v4 as uuidv4 } from "uuid";
+
+const connection = mysql.createConnection("mysql://ormkapdroodwtjvx35sc:pscale_pw_655L4RXc6qup888N48dlfSxRllUtBx3HnaZsgFo4yd2@us-east.connect.psdb.cloud/wordspot?ssl={'rejectUnauthorized':true}");
 
 const TILES = [
   "SGPU", "HEAS", "XAIY",
@@ -43,6 +46,15 @@ const EXTRA_TILES_USER1 = [
   assignExtraTile("", ""),
   assignExtraTile("", ""),
 ];
+
+export async function startGame() {
+  const board = setUpBoard();
+  await writeBoardToDatabase(board);
+}
+
+async function writeBoardToDatabase(board: Row[]) {
+  connection.query(`INSERT INTO Letter VALUES ("1", "A", 0);`)
+}
 
 function setUpBoard() {
   // Create 4x4 grid of tiles.
@@ -186,7 +198,7 @@ function setUpBoard() {
       type: "Placeholder",
     },
   ];
-  rows.push({ id: uuidv4(), tiles: lastRow });
+  rows.push({ id: uuidv4(), tiles: lastRow });  
 
   return rows;
 }
@@ -352,6 +364,7 @@ function assignExtraTile(gameId: string, userId: string): ExtraTile {
 }
 
 export async function getGame() {
+  await startGame();
   return {
     board: TEST_BOARD,
     extraTiles: EXTRA_TILES_USER1,

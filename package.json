@@ -22,6 +22,7 @@
     "@solidjs/meta": "^0.28.2",
     "@solidjs/router": "^0.7.0",
     "@thisbeyond/solid-dnd": "^0.7.4",
+    "mysql2": "^3.2.0",
     "solid-js": "^1.6.11",
     "solid-start": "^0.2.23",
     "undici": "^5.15.1",
