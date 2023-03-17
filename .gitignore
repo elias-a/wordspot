@@ -1,3 +1,6 @@
+.env
+*.sh
+sql_helpers
 
 dist
 .solid
@@ -23,3 +26,4 @@ gitignore
 # System Files
 .DS_Store
 Thumbs.db
+.trash

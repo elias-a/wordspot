@@ -1,0 +1,39 @@
+CREATE TABLE IF NOT EXISTS UserAccount (
+    id VARCHAR(255) NOT NULL,
+    userName VARCHAR(255) NOT NULL,
+    phone VARCHAR(255) NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS Game (
+    id VARCHAR(255) NOT NULL,
+    userId1 VARCHAR(255) NOT NULL,
+    userId2 VARCHAR(255) NOT NULL,
+    winner VARCHAR(255),
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS Tile (
+    id VARCHAR(255) NOT NULL,
+    rowIndex INT,
+    columnIndex INT,
+    tileType VARCHAR(255) NOT NULL,
+    gameId VARCHAR(255) NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS Letter (
+    id VARCHAR(255) NOT NULL,
+    tileId VARCHAR(255) NOT NULL,
+    letterId VARCHAR(255) NOT NULL,
+    gameId VARCHAR(255) NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS TileLetterMap (
+    id VARCHAR(255) NOT NULL,
+    tileId VARCHAR(255) NOT NULL,
+    letterId VARCHAR(255) NOT NULL,
+    gameId VARCHAR(255) NOT NULL,
+    PRIMARY KEY (id)
+);

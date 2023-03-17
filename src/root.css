@@ -1,59 +1,115 @@
-body {
-  font-family: Gordita, Roboto, Oxygen, Ubuntu, Cantarell,
-  'Open Sans', 'Helvetica Neue', sans-serif;
-}
-
-main {
-  width: 25%;
-  margin: 0 auto;
-  border-radius: 1rem;
-  background: #f3f4f6;
-  padding: 1rem;
-}
-
-h1 {
+* {
+  padding: 0;
   margin: 0;
+  box-sizing: border-box;
 }
 
-p {
-  margin: 0 0 0.3rem 0;
-  color: #f87171;
-  flex-basis: 100%;
-}
-
-input {
-  margin: 0 0 0 0.4rem;
-  border: 2px solid #000;
-  border-radius: 0.4rem;
-  padding: 0.3rem;
-  flex: 1;
-}
-
-form {
-  display: flex;
-  flex-direction: column;
-}
-
-fieldset {
-  border: none;
-  padding: 1rem 0;
-  display: flex;
-  justify-content: space-around;
+body {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  min-width: 100vw;
+  max-width: 100vw;
+  min-height: 100vh;
+  max-height: 100vh;
 }
 
 div {
   display: flex;
   align-items: center;
-  margin-bottom: 0.5rem;
 }
 
-button {
-  background: #d1d5db;
-  border: none;
-  border-radius: 0.3rem;
-  padding: 0.2rem;
-  font-size: 1rem;
-  width: 100%;
+.app {
+  min-width: 100vw;
+  max-width: 100vw;
+  min-height: 100vh;
+  max-height: 100vh;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-width: 100vw;
+  max-width: 100vw;
+  min-height: 10vh;
+  max-height: 10vh;
+}
+
+.header-logo {
+  position: absolute;
+  top: 1vh;
+  left: 1vw;
+  height: 9vh;
+}
+
+.logout-button {
+  cursor: pointer;
+  position: absolute;
+  top: 1vh;
+  right: 1vw;
+  height: 8vh;
+  width: 10vw;
+  color: #fff;
+  font-size: 22px;
+  background-color: #785F43;
+  border: 0;
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
+  text-transform: uppercase;
+}
+
+.dashboard {
+  width: 100vw;
+  height: 90vh;
+  position: absolute;
+  top: 10vh;
+  left: 0;
+}
+
+.dashboard-user-section {
+  justify-content: center;
+  width: 40vw;
+  height: 90vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: inline-block;
+}
+
+.dashboard-game-section {
+  width: 60vw;
+  height: 90vh;
+  position: absolute;
+  top: 0;
+  left: 40vw;
+  display: inline-block;
+}
+
+.dashboard-section-title {
+  display: block;
+  text-align: center;
+  font-size: 40px;
+  margin-top: 20px;
+}
+
+.start-game-button {
+  display: block;
+  cursor: pointer;
+  height: 8vh;
+  border: 0;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 30px;
+  height: 48; 
+  width: 30vw;
+  background-color: #785F43;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
+  text-transform: uppercase;
+  margin: 20px auto;
 }
 
 .game {
@@ -111,7 +167,7 @@ button {
   color: #fff;
   padding: 0;
   margin: 0;
-  border-radius: 0;
+  border: none;
   font-size: 26px;
   font-family: Georgia, 'Times New Roman', Times, serif;
 }

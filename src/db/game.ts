@@ -1,7 +1,10 @@
+import { redirect } from "solid-start/server";
 import mysql from "mysql2";
 import { v4 as uuidv4 } from "uuid";
+import { promisify } from "util";
 
-const connection = mysql.createConnection("mysql://ormkapdroodwtjvx35sc:pscale_pw_655L4RXc6qup888N48dlfSxRllUtBx3HnaZsgFo4yd2@us-east.connect.psdb.cloud/wordspot?ssl={'rejectUnauthorized':true}");
+const connection = mysql.createConnection(import.meta.env.VITE_DATABASE_CONNECTION);
+const query = promisify(connection.query).bind(connection);
 
 const TILES = [
   "SGPU", "HEAS", "XAIY",
@@ -41,22 +44,171 @@ export type Letter = {
 };
 
 // TODO: Replace with data from database.
-const TEST_BOARD = setUpBoard();
+const TEST_BOARD = test();
 const EXTRA_TILES_USER1 = [
   assignExtraTile("", ""),
   assignExtraTile("", ""),
 ];
 
-export async function startGame() {
-  const board = setUpBoard();
-  await writeBoardToDatabase(board);
+export async function getGames(request: Request) {
+  
 }
 
-async function writeBoardToDatabase(board: Row[]) {
-  connection.query(`INSERT INTO Letter VALUES ("1", "A", 0);`)
+export async function startGame(request: Request) {
+  // Create game.
+  const gameId = uuidv4();
+  await query({
+    sql: "INSERT INTO Game VALUES (?, ?, ?, ?)",
+    values: [
+      gameId,
+      import.meta.env.VITE_USER1,
+      import.meta.env.VITE_USER2,
+      null,
+    ],
+  });
+
+  // Set up board.
+  const { tiles, letters, tileLetterMap } = setUpBoard(gameId);
+  await query({
+    sql: "INSERT INTO Tile VALUES ?",
+    values: [tiles],
+  });
+  await query({
+    sql: "INSERT INTO Letter VALUES ?",
+    values: [letters],
+  });
+  await query({
+    sql: "INSERT INTO TileLetterMap VALUES ?",
+    values: [tileLetterMap],
+  });
+
+  return redirect(`/games/${gameId}`);
 }
 
-function setUpBoard() {
+function setUpBoard(gameId: string) {
+  // Create 4x4 grid of tiles.
+  const tileOptions = [...TILES];
+
+  const tiles: any = [];
+  const letters: any = [];
+  const tileLetterMap: any = [];
+  
+  // Row of placeholder, 4 empty, placeholder
+  tiles.push([
+      uuidv4(),
+      0,
+      0,
+      "Placeholder",
+      uuidv4(),
+    ])
+    tiles.push([
+      uuidv4(),
+      0,
+      1,
+      "Empty",
+      uuidv4()
+    ])
+    tiles.push([
+      uuidv4(),
+      0,
+      2,
+      "Empty",
+      uuidv4()
+    ])
+    tiles.push([
+      uuidv4(),
+      0,
+      3,
+      "Empty",
+      uuidv4()
+    ])
+    tiles.push([
+      uuidv4(),
+      0,
+      4,
+      "Empty",
+      uuidv4()
+    ])
+    tiles.push([
+      uuidv4(),
+      0,
+      5,
+      "Placeholder",
+      uuidv4()
+    ])
+
+  for (let i = 1; i < 5; i++) {
+    tiles.push([uuidv4(), i, 0, "Empty", uuidv4()]);
+    
+    for (let j = 1; j < 5; j++) {
+      const randomIndex = Math.floor(Math.random() * tileOptions.length);
+      const tileLetters = tileOptions.splice(randomIndex, 1);
+
+      const tileId = uuidv4();
+      tiles.push([tileId, i, j, "Tile", gameId]);
+
+      tileLetters[0].split("").forEach(letter => {
+        const letterId = uuidv4();
+        letters.push([letterId, letter, false, gameId]);
+        tileLetterMap.push([uuidv4(), tileId, letterId, gameId]);
+      });
+    }
+
+    // Last column in the row
+    tiles.push([
+      uuidv4(),
+      i,
+      5,
+      "Empty",
+      uuidv4(),
+    ]);
+  }
+
+  // Row of placeholder, 4 empty, placeholder
+  tiles.push([
+      uuidv4(),
+      5,
+      0,
+      "Placeholder",
+      uuidv4()letters
+    ])
+    tiles.push([
+      uuidv4(),
+      5,
+      2,
+      "Empty",
+      uuidv4()
+    ])
+    tiles.push([
+      uuidv4(),
+      5,
+      3,
+      "Empty",
+      uuidv4()
+    ])
+    tiles.push([
+      uuidv4(),
+      5,
+      4,
+      "Empty",
+      uuidv4()
+    ])
+    tiles.push([
+      uuidv4(),
+      5,
+      5,
+      "Placeholder",
+      uuidv4()
+    ])
+
+  return {
+    tiles: tiles,
+    letters: letters,
+    tileLetterMap: tileLetterMap,
+  };
+}
+
+function test() {
   // Create 4x4 grid of tiles.
   const tileOptions = [...TILES];
   const rows: Row[] = [];
@@ -198,7 +350,7 @@ function setUpBoard() {
       type: "Placeholder",
     },
   ];
-  rows.push({ id: uuidv4(), tiles: lastRow });  
+  rows.push({ id: uuidv4(), tiles: lastRow });
 
   return rows;
 }
@@ -364,7 +516,6 @@ function assignExtraTile(gameId: string, userId: string): ExtraTile {
 }
 
 export async function getGame() {
-  await startGame();
   return {
     board: TEST_BOARD,
     extraTiles: EXTRA_TILES_USER1,

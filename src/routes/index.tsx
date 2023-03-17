@@ -1,10 +1,10 @@
+import { Show } from "solid-js";
 import { useRouteData } from "solid-start";
-import {
-  createServerAction$,
-  createServerData$,
-  redirect,
-} from "solid-start/server";
-import { getUser, logout } from "~/db/session";
+import { createServerData$, redirect } from "solid-start/server";
+import { getUser } from "~/db/session";
+import { getGames } from "~/db/game";
+import Header from "~/components/Header";
+import Dashboard from "~/components/Dashboard";
 
 export function routeData() {
   return createServerData$(async (_, { request }) => {
@@ -14,25 +14,21 @@ export function routeData() {
       throw redirect("/login");
     }
 
+    const games = await getGames(request);
+
     return user;
   });
 }
 
 export default function Home() {
   const user = useRouteData<typeof routeData>();
-  const [, { Form }] = createServerAction$((f: FormData, { request }) =>
-    logout(request)
-  );
 
   return (
-    <main class="w-full p-4 space-y-2">
-      <h1 class="font-bold text-3xl">Hello {user()?.username}</h1>
-      <h3 class="font-bold text-xl">Message board</h3>
-      <Form>
-        <button name="logout" type="submit">
-          Logout
-        </button>
-      </Form>
-    </main>
+    <div class="app">
+      <Header />
+      <Show when={user()}>
+        <Dashboard user={user()!} />
+      </Show>
+    </div>
   );
 }
