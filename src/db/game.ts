@@ -25,7 +25,7 @@ export type Row = {
   tiles: Tile[];
 };
 
-export type TileType = "Tile" | "Empty" | "Placeholder";
+export type TileType = "Tile" | "Empty" | "Placeholder" | "Extra";
 
 export type Tile = {
   id: string;
@@ -42,6 +42,27 @@ export type Letter = {
   letter: string;
   isUsed: boolean;
 };
+
+type TileLetterMap = {
+  id: string;
+  tileId: string;
+  letterId: string;
+  gameId: string;
+};
+
+type SqlTile = [string, number, number, TileType, string];
+type SqlLetter = [string, string, boolean, string];
+type SqlTileLetterMap = [string, string, string, string];
+
+type SqlResultTile = {
+  id: string;
+  rowIndex: number;
+  columnIndex: number;
+  tileType: TileType;
+  gameId: string;
+};
+
+type SqlResultLetter = Letter & { gameId: string };
 
 // TODO: Replace with data from database.
 const TEST_BOARD = test();
@@ -88,56 +109,20 @@ export async function startGame(request: Request) {
 function setUpBoard(gameId: string) {
   // Create 4x4 grid of tiles.
   const tileOptions = [...TILES];
+  const tiles: SqlTile[] = [];
+  const letters: SqlLetter[] = [];
+  const tileLetterMap: SqlTileLetterMap[] = [];
 
-  const tiles: any = [];
-  const letters: any = [];
-  const tileLetterMap: any = [];
-  
-  // Row of placeholder, 4 empty, placeholder
-  tiles.push([
-      uuidv4(),
-      0,
-      0,
-      "Placeholder",
-      uuidv4(),
-    ])
-    tiles.push([
-      uuidv4(),
-      0,
-      1,
-      "Empty",
-      uuidv4()
-    ])
-    tiles.push([
-      uuidv4(),
-      0,
-      2,
-      "Empty",
-      uuidv4()
-    ])
-    tiles.push([
-      uuidv4(),
-      0,
-      3,
-      "Empty",
-      uuidv4()
-    ])
-    tiles.push([
-      uuidv4(),
-      0,
-      4,
-      "Empty",
-      uuidv4()
-    ])
-    tiles.push([
-      uuidv4(),
-      0,
-      5,
-      "Placeholder",
-      uuidv4()
-    ])
+  // The top row.
+  tiles.push([uuidv4(), 0, 0, "Placeholder", uuidv4()]);
+  tiles.push([uuidv4(), 0, 1, "Empty", uuidv4()]);
+  tiles.push([uuidv4(), 0, 2, "Empty", uuidv4()]);
+  tiles.push([uuidv4(), 0, 3, "Empty", uuidv4()]);
+  tiles.push([uuidv4(), 0, 4, "Empty", uuidv4()]);
+  tiles.push([uuidv4(), 0, 5, "Placeholder", uuidv4()]);
 
   for (let i = 1; i < 5; i++) {
+    // First column in the row.
     tiles.push([uuidv4(), i, 0, "Empty", uuidv4()]);
     
     for (let j = 1; j < 5; j++) {
@@ -154,52 +139,16 @@ function setUpBoard(gameId: string) {
       });
     }
 
-    // Last column in the row
-    tiles.push([
-      uuidv4(),
-      i,
-      5,
-      "Empty",
-      uuidv4(),
-    ]);
+    // Last column in the row.
+    tiles.push([uuidv4(), i, 5, "Empty", uuidv4()]);
   }
 
-  // Row of placeholder, 4 empty, placeholder
-  tiles.push([
-      uuidv4(),
-      5,
-      0,
-      "Placeholder",
-      uuidv4()letters
-    ])
-    tiles.push([
-      uuidv4(),
-      5,
-      2,
-      "Empty",
-      uuidv4()
-    ])
-    tiles.push([
-      uuidv4(),
-      5,
-      3,
-      "Empty",
-      uuidv4()
-    ])
-    tiles.push([
-      uuidv4(),
-      5,
-      4,
-      "Empty",
-      uuidv4()
-    ])
-    tiles.push([
-      uuidv4(),
-      5,
-      5,
-      "Placeholder",
-      uuidv4()
-    ])
+  // The bottom row.
+  tiles.push([uuidv4(), 5, 0, "Placeholder", uuidv4()]);
+  tiles.push([uuidv4(), 5, 2, "Empty", uuidv4()]);
+  tiles.push([uuidv4(), 5, 3, "Empty", uuidv4()]);
+  tiles.push([uuidv4(), 5, 4, "Empty", uuidv4()]);
+  tiles.push([uuidv4(), 5, 5, "Placeholder", uuidv4()]);
 
   return {
     tiles: tiles,
@@ -515,7 +464,57 @@ function assignExtraTile(gameId: string, userId: string): ExtraTile {
   };
 }
 
-export async function getGame() {
+function convertSqlResultsToBoard(sqlTiles: SqlResultTile[], sqlLetters: SqlResultLetter[], tileLetterMap: TileLetterMap[]) {
+  const board: Row[] = [];
+  const minRow = Math.min(...sqlTiles.map(t => t.rowIndex));
+  const maxRow = Math.max(...sqlTiles.map(t => t.rowIndex));
+  const minColumn = Math.min(...sqlTiles.map(t => t.columnIndex));
+  const maxColumn = Math.max(...sqlTiles.map(t => t.columnIndex));
+
+  for (let i = minRow; i <= maxRow; i++) {
+    const tiles: Tile[] = [];
+
+    for (let j = minColumn; j <= maxColumn; j++) {
+      const tile = sqlTiles.find(t => t.rowIndex === i && t.columnIndex === j);
+      if (tile) {
+        const tileLetters: TileLetterMap[] = tileLetterMap.filter(m => m.tileId === tile.id);
+        const letters: Letter[] = [];
+        sqlLetters.forEach(l => {
+          if (tileLetters.find())
+          letters.push()
+        });
+        //const letters: Letter[] = sqlLetters.filter(l => letterIds.includes(l.id));
+        
+        tiles.push({
+          id: tile.id,
+          letters: letters,
+          row: tile.rowIndex,
+          column: tile.columnIndex,
+          type: tile.tileType,
+        });
+      }
+    }
+
+    board.push({ id: uuidv4(), tiles });
+  }
+
+  return board;
+}
+
+export async function getGame(gameId: string) {
+  const tiles = await query({
+    sql: `SELECT * FROM Tile WHERE gameId="${gameId}"`,
+  }) as SqlResultTile[];
+  const letters = await query({
+    sql: `SELECT * FROM Letter WHERE gameId="${gameId}"`,
+  }) as SqlResultLetter[];
+  const tileLetterMap = await query({
+    sql: `SELECT * FROM TileLetterMap WHERE gameId="${gameId}"`,
+  }) as TileLetterMap[];
+
+  const board = convertSqlResultsToBoard(tiles, letters, tileLetterMap);
+  console.log(board);
+
   return {
     board: TEST_BOARD,
     extraTiles: EXTRA_TILES_USER1,
