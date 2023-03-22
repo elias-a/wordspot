@@ -1,5 +1,7 @@
 CREATE TABLE IF NOT EXISTS UserAccount (
     id VARCHAR(255) NOT NULL,
+    unverifiedId VARCHAR(255),
+    sessionId VARCHAR(255),
     userName VARCHAR(255) NOT NULL,
     phone VARCHAR(255) NOT NULL,
     PRIMARY KEY (id)
@@ -9,7 +11,17 @@ CREATE TABLE IF NOT EXISTS Game (
     id VARCHAR(255) NOT NULL,
     userId1 VARCHAR(255) NOT NULL,
     userId2 VARCHAR(255) NOT NULL,
+    turn VARCHAR(255) NOT NULL,
     winner VARCHAR(255),
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS Player (
+    id VARCHAR(255) NOT NULL,
+    userId VARCHAR(255) NOT NULL,
+    gameId VARCHAR(255) NOT NULL,
+    tokens INT NOT NULL,
+    turn BOOL NOT NULL,
     PRIMARY KEY (id)
 );
 
@@ -42,7 +54,7 @@ CREATE TABLE IF NOT EXISTS TileLetterMap (
 CREATE TABLE IF NOT EXISTS ExtraTile (
     id VARCHAR(255) NOT NULL,
     tileId VARCHAR(255) NOT NULL,
-    userId VARCHAR(255) NOT NULL,
+    playerId VARCHAR(255) NOT NULL,
     gameId VARCHAR(255) NOT NULL,
     PRIMARY KEY (id)
 );

@@ -21,13 +21,13 @@ export function routeData() {
 }
 
 export default function Home() {
-  const user = useRouteData<typeof routeData>();
+  const data = useRouteData<typeof routeData>();
 
   return (
     <div class="app">
       <Header />
-      <Show when={user()}>
-        <Dashboard user={user()!} />
+      <Show when={data()}>
+        <Dashboard user={data()!} />
       </Show>
     </div>
   );

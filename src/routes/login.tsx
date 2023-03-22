@@ -8,7 +8,6 @@ import {
 } from "solid-start/server";
 import { createUserSession, getUser } from "~/db/session";
 
-function validateName(name: unknown) {}
 function validatePhone(phone: unknown) {}
 
 export function routeData() {
@@ -24,12 +23,10 @@ export default function Login() {
   const data = useRouteData<typeof routeData>();
   const params = useParams();
 
-  const [loggingIn, { Form }] = createServerAction$(async (form: FormData) => {
-    const name = form.get("name");
+  const [loggingIn, { Form }] = createServerAction$(async (form: FormData, { request }) => {
     const phone = form.get("phone");
     const redirectTo = form.get("redirectTo") || "/";
     if (
-      typeof name !== "string" ||
       typeof phone !== "string" ||
       typeof redirectTo !== "string"
     ) {
@@ -38,14 +35,13 @@ export default function Login() {
 
     const fields = { name, phone };
     const fieldErrors = {
-      name: validateName(name),
       phone: validatePhone(phone),
     };
     if (Object.values(fieldErrors).some(Boolean)) {
       throw new FormError("Fields invalid", { fieldErrors, fields });
     }
 
-    return createUserSession();
+    return createUserSession(phone, request);
   });
 
   return (
@@ -57,13 +53,6 @@ export default function Login() {
           name="redirectTo"
           value={params.redirectTo ?? "/"}
         />
-        <div>
-          <label for="name-input">Name</label>
-          <input name="name" placeholder="Name" />
-        </div>
-        <Show when={loggingIn.error?.fieldErrors?.name}>
-          <p role="alert">{loggingIn.error.fieldErrors.name}</p>
-        </Show>
         <div>
           <label for="phone-input">Phone Number</label>
           <input name="phone" placeholder="Phone Number" />

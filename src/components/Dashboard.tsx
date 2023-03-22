@@ -1,13 +1,10 @@
 import { A } from "solid-start";
 import { createServerAction$ } from "solid-start/server";
+import { UserAccount } from "~/db/session";
 import { startGame } from "~/db/game";
 
 type DashboardProps = {
-  user: {
-    id: number;
-    username: string;
-    password: string;
-  };
+  user: UserAccount;
 };
 
 export default function Dashboard(props: DashboardProps) {
@@ -18,7 +15,7 @@ export default function Dashboard(props: DashboardProps) {
   return (
     <div class="dashboard">
       <div class="dashboard-user-section">
-        <h1 class="dashboard-section-title">Welcome, {"Elias!"}</h1>
+        <h1 class="dashboard-section-title">Welcome, {props.user.userName}!</h1>
         <Form>
           <button name="start-game" type="submit" class="start-game-button">
             Start New Game

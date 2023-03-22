@@ -39,7 +39,7 @@ export default function Login() {
       throw new FormError("Fields invalid", { fieldErrors, fields });
     }
 
-    return login(request);
+    return login(request, code);
   });
 
   return (

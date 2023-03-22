@@ -3,7 +3,7 @@ import { createServerAction$ } from "solid-start/server";
 import { FormError } from "solid-start/data";
 import { createDroppable } from "@thisbeyond/solid-dnd";
 import ExtraTileComponent from "~/components/ExtraTile";
-import { updateBoard } from "~/db/game";
+import { endTurn } from "~/db/game";
 import type { Row, ExtraTile, PlacedExtraTile } from "~/db/game";
 
 type UserAreaProps = {
@@ -26,11 +26,13 @@ export default function User(props: UserAreaProps) {
   };
   const [_, { Form }] = createServerAction$(async (form: FormData) => {
     const formGameId = form.get("gameId");
+    const formClicked = form.get("clicked");
     const formExtraTile = form.get("extraTile");
     const formBoard = form.get("board");
     
     if (
       typeof formGameId !== "string" ||
+      typeof formClicked !== "string" ||
       typeof formExtraTile !== "string" ||
       typeof formBoard !== "string"
     ) {
@@ -38,12 +40,13 @@ export default function User(props: UserAreaProps) {
     }
 
     const gameId = formGameId;
+    const clicked = JSON.parse(formClicked);
     const extraTile = formExtraTile !== "undefined"
       ? JSON.parse(formExtraTile)
       : undefined;
     const board = JSON.parse(formBoard);
 
-    await updateBoard(gameId, extraTile, board);
+    await endTurn(gameId, clicked, extraTile, board);
   });
 
   return (
@@ -67,6 +70,11 @@ export default function User(props: UserAreaProps) {
           type="hidden"
           name="gameId"
           value={props.gameId}
+        />
+        <input
+          type="hidden"
+          name="clicked"
+          value={JSON.stringify(props.clicked)}
         />
         <input
           type="hidden"

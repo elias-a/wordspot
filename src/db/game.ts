@@ -1,10 +1,6 @@
 import { redirect } from "solid-start/server";
-import mysql from "mysql2";
 import { v4 as uuidv4 } from "uuid";
-import { promisify } from "util";
-
-const connection = mysql.createConnection(import.meta.env.VITE_DATABASE_CONNECTION);
-const query = promisify(connection.query).bind(connection);
+import { query } from ".";
 
 const TILES = [
   "SGPU", "HEAS", "XAIY",
@@ -61,7 +57,10 @@ type SqlResultBoard = {
 };
 
 export async function getGames(request: Request) {
-  
+
+
+  // Find all games associated with this user.
+
 }
 
 export async function startGame(request: Request) {
@@ -180,7 +179,7 @@ function checkNeighbors(row: number, column: number, board: Row[]) {
   return false;
 }
 
-async function getTileAtLocation(row: number, column: number, board: Row[]): Promise<Tile | undefined> {
+function getTileAtLocation(row: number, column: number, board: Row[]): Tile | undefined {
   board.forEach(r => {
     r.tiles.forEach(tile => {
       if (tile.row === row && tile.column === column) {
@@ -192,70 +191,89 @@ async function getTileAtLocation(row: number, column: number, board: Row[]): Pro
   return undefined;
 }
 
-export async function updateBoard(gameId: string, extraTile: PlacedExtraTile | undefined, board: Row[]) {    
-  const minRow = extraTile
-    ? Math.min(board[0].tiles[0].row, extraTile.row - 1)
-    : board[0].tiles[0].row;
-  const maxRow = extraTile
-    ? Math.max(board[board.length - 1].tiles[0].row, extraTile.row + 1)
-    : board[board.length - 1].tiles[0].row;
-  const minColumn = extraTile
-    ? Math.min(board[0].tiles[0].column, extraTile.column - 1)
-    : board[0].tiles[0].column;
-  const maxColumn = extraTile
-    ? Math.max(board[0].tiles[board[0].tiles.length - 1].column, extraTile.column + 1)
-    : board[0].tiles[board[0].tiles.length - 1].column;
+function getTileFromLetter(letterId: string, board: Row[]): string {
+  board.forEach(r => {
+    r.tiles.forEach(tile => {
+      if (tile.letters.find(letter => letter.id === letterId)) {
+        return tile.id;
+      }
+    });
+  });
 
-  // Iterate over board.
-  const rows: Row[] = [];
-  for (let i = minRow; i <= maxRow; i++) {
-    const tiles: Tile[] = [];
+  throw new Error(`Tile associated with letter ID="${letterId}" was not found.`);
+}
 
-    for (let j = minColumn; j <= maxColumn; j++) {
-      const tileAtLocation = await getTileAtLocation(i, j, board);
+export async function endTurn(gameId: string, clicked: string[], extraTile: PlacedExtraTile | undefined, board: Row[]) {    
+  // Update the turn to the other user.
 
-      if (
-        extraTile &&
-        tileAtLocation &&
-        i === extraTile.row &&
-        j === extraTile.column
-      ) {
-        tiles.push({
-          id: tileAtLocation.id,
-          letters: extraTile.letters,
-          row: i,
-          column: j,
-          type: "Tile",
-        });
-      } else if (tileAtLocation && tileAtLocation.type === "Tile") {
-        tiles.push({
-          id: tileAtLocation.id,
-          letters: tileAtLocation.letters,
-          row: i,
-          column: j,
-          type: "Tile",
-        });
-      } else if (checkNeighbors(i, j, board)) {
-        tiles.push({
-          id: tileAtLocation ? tileAtLocation.id : uuidv4(),
-          letters: [],
-          row: i,
-          column: j,
-          type: "Empty",
-        });
-      } else {
-        tiles.push({
-          id: tileAtLocation ? tileAtLocation.id : uuidv4(),
-          letters: [],
-          row: i,
-          column: j,
-          type: "Placeholder",
-        });
+  
+  // Update letters that have been clicked.
+  for (let i = 0; i < clicked.length; i++) {
+    await query({
+      sql: "UPDATE Letter SET isUsed=1 WHERE id=?",
+      values: clicked[i],
+    });
+  }
+
+  if (clicked.length === 0) {
+    // Give the user an extra tile and two tokens for not making
+    // a move. Do not add an extra tile to the board, even if the
+    // user chose to do so.
+
+    return;
+  } else if (clicked.length > 2) {
+    // Award the user an extra tile for finding a word that spans 
+    // more than two tiles.
+    const tiles = new Set<string>();
+    clicked.forEach(letter => {
+      tiles.add(getTileFromLetter(letter, board));
+    });
+
+    if (tiles.size > 2) {
+      // Need user ID.
+      assignExtraTile(gameId, "");
+    }
+  }
+
+  // If the user placed an extra tile on the board, iterate over
+  // the board to update the layout.
+  if (extraTile) {
+    const { row, column } = extraTile;
+    for (let i = Math.min(board[0].tiles[0].row, row - 1); i <= Math.max(board[board.length - 1].tiles[0].row, row + 1); i++) {
+      for (let j = Math.min(board[0].tiles[0].column, column - 1); j <= Math.max(board[0].tiles[board[0].tiles.length - 1].column, column + 1); j++) {
+        const tileAtLocation = getTileAtLocation(i, j, board);
+
+        if (tileAtLocation) {
+          if (extraTile && i === extraTile.row && j === extraTile.column) {
+            await query({
+              sql: "",
+              values: [],
+            });
+          }
+        } else {
+          // Create new tile.
+          if (checkNeighbors(i, j, board)) {
+            // tiles.push({
+            //   id: uuidv4(),
+            //   letters: [],
+            //   row: i,
+            //   column: j,
+            //   type: "Empty",
+            // });
+          } else {
+            // tiles.push({
+            //   id: uuidv4(),
+            //   letters: [],
+            //   row: i,
+            //   column: j,
+            //   type: "Placeholder",
+            // });
+          }
+        }
       }
     }
-
-    rows.push({ id: uuidv4(), tiles });
   }
+  
 
   // In database, update Tile at (row, col) from Extra -> Tile.
   // Update the 4 entries in TileLetterMap where `tileId` = `extraTileId`.
