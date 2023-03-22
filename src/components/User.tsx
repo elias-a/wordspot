@@ -1,5 +1,6 @@
 import { For, Setter } from "solid-js";
-import { createServerData$ } from "solid-start/server";
+import { createServerAction$ } from "solid-start/server";
+import { FormError } from "solid-start/data";
 import { createDroppable } from "@thisbeyond/solid-dnd";
 import ExtraTileComponent from "~/components/ExtraTile";
 import { updateBoard } from "~/db/game";
@@ -23,13 +24,27 @@ export default function User(props: UserAreaProps) {
       return props.extraTiles;
     }
   };
+  const [_, { Form }] = createServerAction$(async (form: FormData) => {
+    const formGameId = form.get("gameId");
+    const formExtraTile = form.get("extraTile");
+    const formBoard = form.get("board");
+    
+    if (
+      typeof formGameId !== "string" ||
+      typeof formExtraTile !== "string" ||
+      typeof formBoard !== "string"
+    ) {
+      throw new FormError(`Form not submitted correctly.`);
+    }
 
-  const endTurn = async () => {
-    createServerData$(
-      async ({ gameId, extraTile, board }) => await updateBoard(gameId, extraTile, board),
-      { key: () => { return { gameId: props.gameId, extraTile: props.extraTile, board: props.board } } },
-    );
-  };
+    const gameId = formGameId;
+    const extraTile = formExtraTile !== "undefined"
+      ? JSON.parse(formExtraTile)
+      : undefined;
+    const board = JSON.parse(formBoard);
+
+    await updateBoard(gameId, extraTile, board);
+  });
 
   return (
     <div class="user-area">
@@ -47,9 +62,26 @@ export default function User(props: UserAreaProps) {
         }}
         </For>
       </div>
-      <button name="start-game" onClick={endTurn} class="start-game-button">
-        End Turn
-      </button>
+      <Form>
+        <input
+          type="hidden"
+          name="gameId"
+          value={props.gameId}
+        />
+        <input
+          type="hidden"
+          name="extraTile"
+          value={props.extraTile ? JSON.stringify(props.extraTile) : undefined}
+        />
+        <input
+          type="hidden"
+          name="board"
+          value={JSON.stringify(props.board)}
+        />
+        <button name="start-game" type="submit" class="start-game-button">
+          End Turn
+        </button>
+      </Form>
     </div>
   );
 }

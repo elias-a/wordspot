@@ -192,19 +192,19 @@ async function getTileAtLocation(row: number, column: number, board: Row[]): Pro
   return undefined;
 }
 
-export async function updateBoard(gameId: string, extraTile: PlacedExtraTile | undefined, board: Row[]) {
+export async function updateBoard(gameId: string, extraTile: PlacedExtraTile | undefined, board: Row[]) {    
   const minRow = extraTile
     ? Math.min(board[0].tiles[0].row, extraTile.row - 1)
     : board[0].tiles[0].row;
   const maxRow = extraTile
-    ? Math.max(board[-1].tiles[0].row, extraTile.row + 1)
-    : board[-1].tiles[0].row;
+    ? Math.max(board[board.length - 1].tiles[0].row, extraTile.row + 1)
+    : board[board.length - 1].tiles[0].row;
   const minColumn = extraTile
     ? Math.min(board[0].tiles[0].column, extraTile.column - 1)
     : board[0].tiles[0].column;
   const maxColumn = extraTile
-    ? Math.max(board[0].tiles[-1].column, extraTile.column + 1)
-    : board[0].tiles[-1].column;
+    ? Math.max(board[0].tiles[board[0].tiles.length - 1].column, extraTile.column + 1)
+    : board[0].tiles[board[0].tiles.length - 1].column;
 
   // Iterate over board.
   const rows: Row[] = [];
