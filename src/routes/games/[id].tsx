@@ -1,5 +1,5 @@
 import { Show, createSignal } from "solid-js";
-import { useRouteData, RouteDataArgs } from "solid-start";
+import { useRouteData, RouteDataArgs, useParams } from "solid-start";
 import { createServerData$ } from "solid-start/server";
 import {
   DragDropProvider,
@@ -9,7 +9,7 @@ import {
 import Board from "~/components/Board";
 import User from "~/components/User";
 import NotFound from "../[...404]";
-import { getGame, ExtraTile } from "~/db/game";
+import { getGame, PlacedExtraTile } from "~/db/game";
 
 declare module "solid-js" {
   namespace JSX {
@@ -22,15 +22,16 @@ declare module "solid-js" {
 
 export function routeData({ params }: RouteDataArgs) {
   return createServerData$(
-    async ([, id]) => await getGame(id),
-    { key: () => ["game", params.id] }
+    async ({ id }) => await getGame(id),
+    { key: () => { return { id: params.id } } }
   );
 }
 
 export default function Game() {
+  const params = useParams();
   const game = useRouteData<typeof routeData>();
   const [clicked, setClicked] = createSignal<string[]>([], { equals: false });
-  const [extraTile, setExtraTile] = createSignal<ExtraTile>();
+  const [extraTile, setExtraTile] = createSignal<PlacedExtraTile>();
 
   const onDragEnd: DragEventHandler = ({ draggable, droppable }) => {
     if (draggable && droppable && game()) {
@@ -68,6 +69,8 @@ export default function Game() {
             setClicked={setClicked}
           />
           <User
+            gameId={params.id}
+            board={game()!.board}
             extraTiles={game()!.extraTiles}
             extraTile={extraTile()}
             clicked={clicked()}
