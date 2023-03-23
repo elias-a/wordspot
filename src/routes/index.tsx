@@ -9,11 +9,6 @@ import Dashboard from "~/components/Dashboard";
 export function routeData() {
   return createServerData$(async (_, { request }) => {
     const user = await getUser(request);
-
-    if (!user) {
-      throw redirect("/login");
-    }
-
     const games = await getGames(request);
 
     return user;

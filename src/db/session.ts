@@ -1,7 +1,14 @@
 import { redirect } from "solid-start/server";
 import { createCookieSessionStorage } from "solid-start/session";
 import { v4 as uuidv4 } from "uuid";
+import twilio from "twilio";
 import { query } from ".";
+
+const twilioClient = twilio(
+  import.meta.env.VITE_TWILIO_ACCOUNT_SID,
+  import.meta.env.VITE_TWILIO_AUTH_TOKEN,
+);
+const verifySid = import.meta.env.VITE_TWILIO_VERIFY_SID;
 
 export type UserAccount = {
   id: string;
@@ -44,7 +51,7 @@ export async function getUser(request: Request) {
   }) as UserAccount[];
   
   if (user.length !== 1) {
-    //throw logout(request);
+    throw logout(request);
   } else {
     return user[0];
   }
@@ -52,11 +59,43 @@ export async function getUser(request: Request) {
 
 export async function logout(request: Request) {
   const session = await storage.getSession(request.headers.get("Cookie"));
+  const phone = session.get("phone");
+
+  await query({
+    sql: "UPDATE UserAccount SET unverifiedId=?, sessionId=? WHERE phone=?",
+    values: [null, null, phone],
+  });
+
   return redirect("/login", {
     headers: {
       "Set-Cookie": await storage.destroySession(session),
     },
   });
+}
+
+async function sendVerification(phone: string) {
+  await twilioClient.verify.v2.services(verifySid)
+    .verifications.create({ to: `+1${phone}`, channel: "sms" })
+    .catch(_err => {
+      throw new Error(`Error logging in.`);
+    });
+}
+
+async function checkVerification(phone: string, code: string) {
+  await twilioClient.verify.v2.services(verifySid)
+    .verificationChecks.create({ to: `+1${phone}`, code })
+    .then(res => {
+      if (!res.valid) {
+        throw new Error(`Incorrect verification code.`);
+      }
+    }).catch(_err => {
+      throw new Error(`Incorrect verification code`);
+    });
+}
+
+async function cancelVerification(verificationSid: string) {
+  await twilioClient.verify.v2.services(verifySid)
+    .verifications(verificationSid).update({ status: "canceled" });
 }
 
 export async function createUserSession(phone: string, request: Request) {
@@ -68,15 +107,16 @@ export async function createUserSession(phone: string, request: Request) {
   }) as UserAccount[];
 
   const unverifiedId = uuidv4();
-  if (user) {
+  if (user.length === 1) {
     await query({
-      sql: "UPDATE UserAccount SET unverifiedId=?",
-      values: [unverifiedId],
+      sql: "UPDATE UserAccount SET unverifiedId=? WHERE phone=?",
+      values: [unverifiedId, phone],
     });
   } else {
-    // Do not allow user to create an account.
-    return null;
+    throw new Error(`Error logging in.`);
   }
+
+  await sendVerification(phone);
 
   session.set("unverifiedId", unverifiedId);
   session.set("phone", phone);
@@ -101,10 +141,14 @@ export async function getUnverifiedUser(request: Request) {
   }
 
   // Check database to ensure the unverified user ID matches with the account.
-  await query({
+  const id = await query({
     sql: "SELECT id FROM UserAccount WHERE unverifiedId=? AND phone=?",
     values: [unverifiedId, phone],
-  });
+  }) as string[];
+
+  if (id.length !== 1) {
+    return null;
+  }
 
   return unverifiedId;
 }
@@ -113,7 +157,7 @@ export async function login(request: Request, code: string) {
   const session = await getUserSession(request);
   const phone = session.get("phone");
 
-
+  await checkVerification(phone, code);
 
   const sessionId = uuidv4();
   await query({

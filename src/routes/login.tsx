@@ -1,26 +1,12 @@
 import { Show } from "solid-js";
-import { useParams, useRouteData } from "solid-start";
+import { useParams } from "solid-start";
 import { FormError } from "solid-start/data";
-import {
-  createServerAction$,
-  createServerData$,
-  redirect,
-} from "solid-start/server";
-import { createUserSession, getUser } from "~/db/session";
+import { createServerAction$ } from "solid-start/server";
+import { createUserSession } from "~/db/session";
 
 function validatePhone(phone: unknown) {}
 
-export function routeData() {
-  return createServerData$(async (_, { request }) => {
-    if (await getUser(request)) {
-      throw redirect("/");
-    }
-    return {};
-  });
-}
-
 export default function Login() {
-  const data = useRouteData<typeof routeData>();
   const params = useParams();
 
   const [loggingIn, { Form }] = createServerAction$(async (form: FormData, { request }) => {
@@ -65,7 +51,7 @@ export default function Login() {
             {loggingIn.error.message}
           </p>
         </Show>
-        <button type="submit">{data() ? "Login" : ""}</button>
+        <button type="submit">{"Login"}</button>
       </Form>
     </main>
   );

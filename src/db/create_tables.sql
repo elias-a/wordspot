@@ -4,7 +4,8 @@ CREATE TABLE IF NOT EXISTS UserAccount (
     sessionId VARCHAR(255),
     userName VARCHAR(255) NOT NULL,
     phone VARCHAR(255) NOT NULL,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    UNIQUE (phone)
 );
 
 CREATE TABLE IF NOT EXISTS Game (
