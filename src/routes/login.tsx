@@ -33,7 +33,7 @@ export default function Login() {
       throw new FormError(`Form not submitted correctly.`);
     }
 
-    const fields = { name, phone };
+    const fields = { phone };
     const fieldErrors = {
       phone: validatePhone(phone),
     };
