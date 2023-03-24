@@ -112,6 +112,38 @@ div {
   margin: 20px auto;
 }
 
+.game-card {
+  width: 220px;
+  height: 220px;
+  display: inline-block;
+  margin-left: 2vw;
+  margin-top: 2vw;
+  color: #fff;
+  background-color: #3b2f21
+}
+
+.game-summary {
+  width: 220px;
+  height: 150px;
+  display: inline-block;
+  font-size: 20px;
+  text-align: center;
+}
+
+.play-game-button {
+  background-color: #785F43;
+  border: 0;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 24px;
+  height: 50px; 
+  width: 200px;
+  margin-left: 10px;
+  display: block;
+  text-decoration: none;
+  text-align: center;
+}
+
 .game {
   display: flex;
   min-width: 100%;

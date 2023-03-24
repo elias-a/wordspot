@@ -56,11 +56,16 @@ type SqlResultBoard = {
   isUsed: boolean;
 };
 
-export async function getGames(request: Request) {
-
-
-  // Find all games associated with this user.
-
+export async function getGames(userId: string) {
+  return await query({
+    sql: "SELECT Game.id, Game.userId1, Game.userId2, \
+      Game.winner FROM Player INNER JOIN Game ON \
+      Player.gameId=Game.id INNER JOIN UserAccount ON \
+      Player.userId=UserAccount.id WHERE userId=?",
+    values: [userId],
+  });
+//   SELECT Game.id, user1.userName AS userName1, user2.userName AS userName2 FROM Player INNER JOIN Game ON Player.gameId=Game.id INNER JOIN UserAccount user1 ON user1.id=Game.userId1 INNER JOIN UserAccount user2 ON user2.id=Game.use
+// rId2 WHERE Player.userId="e3265204-c987-11ed-8a55-be899927dcd7"
 }
 
 export async function startGame(request: Request) {
@@ -74,6 +79,14 @@ export async function startGame(request: Request) {
       import.meta.env.VITE_USER2,
       null,
     ],
+  });
+
+  await query({
+    sql: "INSERT INTO Player VALUES ?",
+    values: [[
+      [uuidv4(), import.meta.env.VITE_USER1, gameId, 26, true],
+      [uuidv4(), import.meta.env.VITE_USER2, gameId, 25, false],
+    ]],
   });
 
   // Set up board.

@@ -9,9 +9,14 @@ import Dashboard from "~/components/Dashboard";
 export function routeData() {
   return createServerData$(async (_, { request }) => {
     const user = await getUser(request);
-    const games = await getGames(request);
 
-    return user;
+    if (!user) {
+      throw redirect("/login");
+    }
+
+    const games = await getGames(user.id);
+
+    return { user, games };
   });
 }
 
@@ -22,7 +27,7 @@ export default function Home() {
     <div class="app">
       <Header />
       <Show when={data()}>
-        <Dashboard user={data()!} />
+        <Dashboard user={data()!.user} games={data()!.games} />
       </Show>
     </div>
   );

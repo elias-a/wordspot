@@ -12,8 +12,10 @@ CREATE TABLE IF NOT EXISTS Game (
     id VARCHAR(255) NOT NULL,
     userId1 VARCHAR(255) NOT NULL,
     userId2 VARCHAR(255) NOT NULL,
-    turn VARCHAR(255) NOT NULL,
     winner VARCHAR(255),
+    dateCreated DATETIME NOT NULL,
+    dateModified DATETIME NOT NULL,
+    createdBy VARCHAR(255) NOT NULL,
     PRIMARY KEY (id)
 );
 
