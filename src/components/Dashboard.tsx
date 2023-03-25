@@ -1,4 +1,4 @@
-import { For } from "solid-js";
+import { For, Switch, Match } from "solid-js";
 import { A } from "solid-start";
 import { createServerAction$ } from "solid-start/server";
 import { UserAccount } from "~/db/session";
@@ -30,8 +30,33 @@ export default function Dashboard(props: DashboardProps) {
           return (
             <div class="game-card">
               <div class="game-summary">
-                <div></div>
-                <div>Game started: </div>
+                <p class="game-summary-item">
+                  <Switch>
+                    <Match when={game.winner === props.user.id}>
+                      {`You won!`}
+                    </Match>
+                    <Match when={game.winner}>
+                      {`You lost!`}
+                    </Match>
+                    <Match when={game.myTurn}>
+                      {`Your turn!`}
+                    </Match>
+                    <Match when={game.opponentTurn}>
+                      {`${game.opponentName}'s Turn!`}
+                    </Match>
+                  </Switch>
+                </p>
+                <p class="game-summary-item">
+                  <Switch>
+                    <Match when={game.firstPlayer === props.user.id}>
+                      {`${game.myName} vs ${game.opponentName}`}
+                    </Match>
+                    <Match when={game.firstPlayer !== props.user.id}>
+                      {`${game.myName} vs ${game.opponentName}`}
+                    </Match>
+                  </Switch>
+                </p>
+                <p class="game-summary-item">{`Game started: ${game.dateCreated}`}</p>
               </div>
               <A href={`/games/${game.id}`} class="play-game-button">
                 Play Game

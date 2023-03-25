@@ -113,21 +113,28 @@ div {
 }
 
 .game-card {
-  width: 220px;
+  width: 260px;
   height: 220px;
   display: inline-block;
-  margin-left: 2vw;
+  margin-left: 10px;
   margin-top: 2vw;
   color: #fff;
-  background-color: #3b2f21
+  background-color: #3b2f21;
 }
 
 .game-summary {
-  width: 220px;
-  height: 150px;
+  width: 100%;
+  padding: 0;
+  margin: 0;
   display: inline-block;
   font-size: 20px;
   text-align: center;
+}
+
+.game-summary-item {
+  margin: 0;
+  height: 50px;
+  padding-top: 10px;
 }
 
 .play-game-button {
@@ -138,10 +145,11 @@ div {
   font-size: 24px;
   height: 50px; 
   width: 200px;
-  margin-left: 10px;
+  margin-left: 30px;
   display: block;
   text-decoration: none;
   text-align: center;
+  padding-top: 10px;
 }
 
 .game {

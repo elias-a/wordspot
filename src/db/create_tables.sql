@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS Player (
     userId VARCHAR(255) NOT NULL,
     gameId VARCHAR(255) NOT NULL,
     tokens INT NOT NULL,
-    turn BOOL NOT NULL,
+    turn BOOL,
     PRIMARY KEY (id)
 );
 
