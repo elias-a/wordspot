@@ -4,6 +4,8 @@ import { FormError } from "solid-start/data";
 import { createServerAction$ } from "solid-start/server";
 import { login } from '~/db/session';
 
+export function routeData() {}
+
 export default function Login() {
   const params = useParams();
 

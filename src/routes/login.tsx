@@ -6,6 +6,8 @@ import { createUserSession } from "~/db/session";
 
 function validatePhone(phone: unknown) {}
 
+export function routeData() {}
+
 export default function Login() {
   const params = useParams();
 

@@ -6,6 +6,7 @@ import {
   DragDropSensors,
   DragEventHandler,
 } from "@thisbeyond/solid-dnd";
+import Header from "~/components/Header";
 import Board from "~/components/Board";
 import User from "~/components/User";
 import NotFound from "../[...404]";
@@ -60,25 +61,28 @@ export default function Game() {
   return (
     <DragDropProvider onDragEnd={onDragEnd}>
       <DragDropSensors />
-      <Show when={game()} fallback={<NotFound />}>
-        <div class="game">
-          <Board
-            board={game()!.board.board}
-            extraTile={extraTile()}
-            clicked={clicked()}
-            setClicked={setClicked}
-          />
-          <User
-            gameId={params.id}
-            userData={game()!.userData}
-            board={game()!.board.board}
-            extraTiles={game()!.board.extraTiles}
-            extraTile={extraTile()}
-            clicked={clicked()}
-            setClicked={setClicked}
-          />
+      <div class="app">
+        <Header />
+        <div class="content">
+          <Show when={game()} fallback={<NotFound />}>
+              <Board
+                board={game()!.board.board}
+                extraTile={extraTile()}
+                clicked={clicked()}
+                setClicked={setClicked}
+              />
+              <User
+                gameId={params.id}
+                userData={game()!.userData}
+                board={game()!.board.board}
+                extraTiles={game()!.board.extraTiles}
+                extraTile={extraTile()}
+                clicked={clicked()}
+                setClicked={setClicked}
+              />
+          </Show>
         </div>
-      </Show>
+      </div>
     </DragDropProvider>
   );
 }

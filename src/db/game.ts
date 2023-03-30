@@ -58,7 +58,10 @@ type SqlResultBoard = {
 };
 
 export type UserData = {
+  playerId: string;
+  firstPlayer: string;
   winner: string | null;
+  myId: string;
   myName: string;
   myTokens: number;
   myTurn: number;
@@ -195,8 +198,7 @@ function setUpBoard(gameId: string) {
   };
 }
 
-// Checks if location is a valid spot to add a tile.
-function checkNeighbors(row: number, column: number, board: Row[]) {
+function checkNeighbors(row: number, column: number, board: Row[], extraTile: PlacedExtraTile) {
   board.forEach(r => {
     r.tiles.forEach(tile => {
       if (
@@ -210,36 +212,46 @@ function checkNeighbors(row: number, column: number, board: Row[]) {
     });
   });
 
+  if (
+    extraTile.row === row && extraTile.column === column + 1 ||
+    extraTile.row === row && extraTile.column === column - 1 ||
+    extraTile.row === row + 1 && extraTile.column === column ||
+    extraTile.row === row - 1 && extraTile.column === column
+  ) {
+    return true;
+  }
+
   return false;
 }
 
-function getTileAtLocation(row: number, column: number, board: Row[]): Tile | undefined {
-  board.forEach(r => {
-    r.tiles.forEach(tile => {
-      if (tile.row === row && tile.column === column) {
-        return tile;
+function getTileAtLocation(row: number, column: number, board: Row[]) {
+  for (let i = 0; i < board.length; i++) {
+    for (let j = 0; j < board[i].tiles.length; j++) {
+      if (board[i].tiles[j].row === row && board[i].tiles[j].column === column) {
+        return board[i].tiles[j];
       }
-    });
-  });
-
-  return undefined;
+    }
+  }
 }
 
-function getTileFromLetter(letterId: string, board: Row[]): string {
-  board.forEach(r => {
-    r.tiles.forEach(tile => {
-      if (tile.letters.find(letter => letter.id === letterId)) {
-        return tile.id;
+function getTileFromLetter(letterId: string, board: Row[]) {
+  for (let i = 0; i < board.length; i++) {
+    for (let j = 0; j < board[i].tiles.length; j++) {
+      if (board[i].tiles[j].letters.find(letter => letter.id === letterId)) {
+        return board[i].tiles[j].id;
       }
-    });
-  });
+    }
+  }
 
   throw new Error(`Tile associated with letter ID="${letterId}" was not found.`);
 }
 
-export async function endTurn(gameId: string, clicked: string[], extraTile: PlacedExtraTile | undefined, board: Row[]) {    
-  // Update the turn to the other user.
-
+export async function endTurn(gameId: string, playerId: string, clicked: string[], extraTile: PlacedExtraTile | undefined, board: Row[]) {    
+  // Update player data.
+  await query({
+    sql: "UPDATE Player SET tokens=tokens-? WHERE id=?",
+    values: [clicked.length, playerId],
+  });
   
   // Update letters that have been clicked.
   for (let i = 0; i < clicked.length; i++) {
@@ -253,6 +265,11 @@ export async function endTurn(gameId: string, clicked: string[], extraTile: Plac
     // Give the user an extra tile and two tokens for not making
     // a move. Do not add an extra tile to the board, even if the
     // user chose to do so.
+    await assignExtraTile(gameId, playerId);
+    await query({
+      sql: "UPDATE Player SET tokens=tokens+2 WHERE id=?",
+      values: [playerId],
+    });
 
     return;
   } else if (clicked.length > 2) {
@@ -264,8 +281,7 @@ export async function endTurn(gameId: string, clicked: string[], extraTile: Plac
     });
 
     if (tiles.size > 2) {
-      // Need user ID.
-      assignExtraTile(gameId, "");
+      await assignExtraTile(gameId, playerId);
     }
   }
 
@@ -280,65 +296,54 @@ export async function endTurn(gameId: string, clicked: string[], extraTile: Plac
         if (tileAtLocation) {
           if (extraTile && i === extraTile.row && j === extraTile.column) {
             await query({
-              sql: "",
-              values: [],
+              sql: "UPDATE Tile SET row=?, column=?, tileType=? WHERE id=?",
+              values: [i, j, "Tile", tileAtLocation.id],
+            });
+            await query({
+              sql: "UPDATE TileLetterMap SET tileId=? WHERE tileId=?",
+              values: [tileAtLocation.id, extraTile.id],
+            });
+            await query({
+              sql: "DELETE FROM ExtraTile WHERE id=?",
+              values: [extraTile.id],
             });
           }
         } else {
-          // Create new tile.
-          if (checkNeighbors(i, j, board)) {
-            // tiles.push({
-            //   id: uuidv4(),
-            //   letters: [],
-            //   row: i,
-            //   column: j,
-            //   type: "Empty",
-            // });
-          } else {
-            // tiles.push({
-            //   id: uuidv4(),
-            //   letters: [],
-            //   row: i,
-            //   column: j,
-            //   type: "Placeholder",
-            // });
-          }
+          // Create a new tile - either an empty tile or a placeholder.
+          await query({
+            sql: "INSERT INTO Tile (id, row, column, tileType, gameId) VALUES (?, ?, ?, ?, ?)",
+            values: [
+              uuidv4(),
+              i,
+              j,
+              checkNeighbors(i, j, board, extraTile) ? "Empty" : "Placeholder",
+              gameId,
+            ],
+          });
         }
       }
     }
   }
-  
-
-  // In database, update Tile at (row, col) from Extra -> Tile.
-  // Update the 4 entries in TileLetterMap where `tileId` = `extraTileId`.
-  // Change `tileId` to the ID of the Tile at (row, col). 
-  // Delete entries associated with `extraTileId`.
-
-
-  
 }
 
-function assignExtraTile(gameId: string, userId: string): ExtraTile {
-  // Instead of this, check database for tiles available in the game.
-  const tileOptions = [...TILES];
-  const randomIndex = Math.floor(Math.random() * tileOptions.length);
-  const tileLetters = tileOptions.splice(randomIndex, 1);
+async function assignExtraTile(gameId: string, playerId: string) {
+  const rows = await query({
+    sql: "SELECT id FROM Tile WHERE tileType='Option' ORDER BY RAND() LIMIT 1",
+  }) as string[];
 
-  const letters = tileLetters[0].split("").map((letter, letterIndex) => {
-    return {
-      id: uuidv4(),
-      letterIndex: letterIndex,
-      letter: letter,
-      isUsed: false,
-    };
+  if (rows.length === 0) {
+    throw new Error("No extra tiles left to assign!");
+  }
+
+  const newExtraTileId = rows[0];
+  await query({
+    sql: "INSERT INTO ExtraTile (id, tileId, playerId, gameId) VALUES (?, ?, ?, ?)",
+    values: [uuidv4(), newExtraTileId, playerId, gameId],
   });
-
-  return {
-    id: uuidv4(),
-    letters: letters,
-    type: "Extra",
-    tileId: "",
-  };
+  await query({
+    sql: "UPDATE Tile SET tileType=? WHERE id=?",
+    values: ["Extra", newExtraTileId],
+  });
 }
 
 function convertSqlResultsToBoard(sqlTiles: SqlResultBoard[]) {
@@ -417,10 +422,11 @@ export async function getGame(gameId: string, request: Request) {
   }) as SqlResultBoard[];
 
   const userData = await query({
-    sql: "SELECT Game.winner, my.name AS myName, my.tokens AS myTokens, \
+    sql: "SELECT Game.userId1 AS firstPlayer, my.playerId, Game.winner, ? AS myId, \
+    my.name AS myName, my.tokens AS myTokens, \
     my.turn AS myTurn, opponent.name AS opponentName, \
     opponent.tokens AS opponentTokens, opponent.turn AS opponentTurn \
-    FROM (SELECT gameId, UserAccount.userName AS name, tokens, turn \
+    FROM (SELECT gameId, Player.id AS playerId, UserAccount.userName AS name, tokens, turn \
       FROM Player INNER JOIN UserAccount ON Player.userId=UserAccount.id \
       WHERE userId=?) AS my INNER JOIN \
       (SELECT gameId, UserAccount.userName AS name, tokens, turn FROM Player \
@@ -428,7 +434,7 @@ export async function getGame(gameId: string, request: Request) {
         WHERE userId!=?) AS opponent \
         ON my.gameId=opponent.gameId INNER JOIN Game on my.gameId=Game.id \
         WHERE Game.id=?",
-    values: [user.id, user.id, gameId],
+    values: [user.id, user.id, user.id, gameId],
   }) as UserData[];
 
   if (userData.length === 0) {
