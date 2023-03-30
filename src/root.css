@@ -264,3 +264,7 @@ div {
   padding-right: 10px;
   margin: 0;
 }
+
+.user-data {
+  border: 1px solid red;
+}

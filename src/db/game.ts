@@ -1,6 +1,7 @@
 import { redirect } from "solid-start/server";
 import { v4 as uuidv4 } from "uuid";
 import { query } from ".";
+import { getUser } from "~/db/session";
 
 const TILES = [
   "SGPU", "HEAS", "XAIY",
@@ -56,9 +57,20 @@ type SqlResultBoard = {
   isUsed: boolean;
 };
 
+export type UserData = {
+  winner: string | null;
+  myName: string;
+  myTokens: number;
+  myTurn: number;
+  opponentName: string;
+  opponentTokens: number;
+  opponentTurn: number;
+};
+
 export async function getGames(userId: string) {
   return await query({
-    sql: "SELECT Game.id, DATE_FORMAT(Game.dateCreated, '%m/%d/%Y') AS dateCreated, Game.userId1 AS firstPlayer, Game.winner, my.name AS myName, \
+    sql: "SELECT Game.id, DATE_FORMAT(Game.dateCreated, '%m/%d/%Y') AS dateCreated, \
+    Game.userId1 AS firstPlayer, Game.winner, my.name AS myName, \
     my.tokens AS myTokens, my.turn AS myTurn, opponent.name AS opponentName, \
     opponent.tokens AS opponentTokens, opponent.turn AS opponentTurn \
     FROM (SELECT gameId, UserAccount.userName AS name, tokens, turn \
@@ -389,7 +401,12 @@ function convertSqlResultsToBoard(sqlTiles: SqlResultBoard[]) {
   return { board, extraTiles };
 }
 
-export async function getGame(gameId: string) {
+export async function getGame(gameId: string, request: Request) {
+  const user = await getUser(request);
+  if (!user) {
+    return;
+  }
+
   const tiles = await query({
     sql: `SELECT Tile.id AS tileId, Tile.rowIndex, Tile.columnIndex, \
       Tile.tileType, Letter.id AS letterId, Letter.letterIndex, \
@@ -399,5 +416,27 @@ export async function getGame(gameId: string) {
       AND Tile.gameId="${gameId}"`,
   }) as SqlResultBoard[];
 
-  return convertSqlResultsToBoard(tiles);
+  const userData = await query({
+    sql: "SELECT Game.winner, my.name AS myName, my.tokens AS myTokens, \
+    my.turn AS myTurn, opponent.name AS opponentName, \
+    opponent.tokens AS opponentTokens, opponent.turn AS opponentTurn \
+    FROM (SELECT gameId, UserAccount.userName AS name, tokens, turn \
+      FROM Player INNER JOIN UserAccount ON Player.userId=UserAccount.id \
+      WHERE userId=?) AS my INNER JOIN \
+      (SELECT gameId, UserAccount.userName AS name, tokens, turn FROM Player \
+        INNER JOIN UserAccount on Player.userId=UserAccount.id \
+        WHERE userId!=?) AS opponent \
+        ON my.gameId=opponent.gameId INNER JOIN Game on my.gameId=Game.id \
+        WHERE Game.id=?",
+    values: [user.id, user.id, gameId],
+  }) as UserData[];
+
+  if (userData.length === 0) {
+    return;
+  }
+
+  return {
+    board: convertSqlResultsToBoard(tiles),
+    userData: userData[0],
+  };
 }

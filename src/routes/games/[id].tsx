@@ -22,7 +22,7 @@ declare module "solid-js" {
 
 export function routeData({ params }: RouteDataArgs) {
   return createServerData$(
-    async ({ id }) => await getGame(id),
+    async ({ id }, { request }) => await getGame(id, request),
     { key: () => { return { id: params.id } } }
   );
 }
@@ -41,7 +41,7 @@ export default function Game() {
       if (droppableId === "extra-tiles-area") {
         setExtraTile(undefined);
       } else {
-        const selectedExtraTile = game()!
+        const selectedExtraTile = game()!.board
           .extraTiles.find(t => t.id === draggableId);
         if (selectedExtraTile) {
           setExtraTile({
@@ -63,15 +63,16 @@ export default function Game() {
       <Show when={game()} fallback={<NotFound />}>
         <div class="game">
           <Board
-            board={game()!.board}
+            board={game()!.board.board}
             extraTile={extraTile()}
             clicked={clicked()}
             setClicked={setClicked}
           />
           <User
             gameId={params.id}
-            board={game()!.board}
-            extraTiles={game()!.extraTiles}
+            userData={game()!.userData}
+            board={game()!.board.board}
+            extraTiles={game()!.board.extraTiles}
             extraTile={extraTile()}
             clicked={clicked()}
             setClicked={setClicked}

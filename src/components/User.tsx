@@ -4,10 +4,11 @@ import { FormError } from "solid-start/data";
 import { createDroppable } from "@thisbeyond/solid-dnd";
 import ExtraTileComponent from "~/components/ExtraTile";
 import { endTurn } from "~/db/game";
-import type { Row, ExtraTile, PlacedExtraTile } from "~/db/game";
+import type { Row, ExtraTile, PlacedExtraTile, UserData } from "~/db/game";
 
 type UserAreaProps = {
   gameId: string;
+  userData: UserData;
   board: Row[];
   extraTiles: ExtraTile[];
   extraTile: PlacedExtraTile | undefined;
@@ -64,6 +65,12 @@ export default function User(props: UserAreaProps) {
           );
         }}
         </For>
+      </div>
+      <div class="user-data">
+        <div class="user-token-section">
+          <div class="user-tokens">{props.userData.myTokens}</div>
+          <div class="user-tokens">{props.userData.opponentTokens}</div>
+        </div>
       </div>
       <Form>
         <input
