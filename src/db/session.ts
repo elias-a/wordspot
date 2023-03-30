@@ -39,6 +39,24 @@ export async function getSessionId(request: Request) {
   return sessionId;
 }
 
+export async function getUserId(request: Request) {
+  const sessionId = await getSessionId(request);
+  if (!sessionId) {
+    return null;
+  }
+
+  const user = await query({
+    sql: "SELECT id, userName, phone FROM UserAccount WHERE sessionId=?",
+    values: [sessionId],
+  }) as UserAccount[];
+  
+  if (user.length !== 1) {
+    return null;
+  } else {
+    return user[0].id;
+  }
+}
+
 export async function getUser(request: Request) {
   const sessionId = await getSessionId(request);
   if (!sessionId) {

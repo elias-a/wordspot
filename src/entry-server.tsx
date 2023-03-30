@@ -4,7 +4,7 @@ import {
   renderAsync,
 } from "solid-start/entry-server";
 import { redirect } from "solid-start/server";
-import { getUser, getUnverifiedUser } from "~/db/session";
+import { getUserId, getUnverifiedUser } from "~/db/session";
 
 export default createHandler(
   ({ forward }) => {
@@ -12,7 +12,7 @@ export default createHandler(
       const path = new URL(event.request.url).pathname;
 
       if (event.request.method === "GET") {
-        if (!(await getUser(event.request))) {
+        if (!(await getUserId(event.request))) {
           const unverifiedUser = await getUnverifiedUser(event.request);
           
           if (unverifiedUser && path !== "/verify") {
