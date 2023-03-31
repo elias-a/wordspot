@@ -55,6 +55,7 @@ type SqlResultBoard = {
   letterIndex: number;
   letter: string;
   isUsed: boolean;
+  extraTileId: string | null;
 };
 
 export type UserData = {
@@ -329,7 +330,7 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
 async function assignExtraTile(gameId: string, playerId: string) {
   const rows = await query({
     sql: "SELECT id FROM Tile WHERE tileType='Option' ORDER BY RAND() LIMIT 1",
-  }) as string[];
+  }) as { id: string }[];
 
   if (rows.length === 0) {
     throw new Error("No extra tiles left to assign!");
@@ -338,16 +339,16 @@ async function assignExtraTile(gameId: string, playerId: string) {
   const newExtraTileId = rows[0];
   await query({
     sql: "INSERT INTO ExtraTile (id, tileId, playerId, gameId) VALUES (?, ?, ?, ?)",
-    values: [uuidv4(), newExtraTileId, playerId, gameId],
+    values: [uuidv4(), newExtraTileId.id, playerId, gameId],
   });
   await query({
-    sql: "UPDATE Tile SET tileType=? WHERE id=?",
-    values: ["Extra", newExtraTileId],
+    sql: `UPDATE Tile SET tileType="Extra" WHERE id="${newExtraTileId.id}"`,
   });
 }
 
 function convertSqlResultsToBoard(sqlTiles: SqlResultBoard[]) {
   const board: Row[] = [];
+  const extraTiles: ExtraTile[] = [];
   const minRow = Math.min(...sqlTiles.map(t => t.rowIndex));
   const maxRow = Math.max(...sqlTiles.map(t => t.rowIndex));
   const minColumn = Math.min(...sqlTiles.map(t => t.columnIndex));
@@ -364,6 +365,12 @@ function convertSqlResultsToBoard(sqlTiles: SqlResultBoard[]) {
       }
 
       const tileType = sqlLetters[0].tileType;
+
+      if (tileType === "Extra") {
+        console.log("extra");
+        console.log(sqlLetters);
+      }
+
       if (tileType === "Tile" && sqlLetters.length === 4) {
         const letters: Letter[] = sqlLetters.map(l => {
           return {
@@ -392,7 +399,22 @@ function convertSqlResultsToBoard(sqlTiles: SqlResultBoard[]) {
           type: tileType as TileType,
         });
       } else if (tileType === "Extra" && sqlLetters.length === 4) {
-        // TODO: Process extra tiles.
+        const letters: Letter[] = sqlLetters.map(l => {
+          return {
+            id: l.letterId,
+            letterIndex: l.letterIndex,
+            letter: l.letter,
+            isUsed: l.isUsed,
+          };
+        }).sort((a, b) => a.letterIndex - b.letterIndex);
+
+        console.log(sqlLetters);
+        // extraTiles.push({
+        //   id: ,
+        //   letters: letters,
+        //   type: tileType as TileType,
+        //   tileId: sqlLetters[0].tileId
+        // });
       } else {
         throw new Error(`Incorrect data.`);
       }
@@ -400,8 +422,6 @@ function convertSqlResultsToBoard(sqlTiles: SqlResultBoard[]) {
 
     board.push({ id: uuidv4(), tiles });
   }
-
-  const extraTiles: ExtraTile[] = [];
 
   return { board, extraTiles };
 }
@@ -415,9 +435,10 @@ export async function getGame(gameId: string, request: Request) {
   const tiles = await query({
     sql: `SELECT Tile.id AS tileId, Tile.rowIndex, Tile.columnIndex, \
       Tile.tileType, Letter.id AS letterId, Letter.letterIndex, \
-      Letter.letter, Letter.isUsed FROM Tile LEFT JOIN \
+      Letter.letter, Letter.isUsed, ExtraTile.id AS extraTileId FROM Tile LEFT JOIN \
       TileLetterMap ON Tile.id=TileLetterMap.tileId LEFT JOIN Letter \
-      ON TileLetterMap.letterId=Letter.id WHERE Tile.tileType != "Option" \
+      ON TileLetterMap.letterId=Letter.id LEFT JOIN ExtraTile ON \
+      ExtraTile.tileId=Tile.id WHERE Tile.tileType != "Option" \
       AND Tile.gameId="${gameId}"`,
   }) as SqlResultBoard[];
 
