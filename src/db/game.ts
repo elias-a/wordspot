@@ -348,7 +348,6 @@ async function assignExtraTile(gameId: string, playerId: string) {
 
 function convertSqlResultsToBoard(sqlTiles: SqlResultBoard[]) {
   const board: Row[] = [];
-  const extraTiles: ExtraTile[] = [];
   const minRow = Math.min(...sqlTiles.map(t => t.rowIndex));
   const maxRow = Math.max(...sqlTiles.map(t => t.rowIndex));
   const minColumn = Math.min(...sqlTiles.map(t => t.columnIndex));
@@ -365,12 +364,6 @@ function convertSqlResultsToBoard(sqlTiles: SqlResultBoard[]) {
       }
 
       const tileType = sqlLetters[0].tileType;
-
-      if (tileType === "Extra") {
-        console.log("extra");
-        console.log(sqlLetters);
-      }
-
       if (tileType === "Tile" && sqlLetters.length === 4) {
         const letters: Letter[] = sqlLetters.map(l => {
           return {
@@ -398,23 +391,6 @@ function convertSqlResultsToBoard(sqlTiles: SqlResultBoard[]) {
           column: j,
           type: tileType as TileType,
         });
-      } else if (tileType === "Extra" && sqlLetters.length === 4) {
-        const letters: Letter[] = sqlLetters.map(l => {
-          return {
-            id: l.letterId,
-            letterIndex: l.letterIndex,
-            letter: l.letter,
-            isUsed: l.isUsed,
-          };
-        }).sort((a, b) => a.letterIndex - b.letterIndex);
-
-        console.log(sqlLetters);
-        // extraTiles.push({
-        //   id: ,
-        //   letters: letters,
-        //   type: tileType as TileType,
-        //   tileId: sqlLetters[0].tileId
-        // });
       } else {
         throw new Error(`Incorrect data.`);
       }
@@ -422,6 +398,37 @@ function convertSqlResultsToBoard(sqlTiles: SqlResultBoard[]) {
 
     board.push({ id: uuidv4(), tiles });
   }
+
+  const extraTiles: ExtraTile[] = [];
+  const extraTileIds = new Set<string>();
+  sqlTiles.forEach(t => {
+    if (t.tileType === "Extra") {
+      extraTileIds.add(t.tileId);
+    }
+  });
+  Array.from(extraTileIds).forEach(id => {
+    const sqlLetters = sqlTiles.filter(t => t.tileId === id);
+    const letters: Letter[] = sqlLetters.map(l => {
+      return {
+        id: l.letterId,
+        letterIndex: l.letterIndex,
+        letter: l.letter,
+        isUsed: l.isUsed,
+      };
+    }).sort((a, b) => a.letterIndex - b.letterIndex);
+    
+    const sqlExtraTile = sqlTiles.find(t => t.tileId === id);
+    if (!sqlExtraTile || !sqlExtraTile.extraTileId) {
+      throw new Error(`Tile with id=${id} not found when searching for extra tile.`);
+    }
+
+    extraTiles.push({
+      id: sqlExtraTile.extraTileId,
+      letters: letters,
+      type: "Extra",
+      tileId: id,
+    });
+  });
 
   return { board, extraTiles };
 }
