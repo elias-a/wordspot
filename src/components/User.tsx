@@ -4,14 +4,14 @@ import { FormError } from "solid-start/data";
 import { createDroppable } from "@thisbeyond/solid-dnd";
 import ExtraTileComponent from "~/components/ExtraTile";
 import { endTurn } from "~/db/game";
-import type { Row, ExtraTile, PlacedExtraTile, UserData } from "~/db/game";
+import type { Row, ExtraTile, UserData } from "~/db/game";
 
 type UserAreaProps = {
   gameId: string;
   userData: UserData;
   board: Row[];
   extraTiles: ExtraTile[];
-  extraTile: PlacedExtraTile | undefined;
+  extraTile: ExtraTile | undefined;
   clicked: string[];
   setClicked: Setter<string[]>;
 };
@@ -139,11 +139,7 @@ export default function User(props: UserAreaProps) {
         <For each={userExtraTiles()}>{tile => {
           return (
             <div class="extra-tile-container">
-              <ExtraTileComponent
-                tile={tile}
-                clicked={props.clicked}
-                setClicked={props.setClicked}
-              />
+              <ExtraTileComponent tile={tile} />
             </div>
           );
         }}

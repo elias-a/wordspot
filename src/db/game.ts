@@ -235,7 +235,7 @@ function getTileAtLocation(row: number, column: number, board: Row[]) {
   }
 }
 
-function getTileFromLetter(letterId: string, board: Row[]) {
+function getTileFromLetter(letterId: string, board: Row[], extraTile: ExtraTile | undefined) {
   for (let i = 0; i < board.length; i++) {
     for (let j = 0; j < board[i].tiles.length; j++) {
       if (board[i].tiles[j].letters.find(letter => letter.id === letterId)) {
@@ -244,10 +244,14 @@ function getTileFromLetter(letterId: string, board: Row[]) {
     }
   }
 
+  if (extraTile && extraTile.letters.find(l => l.id === letterId)) {
+    return extraTile.tileId;
+  }
+
   throw new Error(`Tile associated with letter ID="${letterId}" was not found.`);
 }
 
-export async function endTurn(gameId: string, playerId: string, clicked: string[], extraTile: PlacedExtraTile | undefined, board: Row[]) {    
+export async function endTurn(gameId: string, playerId: string, clicked: string[], extraTile: ExtraTile | undefined, board: Row[]) {    
   // Update player data.
   await query({
     sql: "UPDATE Player SET tokens=tokens-? WHERE id=?",
@@ -278,7 +282,7 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
     // more than two tiles.
     const tiles = new Set<string>();
     clicked.forEach(letter => {
-      tiles.add(getTileFromLetter(letter, board));
+      tiles.add(getTileFromLetter(letter, board, extraTile));
     });
 
     if (tiles.size > 2) {
@@ -289,35 +293,65 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
   // If the user placed an extra tile on the board, iterate over
   // the board to update the layout.
   if (extraTile) {
-    const { row, column } = extraTile;
+    // Find row and column of the extra tile that has been placed on the board.
+    const extraTileLocation = await query({
+      sql: "SELECT rowIndex, columnIndex FROM Tile WHERE id=?",
+      values: [extraTile.tileId],
+    }) as { rowIndex: number, columnIndex: number }[];
+
+    if (extraTileLocation.length !== 1) {
+      throw new Error(`Error querying the database for the row and column location of the extra tile placed on the board.`);
+    }
+
+    const placedExtraTile: PlacedExtraTile = {
+      id: extraTile.id,
+      letters: extraTile.letters,
+      type: extraTile.type,
+      tileId: extraTile.tileId,
+      row: extraTileLocation[0].rowIndex,
+      column: extraTileLocation[0].columnIndex,
+    };
+
+    const { row, column } = placedExtraTile;
     for (let i = Math.min(board[0].tiles[0].row, row - 1); i <= Math.max(board[board.length - 1].tiles[0].row, row + 1); i++) {
       for (let j = Math.min(board[0].tiles[0].column, column - 1); j <= Math.max(board[0].tiles[board[0].tiles.length - 1].column, column + 1); j++) {
         const tileAtLocation = getTileAtLocation(i, j, board);
 
         if (tileAtLocation) {
-          if (extraTile && i === extraTile.row && j === extraTile.column) {
+          if (extraTile && i === row && j === column) {
+            console.log(i, j, tileAtLocation.id, extraTile.id);
             await query({
-              sql: "UPDATE Tile SET row=?, column=?, tileType=? WHERE id=?",
-              values: [i, j, "Tile", tileAtLocation.id],
+              sql: "UPDATE Tile SET tileType=? WHERE id=?",
+              values: ["Tile", tileAtLocation.id],
             });
+            console.log(tileAtLocation.id, extraTile.id);
+            // tileAtLocation.id === extraTile.tileId
             await query({
               sql: "UPDATE TileLetterMap SET tileId=? WHERE tileId=?",
-              values: [tileAtLocation.id, extraTile.id],
+              values: [tileAtLocation.id, extraTile.tileId],
             });
-            await query({
-              sql: "DELETE FROM ExtraTile WHERE id=?",
-              values: [extraTile.id],
-            });
+            // await query({
+            //   sql: "DELETE FROM ExtraTile WHERE id=?",
+            //   values: [extraTile.id],
+            // });
+            // Don't delete from Tile for now.
+            // await query({
+            //   sql: "DELETE FROM Tile WHERE id=?",
+            //   values: [extraTile.tileId],
+            // });
+          } else {
+            // Update the type of tile at the location.
+
           }
         } else {
           // Create a new tile - either an empty tile or a placeholder.
           await query({
-            sql: "INSERT INTO Tile (id, row, column, tileType, gameId) VALUES (?, ?, ?, ?, ?)",
+            sql: "INSERT INTO Tile (id, rowIndex, columnIndex, tileType, gameId) VALUES (?, ?, ?, ?, ?)",
             values: [
               uuidv4(),
               i,
               j,
-              checkNeighbors(i, j, board, extraTile) ? "Empty" : "Placeholder",
+              checkNeighbors(i, j, board, placedExtraTile) ? "Empty" : "Placeholder",
               gameId,
             ],
           });

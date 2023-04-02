@@ -240,26 +240,6 @@ div {
   padding-top: 15vh;
 }
 
-.extra-tiles-area {
-  display: flex;
-  flex: 1;
-  min-height: 200px;
-  max-height: 200px;
-}
-
-.extra-tile-container {
-  display: grid;
-  align-items: stretch;
-  align-items: stretch;
-  min-width: 150px;
-  max-width: 150px;
-  min-height: 150px;
-  max-height: 150px;
-  padding-left: 10px;
-  padding-right: 10px;
-  margin: 0;
-}
-
 .user-data {
   display: block;
   width: 100%;
@@ -313,4 +293,24 @@ div {
   box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
   text-transform: uppercase;
   margin: 20px auto;
+}
+
+.extra-tiles-area {
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 5vh 0;
+}
+
+.extra-tile-container {
+  display: grid;
+  align-items: stretch;
+  align-items: stretch;
+  min-width: 150px;
+  max-width: 150px;
+  min-height: 150px;
+  max-height: 150px;
+  padding-left: 10px;
+  padding-right: 10px;
+  margin: 0;
 }

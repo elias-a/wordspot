@@ -2,7 +2,7 @@ import { For, Show, Switch, Match, Setter } from "solid-js";
 import TileComponent from "~/components/Tile";
 import PlaceholderTile from "~/components/PlaceholderTile";
 import EmptyTile from "~/components/EmptyTile";
-import ExtraTileComponent from "~/components/ExtraTile";
+import PlacedExtraTile from "~/components/PlacedExtraTile";
 import { Row, ExtraTile } from "~/db/game";
 
 type RowProps = {
@@ -31,7 +31,7 @@ export default function RowComponent(props: RowProps) {
                   when={props.extraTile && props.extraTile.tileId === tile.id}
                   fallback={<EmptyTile id={tile.id} />}
                 >
-                  <ExtraTileComponent
+                  <PlacedExtraTile
                     tile={props.extraTile!}
                     clicked={props.clicked}
                     setClicked={props.setClicked}
