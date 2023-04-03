@@ -55,8 +55,8 @@ export default function Game() {
       if (droppableId === "extra-tiles-area") {
         setExtraTile(undefined);
       } else {
-        const selectedExtraTile = game()!.board
-          .extraTiles.find(t => t.id === draggableId);
+        const selectedExtraTile = game()!.extraTiles
+          .find(t => t.id === draggableId);
         if (selectedExtraTile) {
           setExtraTile({
             ...selectedExtraTile,
@@ -78,21 +78,21 @@ export default function Game() {
         <Header />
         <div class="content">
           <Show when={game()} fallback={<NotFound />}>
-              <Board
-                board={game()!.board.board}
-                extraTile={extraTile()}
-                clicked={clicked()}
-                setClicked={setClicked}
-              />
-              <User
-                gameId={params.id}
-                userData={game()!.userData}
-                board={game()!.board.board}
-                extraTiles={game()!.board.extraTiles}
-                extraTile={extraTile()}
-                clicked={clicked()}
-                setClicked={setClicked}
-              />
+            <Board
+              board={game()!.board}
+              extraTile={extraTile()}
+              clicked={clicked()}
+              setClicked={setClicked}
+            />
+            <User
+              gameId={params.id}
+              userData={game()!.userData}
+              board={game()!.board}
+              extraTiles={game()!.extraTiles}
+              extraTile={extraTile()}
+              clicked={clicked()}
+              setClicked={setClicked}
+            />
           </Show>
         </div>
       </div>

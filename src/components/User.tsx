@@ -79,7 +79,7 @@ export default function User(props: UserAreaProps) {
                 {props.userData.myName}
               </div>
               <div class="user-tokens">
-                {props.userData.myTokens}
+                {props.userData.myTokens - props.clicked.length}
               </div>
               <div class="user-tokens">
                 {props.userData.opponentName}
