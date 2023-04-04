@@ -1,4 +1,4 @@
-import { Show, createSignal } from "solid-js";
+import { Show, createSignal, createEffect } from "solid-js";
 import { useRouteData, RouteDataArgs, useParams } from "solid-start";
 import { createServerData$ } from "solid-start/server";
 import {
@@ -33,6 +33,13 @@ export default function Game() {
   const game = useRouteData<typeof routeData>();
   const [clicked, setClicked] = createSignal<string[]>([], { equals: false });
   const [extraTile, setExtraTile] = createSignal<ExtraTile>();
+
+  createEffect(() => {
+    if (game() && game()!.userData) {
+      setClicked([]);
+      setExtraTile(undefined);
+    }
+  });
 
   const onDragEnd: DragEventHandler = ({ draggable, droppable }) => {
     if (draggable && droppable && game()) {
@@ -92,6 +99,7 @@ export default function Game() {
               extraTile={extraTile()}
               clicked={clicked()}
               setClicked={setClicked}
+              setExtraTile={setExtraTile}
             />
           </Show>
         </div>

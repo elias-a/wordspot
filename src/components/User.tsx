@@ -1,9 +1,7 @@
 import { For, Setter, Switch, Match } from "solid-js";
-import { createServerAction$ } from "solid-start/server";
-import { FormError } from "solid-start/data";
+import { createRouteAction, FormError } from "solid-start/data";
 import { createDroppable } from "@thisbeyond/solid-dnd";
 import ExtraTileComponent from "~/components/ExtraTile";
-import { endTurn } from "~/db/game";
 import type { Row, ExtraTile, UserData } from "~/db/game";
 
 type UserAreaProps = {
@@ -14,6 +12,7 @@ type UserAreaProps = {
   extraTile: ExtraTile | undefined;
   clicked: string[];
   setClicked: Setter<string[]>;
+  setExtraTile: Setter<ExtraTile | undefined>;
 };
 
 export default function User(props: UserAreaProps) {
@@ -25,7 +24,7 @@ export default function User(props: UserAreaProps) {
       return props.extraTiles;
     }
   };
-  const [_, { Form }] = createServerAction$(async (form: FormData) => {
+  const [_, { Form }] = createRouteAction(async (form: FormData) => {
     const formGameId = form.get("gameId");
     const formPlayerId = form.get("playerId");
     const formClicked = form.get("clicked");
@@ -50,7 +49,21 @@ export default function User(props: UserAreaProps) {
       : undefined;
     const board = JSON.parse(formBoard);
 
-    await endTurn(gameId, playerId, clicked, extraTile, board);
+    await fetch(
+      "/api/endTurn",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          gameId,
+          playerId,
+          clicked,
+          extraTile,
+          board,
+        }),
+      },
+    );
+    // props.setClicked([]);
+    // props.setExtraTile(undefined);
   });
 
   return (
