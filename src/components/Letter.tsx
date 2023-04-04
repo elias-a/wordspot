@@ -10,7 +10,6 @@ type LetterProps = {
 
 export default function Letter(props: LetterProps) {
   const handleClick = (_event: MouseEvent) => {
-    console.log(props.clicked.length);
     if (props.clicked.includes(props.letter.id)) {
       props.setClicked(clicked => clicked.filter(c => c !== props.letter.id));
     } else {
