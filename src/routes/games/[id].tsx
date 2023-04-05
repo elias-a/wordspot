@@ -10,7 +10,7 @@ import Header from "~/components/Header";
 import Board from "~/components/Board";
 import User from "~/components/User";
 import NotFound from "../[...404]";
-import { getGame, ExtraTile } from "~/db/game";
+import { getGame, PlacedExtraTile } from "~/db/game";
 
 declare module "solid-js" {
   namespace JSX {
@@ -32,7 +32,7 @@ export default function Game() {
   const params = useParams();
   const game = useRouteData<typeof routeData>();
   const [clicked, setClicked] = createSignal<string[]>([], { equals: false });
-  const [extraTile, setExtraTile] = createSignal<ExtraTile>();
+  const [extraTile, setExtraTile] = createSignal<PlacedExtraTile>();
 
   createEffect(() => {
     if (game() && game()!.userData.myTokens) {
@@ -67,8 +67,6 @@ export default function Game() {
         if (selectedExtraTile) {
           setExtraTile({
             ...selectedExtraTile,
-            row: 0,
-            column: 0,
             tileId: droppableId,
           });
         } else {
@@ -90,6 +88,10 @@ export default function Game() {
               extraTile={extraTile()}
               clicked={clicked()}
               setClicked={setClicked}
+              disabled={
+                game()!.userData.myTokens - clicked().length === 0 ||
+                game()!.userData.winner !== null
+              }
             />
             <User
               gameId={params.id}

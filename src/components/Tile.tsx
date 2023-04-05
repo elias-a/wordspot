@@ -6,6 +6,7 @@ type TileProps = {
   letters: Letter[];
   clicked: string[];
   setClicked: Setter<string[]>;
+  disabled: boolean;
 };
 
 export default function Tile(props: TileProps) {
@@ -15,13 +16,13 @@ export default function Tile(props: TileProps) {
         letters={[props.letters[0], props.letters[1]]}
         clicked={props.clicked}
         setClicked={props.setClicked}
-        disabled={false}
+        disabled={props.disabled}
       />
       <LetterRow
         letters={[props.letters[2], props.letters[3]]}
         clicked={props.clicked}
         setClicked={props.setClicked}
-        disabled={false}
+        disabled={props.disabled}
       />
     </div>
   );

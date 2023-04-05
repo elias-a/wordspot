@@ -2,14 +2,15 @@ import { For, Show, Switch, Match, Setter } from "solid-js";
 import TileComponent from "~/components/Tile";
 import PlaceholderTile from "~/components/PlaceholderTile";
 import EmptyTile from "~/components/EmptyTile";
-import PlacedExtraTile from "~/components/PlacedExtraTile";
-import { Row, ExtraTile } from "~/db/game";
+import PlacedExtraTileComponent from "~/components/PlacedExtraTile";
+import { Row, PlacedExtraTile } from "~/db/game";
 
 type RowProps = {
   row: Row;
-  extraTile: ExtraTile | undefined;
+  extraTile: PlacedExtraTile | undefined;
   clicked: string[]
   setClicked: Setter<string[]>;
+  disabled: boolean;
 };
 
 export default function RowComponent(props: RowProps) {
@@ -24,6 +25,7 @@ export default function RowComponent(props: RowProps) {
                   letters={tile.letters}
                   clicked={props.clicked}
                   setClicked={props.setClicked}
+                  disabled={props.disabled}
                 />
               </Match>
               <Match when={tile.type === "Empty"}>
@@ -31,7 +33,7 @@ export default function RowComponent(props: RowProps) {
                   when={props.extraTile && props.extraTile.tileId === tile.id}
                   fallback={<EmptyTile id={tile.id} />}
                 >
-                  <PlacedExtraTile
+                  <PlacedExtraTileComponent
                     tile={props.extraTile!}
                     clicked={props.clicked}
                     setClicked={props.setClicked}

@@ -264,7 +264,24 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
     sql: "UPDATE Player SET tokens=tokens-? WHERE id=?",
     values: [clicked.length, playerId],
   });
-  
+
+  // Check how many tokens the user has left.
+  const playerTokens = await query({
+    sql: "SELECT tokens FROM Player WHERE id=?",
+    values: [playerId],
+  }) as { tokens: number }[];
+
+  if (playerTokens.length === 0) {
+    throw new Error(`Can't find database record for player with ID=${playerId}`);
+  } else if (playerTokens[0].tokens < 0) {
+    throw new Error(`Player with ID=${playerId} has negative tokens.`);
+  } else if (playerTokens[0].tokens === 0) {
+    await query({
+      sql: "UPDATE Game SET winner=? WHERE id=?",
+      values: [playerId, gameId],
+    });
+  }
+
   // Update letters that have been clicked.
   for (let i = 0; i < clicked.length; i++) {
     await query({

@@ -27,7 +27,7 @@ export default function Letter(props: LetterProps) {
           props.clicked.includes(props.letter.id),
       }}
       onClick={handleClick}
-      disabled={props.disabled}
+      disabled={props.disabled && !props.clicked.includes(props.letter.id)}
     >
       {props.letter.letter}
     </button>
