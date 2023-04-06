@@ -3,10 +3,11 @@ import { A } from "solid-start";
 import { createServerAction$ } from "solid-start/server";
 import { UserAccount } from "~/db/session";
 import { startGame } from "~/db/game";
+import type { GameData } from "~/db/game";
 
 type DashboardProps = {
   user: UserAccount;
-  games: any;
+  games: GameData[];
 };
 
 export default function Dashboard(props: DashboardProps) {
@@ -31,8 +32,8 @@ export default function Dashboard(props: DashboardProps) {
             <div class="game-card">
               <div class="game-summary">
                 <p class="game-summary-item">
-                  <Switch>
-                    <Match when={game.winner === props.user.id}>
+                  <Switch fallback={`${game.opponentName}'s Turn!`}>
+                    <Match when={game.winner === game.myId}>
                       {`You won!`}
                     </Match>
                     <Match when={game.winner}>
@@ -41,17 +42,11 @@ export default function Dashboard(props: DashboardProps) {
                     <Match when={game.myTurn}>
                       {`Your turn!`}
                     </Match>
-                    <Match when={game.opponentTurn}>
-                      {`${game.opponentName}'s Turn!`}
-                    </Match>
                   </Switch>
                 </p>
                 <p class="game-summary-item">
-                  <Switch>
-                    <Match when={game.firstPlayer === props.user.id}>
-                      {`${game.myName} vs ${game.opponentName}`}
-                    </Match>
-                    <Match when={game.firstPlayer !== props.user.id}>
+                  <Switch fallback={`${game.opponentName} vs ${game.myName}`}>
+                    <Match when={game.firstPlayer === game.myId}>
                       {`${game.myName} vs ${game.opponentName}`}
                     </Match>
                   </Switch>

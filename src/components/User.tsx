@@ -140,7 +140,10 @@ export default function User(props: UserAreaProps) {
         <For each={userExtraTiles()}>{tile => {
           return (
             <div class="extra-tile-container">
-              <ExtraTileComponent tile={tile} />
+              <ExtraTileComponent
+                tile={tile}
+                disabled={props.userData.winner !== null}
+              />
             </div>
           );
         }}

@@ -35,7 +35,7 @@ export default function Game() {
   const [extraTile, setExtraTile] = createSignal<PlacedExtraTile>();
 
   createEffect(() => {
-    if (game() && game()!.userData.myTokens) {
+    if (game() && game()!.userData.myTokens >= 0) {
       setClicked([]);
       setExtraTile(undefined);
     }

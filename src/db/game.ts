@@ -77,46 +77,63 @@ export type UserData = {
   opponentTurn: number;
 };
 
+export type GameData = {
+  id: string;
+  dateCreated: string;
+  firstPlayer: string;
+  winner: string;
+  myId: string;
+  myName: string;
+  myTurn: boolean;
+  opponentName: string;
+};
+
 export async function getGames(userId: string) {
   return await query({
     sql: "SELECT Game.id, DATE_FORMAT(Game.dateCreated, '%m/%d/%Y') AS dateCreated, \
-    Game.userId1 AS firstPlayer, Game.winner, my.name AS myName, \
-    my.tokens AS myTokens, my.turn AS myTurn, opponent.name AS opponentName, \
-    opponent.tokens AS opponentTokens, opponent.turn AS opponentTurn \
-    FROM (SELECT gameId, UserAccount.userName AS name, tokens, turn \
+    IF(my.firstMove, my.id, opponent.id) AS firstPlayer, Game.winner, my.id AS myId, my.name AS myName, \
+    my.turn AS myTurn, opponent.name AS opponentName \
+    FROM (SELECT Player.id AS id, gameId, UserAccount.userName AS name, tokens, turn, firstMove \
       FROM Player INNER JOIN UserAccount ON Player.userId=UserAccount.id \
       WHERE userId=?) AS my INNER JOIN \
-      (SELECT gameId, UserAccount.userName AS name, tokens, turn FROM Player \
+      (SELECT Player.id AS id, gameId, UserAccount.userName AS name, tokens, turn, firstMove FROM Player \
         INNER JOIN UserAccount on Player.userId=UserAccount.id \
         WHERE userId!=?) AS opponent \
         ON my.gameId=opponent.gameId INNER JOIN Game ON my.gameId=Game.id",
     values: [userId, userId],
-  });
+  }) as GameData[];
 }
 
 export async function startGame(request: Request) {
+  // Get user who started the game.
+  const user = await getUser(request);
+  if (!user) {
+    return;
+  }
+
+  const player1 = user.id;
+  const player2 = import.meta.env.VITE_USER2;
+
   // Create game.
   const gameId = uuidv4();
   await query({
-    sql: "INSERT INTO Game (id, userId1, userId2, winner, \
+    sql: "INSERT INTO Game (id, winner, \
       dateCreated, dateModified, createdBy) VALUES \
-      (?, ?, ?, ?, ?, ?, ?)",
+      (?, ?, ?, ?, ?)",
     values: [
       gameId,
-      import.meta.env.VITE_USER1,
-      import.meta.env.VITE_USER2,
       null,
       new Date(),
       new Date(),
-      import.meta.env.VITE_USER1,
+      player1,
     ],
   });
 
   await query({
     sql: "INSERT INTO Player VALUES ?",
     values: [[
-      [uuidv4(), import.meta.env.VITE_USER1, gameId, 26, true],
-      [uuidv4(), import.meta.env.VITE_USER2, gameId, 25, false],
+      [uuidv4(), player1, gameId, 26, true, true],
+      [uuidv4(), player2, gameId, 25, false, false],
     ]],
   });
 
@@ -500,19 +517,19 @@ export async function getGame(gameId: string, request: Request) {
   }) as SqlResultBoard[];
 
   const userData = await query({
-    sql: "SELECT Game.userId1 AS firstPlayer, my.playerId, Game.winner, ? AS myId, \
+    sql: "SELECT IF(my.firstMove, my.playerId, opponent.playerId) AS firstPlayer, my.playerId, Game.winner, my.playerId AS myId, \
     my.name AS myName, my.tokens AS myTokens, \
     my.turn AS myTurn, opponent.name AS opponentName, \
     opponent.tokens AS opponentTokens, opponent.turn AS opponentTurn \
-    FROM (SELECT gameId, Player.id AS playerId, UserAccount.userName AS name, tokens, turn \
+    FROM (SELECT gameId, Player.id AS playerId, UserAccount.userName AS name, tokens, turn, firstMove \
       FROM Player INNER JOIN UserAccount ON Player.userId=UserAccount.id \
       WHERE userId=?) AS my INNER JOIN \
-      (SELECT gameId, UserAccount.userName AS name, tokens, turn FROM Player \
+      (SELECT gameId, Player.id AS playerId, UserAccount.userName AS name, tokens, turn FROM Player \
         INNER JOIN UserAccount on Player.userId=UserAccount.id \
         WHERE userId!=?) AS opponent \
         ON my.gameId=opponent.gameId INNER JOIN Game on my.gameId=Game.id \
         WHERE Game.id=?",
-    values: [user.id, user.id, user.id, gameId],
+    values: [user.id, user.id, gameId],
   }) as UserData[];
 
   if (userData.length === 0) {

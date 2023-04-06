@@ -10,8 +10,6 @@ CREATE TABLE IF NOT EXISTS UserAccount (
 
 CREATE TABLE IF NOT EXISTS Game (
     id VARCHAR(255) NOT NULL,
-    userId1 VARCHAR(255) NOT NULL,
-    userId2 VARCHAR(255) NOT NULL,
     winner VARCHAR(255),
     dateCreated DATETIME NOT NULL,
     dateModified DATETIME NOT NULL,
@@ -25,6 +23,7 @@ CREATE TABLE IF NOT EXISTS Player (
     gameId VARCHAR(255) NOT NULL,
     tokens INT NOT NULL,
     turn BOOL,
+    firstMove BOOL,
     PRIMARY KEY (id)
 );
 
