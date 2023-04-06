@@ -92,8 +92,9 @@ export async function logout(request: Request) {
 }
 
 async function sendVerification(phone: string) {
-  await twilioClient.verify.v2.services(verifySid)
+  return await twilioClient.verify.v2.services(verifySid)
     .verifications.create({ to: `+1${phone}`, channel: "sms" })
+    .then(res => res.sid)
     .catch(_err => {
       throw new Error(`Error logging in.`);
     });
@@ -111,12 +112,36 @@ async function checkVerification(phone: string, code: string) {
     });
 }
 
-async function cancelVerification(verificationSid: string) {
-  await twilioClient.verify.v2.services(verifySid)
-    .verifications(verificationSid).update({ status: "canceled" });
+export async function cancelVerification(request: Request) {
+  const session = await getUserSession(request);
+  const phone = session.get("phone");
+  const verificationSid = session.get("verificationSid");
+  if (!phone || !verificationSid) {
+    throw new Error("Verification SID or phone is missing from the request headers.");
+  }
+
+  // Use Twilio API to cancel verification request.
+  try {
+    await twilioClient.verify.v2.services(verifySid)
+      .verifications(verificationSid).update({ status: "canceled" });
+  } catch (_err) {
+    // No need to cancel, verification code has already expired.
+  }
+
+  // Set user's unverified ID in the database to null.
+  await query({
+    sql: "UPDATE UserAccount SET unverifiedId=NULL WHERE phone=?",
+    values: [phone],
+  });
+  
+  return redirect("/login", {
+    headers: {
+      "Set-Cookie": await storage.destroySession(session),
+    },
+  });
 }
 
-export async function createUserSession(phone: string, request: Request) {
+export async function createUserSession(phone: string) {
   const session = await storage.getSession();
 
   const user = await query({
@@ -134,8 +159,9 @@ export async function createUserSession(phone: string, request: Request) {
     throw new Error(`Error logging in.`);
   }
 
-  await sendVerification(phone);
+  const verificationSid = await sendVerification(phone);
 
+  session.set("verificationSid", verificationSid);
   session.set("unverifiedId", unverifiedId);
   session.set("phone", phone);
   return redirect("/verify", {

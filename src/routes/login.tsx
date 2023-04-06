@@ -3,15 +3,19 @@ import { useParams } from "solid-start";
 import { FormError } from "solid-start/data";
 import { createServerAction$ } from "solid-start/server";
 import { createUserSession } from "~/db/session";
+import Spinner from "~/components/Spinner";
 
-function validatePhone(phone: unknown) {}
+function isInvalidPhone(phone: string) {
+  const regex = /^[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4}[\s]*$/;
+  return !regex.test(phone);
+}
 
 export function routeData() {}
 
-export default function Login() {
+export default function PhoneNumber() {
   const params = useParams();
 
-  const [loggingIn, { Form }] = createServerAction$(async (form: FormData, { request }) => {
+  const [loggingIn, { Form }] = createServerAction$(async (form: FormData) => {
     const phone = form.get("phone");
     const redirectTo = form.get("redirectTo") || "/";
     if (
@@ -23,38 +27,53 @@ export default function Login() {
 
     const fields = { phone };
     const fieldErrors = {
-      phone: validatePhone(phone),
+      phone: isInvalidPhone(phone),
     };
     if (Object.values(fieldErrors).some(Boolean)) {
-      throw new FormError("Fields invalid", { fieldErrors, fields });
+      throw new FormError("Invalid phone number", { fieldErrors, fields });
     }
 
-    return createUserSession(phone, request);
+    return createUserSession(phone);
   });
 
   return (
-    <main>
-      <h1>Login</h1>
-      <Form>
-        <input
-          type="hidden"
-          name="redirectTo"
-          value={params.redirectTo ?? "/"}
-        />
-        <div>
-          <label for="phone-input">Phone Number</label>
-          <input name="phone" placeholder="Phone Number" />
+    <div class="app">
+      <div class="authentication-screen" />
+      <div
+        class="authentication-content"
+        classList={{
+          authErrorContent: loggingIn.error,
+        }}
+      >
+        <div class="authentication-field authentication-title">
+          <h1>Login to Wordspot</h1>
         </div>
-        <Show when={loggingIn.error?.fieldErrors?.phone}>
-          <p role="alert">{loggingIn.error.fieldErrors.phone}</p>
-        </Show>
-        <Show when={loggingIn.error}>
-          <p role="alert" id="error-message">
-            {loggingIn.error.message}
-          </p>
-        </Show>
-        <button type="submit">{"Login"}</button>
-      </Form>
-    </main>
+        <Form>
+          <input
+            type="hidden"
+            name="redirectTo"
+            value={params.redirectTo ?? "/"}
+          />
+          <div class="authentication-field">
+            <input name="phone" placeholder="Phone Number" autocomplete="off" />
+          </div>
+          <Show when={loggingIn.error}>
+            <div class="authentication-field authentication-error">
+              {loggingIn.error.message}
+            </div>
+          </Show>
+          <button
+            type="submit"
+            disabled={loggingIn.pending}
+            class="authentication-button"
+          >
+            <Show
+              when={!loggingIn.pending}
+              fallback={<Spinner />}
+            >Continue</Show>
+          </button>
+        </Form>
+      </div>
+    </div>
   );
 }

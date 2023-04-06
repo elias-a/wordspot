@@ -13,6 +13,7 @@ specifiers:
   postcss: ^8.4.21
   rollup: ^3.10.0
   solid-js: ^1.6.11
+  solid-spinner: ^0.1.9
   solid-start: ^0.2.23
   solid-start-node: ^0.2.19
   twilio: ^4.9.0
@@ -27,6 +28,7 @@ dependencies:
   '@thisbeyond/solid-dnd': 0.7.4_solid-js@1.6.13
   mysql2: 3.2.0
   solid-js: 1.6.13
+  solid-spinner: 0.1.9_solid-js@1.6.13
   solid-start: 0.2.23_rkkq6zg7qgu7px5m73pb6mgk6q
   twilio: 4.9.0
   undici: 5.20.0
@@ -2800,6 +2802,15 @@ packages:
       '@babel/helper-module-imports': 7.18.6
       '@babel/types': 7.21.2
       solid-js: 1.6.13
+
+  /solid-spinner/0.1.9_solid-js@1.6.13:
+    resolution: {integrity: sha512-cwSmcvlSm134MzUHL1/Il5Mv0/eWTuj0D3A8TBEvVGgN00hBCyHV9wbtfkK2uOlk4gop4FvvI9UFo9mQnONx5g==}
+    engines: {node: '>=16'}
+    peerDependencies:
+      solid-js: '*'
+    dependencies:
+      solid-js: 1.6.13
+    dev: false
 
   /solid-start-node/0.2.23_khi2xaawkj47umidgojilh44pe:
     resolution: {integrity: sha512-lMDDd9fAtce+G2r8d7bO8NN0nfbYi3ZT/btAc/0wmTEWVhbfccuhnI9aC3jnPV9XdIKYfxE+3lQ5SaCahvTQ4g==}

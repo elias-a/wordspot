@@ -29,6 +29,112 @@ div {
   left: 0;
 }
 
+.spinner {
+  color: #fff;
+  height: 36px;
+  margin-top: 7px;
+}
+
+.authentication-button {
+  cursor: pointer;
+  width: 100%;
+  height: 50px;
+  color: #fff;
+  background-color: #654321;
+  font-size: 22px;
+  border: 0;
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
+  text-transform: uppercase;
+}
+
+.authentication-field {
+  display: block;
+  width: 350px;
+  -webkit-box-pack: justify;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  position: relative;
+  margin: 20px 0;
+}
+
+.authentication-error {
+  color: #cc0000;
+  font-size: 22px;
+  height: 60px;
+  margin: 0;
+  text-align: center;
+}
+
+.authentication-screen {
+  background-image: url("/images/wordspot.jpg");
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-size: contain;
+  filter: blur(2px);
+}
+
+.authentication-content {
+  display: flex;
+  flex-direction: column;
+  align-self: center;
+  width: 500px;
+  height: 300px;
+  margin: auto;
+  margin-top: 10%;
+  padding: 5px;
+  backdrop-filter: blur(17px) saturate(200%);
+  -webkit-backdrop-filter: blur(17px) saturate(200%);
+  background-color: rgba(190, 190, 190, 0.44);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.125);
+  border-radius: 10px;
+}
+
+.authErrorContent {
+  height: 370px;
+}
+
+.authentication-title {
+  width: 100%;
+  text-align: center;
+  color: #654321;
+  font-size: 20px;
+}
+
+.authentication-field input {
+  font-size: 26;
+  font-family: inherit;
+  width: 100%;
+  height: 50px;
+  outline: none;
+  background-color: #fff;
+  border-radius: 4px;
+  border: none;
+  display: block;
+  padding: 0.9rem 0.7rem;
+  box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.16);
+  font-size: 22px;
+  color: #000;
+}
+
+.authentication-cancel-button {
+  width: 100%;
+  background: none;
+	color: #fff;
+  font-size: 20px;
+	border: none;
+	padding: 0;
+	cursor: pointer;
+  text-align: center;
+}
+
 .header {
   position: absolute;
   top: 0;
@@ -55,7 +161,7 @@ div {
   width: 10vw;
   color: #fff;
   font-size: 22px;
-  background-color: #785F43;
+  background-color: #654321;
   border: 0;
   border-radius: 10px;
   box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
@@ -115,7 +221,7 @@ div {
   font-size: 30px;
   height: 48; 
   width: 30vw;
-  background-color: #785F43;
+  background-color: #654321;
   box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
   text-transform: uppercase;
   margin: 20px auto;
@@ -147,7 +253,7 @@ div {
 }
 
 .play-game-button {
-  background-color: #785F43;
+  background-color: #654321;
   border: 0;
   border-radius: 10px;
   color: #fff;
@@ -199,7 +305,7 @@ div {
   max-height: 100%;
   align-items: center;
   justify-content: center;
-  background-color: #785F43;
+  background-color: #654321;
   color: #fff;
   padding: 0;
   margin: 0;
@@ -289,7 +395,7 @@ div {
   font-size: 30px;
   height: 48; 
   width: 30vw;
-  background-color: #785F43;
+  background-color: #654321;
   box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
   text-transform: uppercase;
   margin: 20px auto;

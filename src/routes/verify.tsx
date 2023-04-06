@@ -2,14 +2,19 @@ import { Show } from "solid-js";
 import { useParams } from "solid-start";
 import { FormError } from "solid-start/data";
 import { createServerAction$ } from "solid-start/server";
-import { login } from '~/db/session';
+import { login, cancelVerification } from '~/db/session';
+import Spinner from "~/components/Spinner";
+
+function isInvalidCode(code: string) {
+  const regex = /^[0-9]{6}$/;
+  return !regex.test(code);
+}
 
 export function routeData() {}
 
-export default function Login() {
+export default function VerificationCode() {
   const params = useParams();
-
-  const [loggingIn, { Form }] = createServerAction$(async (form: FormData, { request }) => {
+  const [loggingIn, LogInForm] = createServerAction$(async (form: FormData, { request }) => {
     const code = form.get("code");
     const redirectTo = form.get("redirectTo") || "/";
     if (
@@ -21,38 +26,63 @@ export default function Login() {
 
     const fields = { code };
     const fieldErrors = {
-      code: false,
+      code: isInvalidCode(code),
     };
     if (Object.values(fieldErrors).some(Boolean)) {
-      throw new FormError("Fields invalid", { fieldErrors, fields });
+      throw new FormError("Invalid verification code", { fieldErrors, fields });
     }
 
     return login(request, code);
   });
+  const [_, CancelForm] = createServerAction$(async (_formData: FormData, { request }) => {
+    return cancelVerification(request);
+  });
 
   return (
-    <main>
-      <h1>Login</h1>
-      <Form>
-        <input
-          type="hidden"
-          name="redirectTo"
-          value={params.redirectTo ?? "/"}
-        />
-        <div>
-          <label for="code-input">Verification Code</label>
-          <input name="code" placeholder="Verification Code" />
+    <div class="app">
+      <div class="authentication-screen" />
+      <div 
+        class="authentication-content"
+        classList={{
+          authErrorContent: loggingIn.error,
+        }}
+      >
+        <div class="authentication-field authentication-title">
+          <h1>Login to Wordspot</h1>
         </div>
-        <Show when={loggingIn.error?.fieldErrors?.code}>
-          <p role="alert">{loggingIn.error.fieldErrors.code}</p>
-        </Show>
-        <Show when={loggingIn.error}>
-          <p role="alert" id="error-message">
-            {loggingIn.error.message}
-          </p>
-        </Show>
-        <button type="submit">{"Log In"}</button>
-      </Form>
-    </main>
+        <LogInForm.Form>
+          <input
+            type="hidden"
+            name="redirectTo"
+            value={params.redirectTo ?? "/"}
+          />
+          <div class="authentication-field">
+            <input name="code" placeholder="Verification Code" autocomplete="off" />
+          </div>
+          <Show when={loggingIn.error}>
+            <div class="authentication-field authentication-error">
+              {loggingIn.error.message}
+            </div>
+          </Show>
+          <button
+            type="submit"
+            disabled={loggingIn.pending}
+            class="authentication-button"
+          >
+            <Show
+              when={!loggingIn.pending}
+              fallback={<Spinner />}
+            >Continue</Show>
+          </button>
+        </LogInForm.Form>
+        <CancelForm.Form>
+          <div class="authentication-field">
+            <button type="submit" class="authentication-cancel-button">
+              Use a different phone number
+            </button>
+          </div>
+        </CancelForm.Form>
+      </div>
+    </div>
   );
 }
