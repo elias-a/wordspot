@@ -99,7 +99,8 @@ export async function getGames(userId: string) {
       (SELECT Player.id AS id, gameId, UserAccount.userName AS name, tokens, turn, firstMove FROM Player \
         INNER JOIN UserAccount on Player.userId=UserAccount.id \
         WHERE userId!=?) AS opponent \
-        ON my.gameId=opponent.gameId INNER JOIN Game ON my.gameId=Game.id",
+        ON my.gameId=opponent.gameId INNER JOIN Game ON my.gameId=Game.id \
+        ORDER BY Game.dateCreated DESC",
     values: [userId, userId],
   }) as GameData[];
 }

@@ -25,8 +25,9 @@ export default function Home() {
 
   return (
     <div class="app">
-      <Header />
+      <div class="authentication-screen" />
       <Show when={data()}>
+        <Header name={data()!.user.userName} />
         <Dashboard user={data()!.user} games={data()!.games} />
       </Show>
     </div>

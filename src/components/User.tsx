@@ -2,6 +2,7 @@ import { For, Setter, Switch, Match } from "solid-js";
 import { createServerAction$ } from "solid-start/server";
 import { FormError } from "solid-start/data";
 import { createDroppable } from "@thisbeyond/solid-dnd";
+import ExtraTileRow from "~/components/ExtraTileRow";
 import ExtraTileComponent from "~/components/ExtraTile";
 import { endTurn } from "~/db/game";
 import type { Row, ExtraTile, UserData } from "~/db/game";
@@ -106,6 +107,23 @@ export default function User(props: UserAreaProps) {
           </Switch>
         </div>
       </div>
+      <div use:droppable id="extra-tiles-area" class="extra-tiles-area">
+        {/* <ExtraTileRow
+          row={}
+          disabled={props.userData.winner !== null}
+        /> */}
+        {/* <For each={userExtraTiles()}>{tile => {
+          return (
+            <div class="extra-tile-container">
+              <ExtraTileComponent
+                tile={tile}
+                disabled={props.userData.winner !== null}
+              />
+            </div>
+          );
+        }}
+        </For> */}
+      </div>
       <Form>
         <input
           type="hidden"
@@ -136,19 +154,6 @@ export default function User(props: UserAreaProps) {
           End Turn
         </button>
       </Form>
-      <div use:droppable id="extra-tiles-area" class="extra-tiles-area">
-        <For each={userExtraTiles()}>{tile => {
-          return (
-            <div class="extra-tile-container">
-              <ExtraTileComponent
-                tile={tile}
-                disabled={props.userData.winner !== null}
-              />
-            </div>
-          );
-        }}
-        </For>
-      </div>
     </div>
   );
 }

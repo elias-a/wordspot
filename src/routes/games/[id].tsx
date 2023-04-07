@@ -80,9 +80,10 @@ export default function Game() {
     <DragDropProvider onDragEnd={onDragEnd}>
       <DragDropSensors />
       <div class="app">
-        <Header />
-        <div class="content">
-          <Show when={game()} fallback={<NotFound />}>
+        <div class="authentication-screen" />
+        <Show when={game()} fallback={<NotFound />}>
+          <Header name={game()!.userData.myName} />
+          <div class="content">
             <Board
               board={game()!.board}
               extraTile={extraTile()}
@@ -103,8 +104,8 @@ export default function Game() {
               setClicked={setClicked}
               setExtraTile={setExtraTile}
             />
-          </Show>
-        </div>
+          </div>
+        </Show>
       </div>
     </DragDropProvider>
   );
