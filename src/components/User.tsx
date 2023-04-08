@@ -26,10 +26,10 @@ export default function User(props: UserAreaProps) {
       : props.extraTiles;
     const rows: ExtraTileRow[] = [];
 
-    for (let i = 0; i < userExtraTiles.length; i += 3) {
+    for (let i = 0; i < userExtraTiles.length; i += 2) {
       rows.push({
         id: uuidv4(),
-        tiles: userExtraTiles.slice(i, i + 3),
+        tiles: userExtraTiles.slice(i, i + 2),
       });
     }
     
@@ -86,16 +86,10 @@ export default function User(props: UserAreaProps) {
           <Switch>
             <Match when={props.userData.firstPlayer === props.userData.myId}>
               <div class="user-tokens">
-                {props.userData.myName}
+                {`${props.userData.myName} has ${props.userData.myTokens - props.clicked.length} ${(props.userData.myTokens - props.clicked.length) === 1 ? "token" : "tokens"} left`}
               </div>
               <div class="user-tokens">
-                {props.userData.myTokens - props.clicked.length}
-              </div>
-              <div class="user-tokens">
-                {props.userData.opponentName}
-              </div>
-              <div class="user-tokens">
-                {props.userData.opponentTokens}
+                {`${props.userData.opponentName} has ${props.userData.opponentTokens} ${props.userData.opponentTokens === 1 ? "token" : "tokens"} left`}
               </div>
             </Match>
             <Match when={props.userData.firstPlayer !== props.userData.myId}>

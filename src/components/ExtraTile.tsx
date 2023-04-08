@@ -9,7 +9,7 @@ type ExtraTileProps = {
 
 function ExtraTileDetails(props: ExtraTileProps) {
   return (
-    <>
+    <div class="extra-tile">
       <div class="letter-row">
         <button class="extra-letter" disabled={true}>
           {props.tile.letters[0].letter}
@@ -26,7 +26,7 @@ function ExtraTileDetails(props: ExtraTileProps) {
           {props.tile.letters[3].letter}
         </button>
       </div>
-    </>
+    </div>
   );
 }
 
