@@ -17,6 +17,11 @@ const TILES = [
   "RAIB", "BOUT",
 ];
 
+export type ExtraTileRow = {
+  id: string;
+  tiles: ExtraTile[];
+};
+
 export type Row = {
   id: string;
   tiles: Tile[];

@@ -1,9 +1,9 @@
 import { For } from "solid-js";
 import ExtraTileComponent from "~/components/ExtraTile";
-import { Row } from "~/db/game";
+import { ExtraTileRow } from "~/db/game";
 
 type ExtraTileRowProps = {
-  row: Row;
+  row: ExtraTileRow;
   disabled: boolean;
 };
 

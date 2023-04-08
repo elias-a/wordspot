@@ -2,10 +2,10 @@ import { For, Setter, Switch, Match } from "solid-js";
 import { createServerAction$ } from "solid-start/server";
 import { FormError } from "solid-start/data";
 import { createDroppable } from "@thisbeyond/solid-dnd";
-import ExtraTileRow from "~/components/ExtraTileRow";
-import ExtraTileComponent from "~/components/ExtraTile";
+import ExtraTileRowComponent from "~/components/ExtraTileRow";
 import { endTurn } from "~/db/game";
-import type { Row, ExtraTile, UserData } from "~/db/game";
+import type { Row, ExtraTile, UserData, ExtraTileRow } from "~/db/game";
+import { v4 as uuidv4 } from "uuid";
 
 type UserAreaProps = {
   gameId: string;
@@ -20,12 +20,20 @@ type UserAreaProps = {
 
 export default function User(props: UserAreaProps) {
   const droppable = createDroppable("extra-tiles-area");
-  const userExtraTiles = () => {
-    if (props.extraTile) {
-      return props.extraTiles.filter(t => t.id !== props.extraTile!.id);
-    } else {
-      return props.extraTiles;
+  const extraTileRows = () => {
+    const userExtraTiles = props.extraTile
+      ? props.extraTiles.filter(t => t.id !== props.extraTile!.id)
+      : props.extraTiles;
+    const rows: ExtraTileRow[] = [];
+
+    for (let i = 0; i < userExtraTiles.length; i += 3) {
+      rows.push({
+        id: uuidv4(),
+        tiles: userExtraTiles.slice(i, i + 3),
+      });
     }
+    
+    return rows;
   };
   const [_, { Form }] = createServerAction$(async (form: FormData) => {
     const formGameId = form.get("gameId");
@@ -108,21 +116,14 @@ export default function User(props: UserAreaProps) {
         </div>
       </div>
       <div use:droppable id="extra-tiles-area" class="extra-tiles-area">
-        {/* <ExtraTileRow
-          row={}
-          disabled={props.userData.winner !== null}
-        /> */}
-        {/* <For each={userExtraTiles()}>{tile => {
+        <For each={extraTileRows()}>{row => {
           return (
-            <div class="extra-tile-container">
-              <ExtraTileComponent
-                tile={tile}
-                disabled={props.userData.winner !== null}
-              />
-            </div>
+            <ExtraTileRowComponent
+              row={row}
+              disabled={props.userData.winner !== null}
+            />
           );
-        }}
-        </For> */}
+        }}</For>
       </div>
       <Form>
         <input
