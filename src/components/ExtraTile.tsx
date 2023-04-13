@@ -1,34 +1,12 @@
 import { Show } from "solid-js";
 import { createDraggable } from "@thisbeyond/solid-dnd";
+import ExtraTileDetails from "~/components/ExtraTileDetails";
 import type { ExtraTile } from "~/db/game";
 
 type ExtraTileProps = {
   tile: ExtraTile;
   disabled: boolean;
 };
-
-function ExtraTileDetails(props: ExtraTileProps) {
-  return (
-    <div class="extra-tile">
-      <div class="letter-row">
-        <button class="extra-letter" disabled={true}>
-          {props.tile.letters[0].letter}
-        </button>
-        <button class="extra-letter" disabled={true}>
-          {props.tile.letters[1].letter}
-        </button>
-      </div>
-      <div class="letter-row">
-        <button class="extra-letter" disabled={true}>
-          {props.tile.letters[2].letter}
-        </button>
-        <button class="extra-letter" disabled={true}>
-          {props.tile.letters[3].letter}
-        </button>
-      </div>
-    </div>
-  );
-}
 
 export default function ExtraTile(props: ExtraTileProps) {
   const draggable = createDraggable(props.tile.id);
@@ -38,10 +16,14 @@ export default function ExtraTile(props: ExtraTileProps) {
       when={!props.disabled}
       fallback={<div class="tile"><ExtraTileDetails {...props} /></div>}
     >
-      <div use:draggable id={props.tile.id} class="tile">
+      <div
+        use:draggable
+        id={props.tile.id}
+        class="tile"
+        classList={{ "active-draggable-tile": draggable.isActiveDraggable }}
+      >
         <ExtraTileDetails {...props} />
       </div>
     </Show>
-
   );
 }

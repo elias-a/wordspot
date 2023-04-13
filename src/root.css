@@ -371,7 +371,6 @@ div {
   margin: 0;
   border: none;
   font-size: 26px;
-  font-family: Georgia, 'Times New Roman', Times, serif;
 }
 
 .filler-tile {
@@ -461,8 +460,12 @@ div {
   flex-direction: column;
   height: 200px;
   width: 350px;
-  overflow-y: scroll;
   margin-bottom: 20px;
+  overflow-y: scroll;
+}
+
+.active-draggable-tile * {
+  opacity: 0.8;
 }
 
 .extra-tile-row {
@@ -478,18 +481,9 @@ div {
   margin-left: 20px;
 }
 
-.extra-letter {
-  display: flex;
+.extra-tile .letter {
   min-width: 70px;
   max-width: 70px;
   min-height: 70px;
   max-height: 70px;
-  align-items: center;
-  justify-content: center;
-  background-color: #B07C4F;
-  color: #fff;
-  padding: 0;
-  margin: 0;
-  border: none;
-  font-size: 26px;
 }

@@ -1,14 +1,17 @@
-import { Show, createSignal, createEffect } from "solid-js";
+import { Show, createSignal, createEffect, JSXElement } from "solid-js";
 import { useRouteData, RouteDataArgs, useParams } from "solid-start";
 import { createServerData$ } from "solid-start/server";
 import {
   DragDropProvider,
   DragDropSensors,
   DragEventHandler,
+  DragOverlay,
+  Draggable,
 } from "@thisbeyond/solid-dnd";
 import Header from "~/components/Header";
 import Board from "~/components/Board";
 import User from "~/components/User";
+import MovingExtraTile from "~/components/MovingExtraTile";
 import NotFound from "../[...404]";
 import { getGame, PlacedExtraTile } from "~/db/game";
 
@@ -105,6 +108,15 @@ export default function Game() {
               setExtraTile={setExtraTile}
             />
           </div>
+          <DragOverlay>
+            {((draggable: Draggable) => {
+              return (
+                <MovingExtraTile
+                  tile={game()!.extraTiles.find(tile => tile.id === draggable!.id.toString())!}
+                />
+              );
+            }) as JSXElement}
+          </DragOverlay>
         </Show>
       </div>
     </DragDropProvider>
