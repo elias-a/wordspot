@@ -281,7 +281,11 @@ function getTileFromLetter(letterId: string, board: Row[], extraTile: ExtraTile 
   throw new Error(`Tile associated with letter ID="${letterId}" was not found.`);
 }
 
-export async function endTurn(gameId: string, playerId: string, clicked: string[], extraTile: PlacedExtraTile | undefined, board: Row[]) {
+export async function endTurn(gameId: string, playerId: string, clicked: string[], selected: string[], extraTile: PlacedExtraTile | undefined, board: Row[]) {
+  // `clicked` contains IDs for unused letters that the user clicked.
+  // `selected` contains IDs for used letters that the user clicked.
+  const lettersChosenByUser = clicked.concat(selected);
+  
   // Update player data.
   await query({
     sql: "UPDATE Player SET tokens=tokens-? WHERE id=?",
@@ -313,10 +317,10 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
     });
   }
 
+  // Give the user an extra tile and two tokens for not making
+  // a move. Do not add an extra tile to the board, even if the
+  // user chose to do so.
   if (clicked.length === 0) {
-    // Give the user an extra tile and two tokens for not making
-    // a move. Do not add an extra tile to the board, even if the
-    // user chose to do so.
     await assignExtraTile(gameId, playerId);
     await query({
       sql: "UPDATE Player SET tokens=tokens+2 WHERE id=?",
@@ -324,11 +328,13 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
     });
 
     return;
-  } else if (clicked.length > 2) {
-    // Award the user an extra tile for finding a word that spans 
-    // more than two tiles.
+  } 
+  
+  // Award the user an extra tile for finding a word that spans
+  // more than two tiles.
+  if (lettersChosenByUser.length > 2) {
     const tiles = new Set<string>();
-    clicked.forEach(letter => {
+    lettersChosenByUser.forEach(letter => {
       tiles.add(getTileFromLetter(letter, board, extraTile));
     });
 

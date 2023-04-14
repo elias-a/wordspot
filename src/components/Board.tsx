@@ -5,8 +5,10 @@ import type { Row, PlacedExtraTile } from "~/db/game";
 type BoardProps = {
   board: Row[];
   extraTile: PlacedExtraTile | undefined;
-  clicked: string[]
+  clicked: string[];
   setClicked: Setter<string[]>;
+  selected: string[];
+  setSelected: Setter<string[]>;
   disabled: boolean;
 };
 
@@ -21,6 +23,8 @@ export default function Board(props: BoardProps) {
                extraTile={props.extraTile}
                clicked={props.clicked}
                setClicked={props.setClicked}
+               selected={props.selected}
+               setSelected={props.setSelected}
                disabled={props.disabled}
             />
           );

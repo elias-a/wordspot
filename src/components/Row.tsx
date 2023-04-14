@@ -10,6 +10,8 @@ type RowProps = {
   extraTile: PlacedExtraTile | undefined;
   clicked: string[]
   setClicked: Setter<string[]>;
+  selected: string[];
+  setSelected: Setter<string[]>;
   disabled: boolean;
 };
 
@@ -25,6 +27,8 @@ export default function RowComponent(props: RowProps) {
                   letters={tile.letters}
                   clicked={props.clicked}
                   setClicked={props.setClicked}
+                  selected={props.selected}
+                  setSelected={props.setSelected}
                   disabled={props.disabled}
                 />
               </Match>
@@ -37,6 +41,8 @@ export default function RowComponent(props: RowProps) {
                     tile={props.extraTile!}
                     clicked={props.clicked}
                     setClicked={props.setClicked}
+                    selected={props.selected}
+                    setSelected={props.setSelected}
                   />
                 </Show>
               </Match>

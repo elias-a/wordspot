@@ -369,8 +369,8 @@ div {
   color: #fff;
   padding: 0;
   margin: 0;
-  border: none;
   font-size: 26px;
+  border-color: transparent;
 }
 
 .filler-tile {
@@ -378,22 +378,17 @@ div {
   padding: 0;
 }
 
-.letterClicked {
-  color: #fff;
-  display: inline-block;
+.letter-clicked {
   background-color: #2b2218;
 }
 
-.letterSelected {
-  color: #fff;
-  display: inline-block;
-  background-color: grey;
+.letter-used {
+  background-color: #704F32;
 }
 
-.letterUsed {
-  color: #fff;
-  display: inline-block;
+.letter-selected {
   background-color: #704F32;
+  border: 2px dashed #fff;
 }
 
 .user-area {
@@ -462,6 +457,12 @@ div {
   width: 350px;
   margin-bottom: 20px;
   overflow-y: scroll;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.extra-tiles-area::-webkit-scrollbar {
+  display: none;
 }
 
 .active-draggable-tile * {

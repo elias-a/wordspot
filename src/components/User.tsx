@@ -1,4 +1,4 @@
-import { For, Setter, Switch, Match } from "solid-js";
+import { For, Switch, Match } from "solid-js";
 import { createServerAction$ } from "solid-start/server";
 import { FormError } from "solid-start/data";
 import { createDroppable } from "@thisbeyond/solid-dnd";
@@ -14,8 +14,7 @@ type UserAreaProps = {
   extraTiles: ExtraTile[];
   extraTile: ExtraTile | undefined;
   clicked: string[];
-  setClicked: Setter<string[]>;
-  setExtraTile: Setter<ExtraTile | undefined>;
+  selected: string[];
 };
 
 export default function User(props: UserAreaProps) {
@@ -39,6 +38,7 @@ export default function User(props: UserAreaProps) {
     const formGameId = form.get("gameId");
     const formPlayerId = form.get("playerId");
     const formClicked = form.get("clicked");
+    const formSelected = form.get("selected");
     const formExtraTile = form.get("extraTile");
     const formBoard = form.get("board");
     
@@ -46,6 +46,7 @@ export default function User(props: UserAreaProps) {
       typeof formGameId !== "string" ||
       typeof formPlayerId !== "string" ||
       typeof formClicked !== "string" ||
+      typeof formSelected !== "string" ||
       typeof formExtraTile !== "string" ||
       typeof formBoard !== "string"
     ) {
@@ -55,12 +56,13 @@ export default function User(props: UserAreaProps) {
     const gameId = formGameId;
     const playerId = formPlayerId;
     const clicked = JSON.parse(formClicked);
+    const selected = JSON.parse(formSelected);
     const extraTile = formExtraTile !== "undefined"
       ? JSON.parse(formExtraTile)
       : undefined;
     const board = JSON.parse(formBoard);
 
-    await endTurn(gameId, playerId, clicked, extraTile, board);
+    await endTurn(gameId, playerId, clicked, selected, extraTile, board);
   });
 
   return (
@@ -134,6 +136,11 @@ export default function User(props: UserAreaProps) {
           type="hidden"
           name="clicked"
           value={JSON.stringify(props.clicked)}
+        />
+        <input
+          type="hidden"
+          name="selected"
+          value={JSON.stringify(props.selected)}
         />
         <input
           type="hidden"

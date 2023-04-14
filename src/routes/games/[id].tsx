@@ -35,6 +35,7 @@ export default function Game() {
   const params = useParams();
   const game = useRouteData<typeof routeData>();
   const [clicked, setClicked] = createSignal<string[]>([], { equals: false });
+  const [selected, setSelected] = createSignal<string[]>([], { equals: false });
   const [extraTile, setExtraTile] = createSignal<PlacedExtraTile>();
 
   createEffect(() => {
@@ -92,6 +93,8 @@ export default function Game() {
               extraTile={extraTile()}
               clicked={clicked()}
               setClicked={setClicked}
+              selected={selected()}
+              setSelected={setSelected}
               disabled={
                 game()!.userData.myTokens - clicked().length === 0 ||
                 game()!.userData.winner !== null
@@ -104,8 +107,7 @@ export default function Game() {
               extraTiles={game()!.extraTiles}
               extraTile={extraTile()}
               clicked={clicked()}
-              setClicked={setClicked}
-              setExtraTile={setExtraTile}
+              selected={selected()}
             />
           </div>
           <DragOverlay>
