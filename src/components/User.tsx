@@ -1,20 +1,15 @@
-import { For, Switch, Match } from "solid-js";
-import { createServerAction$ } from "solid-start/server";
-import { FormError } from "solid-start/data";
+import { Setter, For, Switch, Match } from "solid-js";
 import { createDroppable } from "@thisbeyond/solid-dnd";
 import ExtraTileRowComponent from "~/components/ExtraTileRow";
-import { endTurn } from "~/db/game";
-import type { Row, ExtraTile, UserData, ExtraTileRow } from "~/db/game";
+import type { ExtraTile, UserData, ExtraTileRow } from "~/db/game";
 import { v4 as uuidv4 } from "uuid";
 
 type UserAreaProps = {
-  gameId: string;
   userData: UserData;
-  board: Row[];
   extraTiles: ExtraTile[];
   extraTile: ExtraTile | undefined;
   clicked: string[];
-  selected: string[];
+  setIsConfirmOpen: Setter<boolean>;
 };
 
 export default function User(props: UserAreaProps) {
@@ -34,36 +29,6 @@ export default function User(props: UserAreaProps) {
     
     return rows;
   };
-  const [_, { Form }] = createServerAction$(async (form: FormData) => {
-    const formGameId = form.get("gameId");
-    const formPlayerId = form.get("playerId");
-    const formClicked = form.get("clicked");
-    const formSelected = form.get("selected");
-    const formExtraTile = form.get("extraTile");
-    const formBoard = form.get("board");
-    
-    if (
-      typeof formGameId !== "string" ||
-      typeof formPlayerId !== "string" ||
-      typeof formClicked !== "string" ||
-      typeof formSelected !== "string" ||
-      typeof formExtraTile !== "string" ||
-      typeof formBoard !== "string"
-    ) {
-      throw new FormError(`Form not submitted correctly.`);
-    }
-
-    const gameId = formGameId;
-    const playerId = formPlayerId;
-    const clicked = JSON.parse(formClicked);
-    const selected = JSON.parse(formSelected);
-    const extraTile = formExtraTile !== "undefined"
-      ? JSON.parse(formExtraTile)
-      : undefined;
-    const board = JSON.parse(formBoard);
-
-    await endTurn(gameId, playerId, clicked, selected, extraTile, board);
-  });
 
   return (
     <div class="user-area">
@@ -121,41 +86,13 @@ export default function User(props: UserAreaProps) {
           );
         }}</For>
       </div>
-      <Form>
-        <input
-          type="hidden"
-          name="gameId"
-          value={props.gameId}
-        />
-        <input
-          type="hidden"
-          name="playerId"
-          value={props.userData.playerId}
-        />
-        <input
-          type="hidden"
-          name="clicked"
-          value={JSON.stringify(props.clicked)}
-        />
-        <input
-          type="hidden"
-          name="selected"
-          value={JSON.stringify(props.selected)}
-        />
-        <input
-          type="hidden"
-          name="extraTile"
-          value={props.extraTile ? JSON.stringify(props.extraTile) : undefined}
-        />
-        <input
-          type="hidden"
-          name="board"
-          value={JSON.stringify(props.board)}
-        />
-        <button name="start-game" type="submit" class="end-turn-button">
-          End Turn
-        </button>
-      </Form>
+      <button
+        name="start-game"
+        class="end-turn-button"
+        onClick={() => props.setIsConfirmOpen(true)}
+      >
+        End Turn
+      </button>
     </div>
   );
 }
