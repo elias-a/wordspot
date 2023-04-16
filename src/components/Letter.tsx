@@ -1,5 +1,5 @@
 import { Setter } from "solid-js";
-import type { Letter } from "~/db/game";
+import type { Letter, UserData } from "~/db/game";
 
 type LetterProps = {
   letter: Letter;
@@ -7,7 +7,8 @@ type LetterProps = {
   setClicked: Setter<string[]>;
   selected: string[];
   setSelected: Setter<string[]>;
-  disabled: boolean;
+  myTurn: boolean;
+  hasTokensLeft: boolean;
 };
 
 export default function Letter(props: LetterProps) {
@@ -33,9 +34,13 @@ export default function Letter(props: LetterProps) {
         "letter-selected": props.selected.includes(props.letter.id),
       }}
       onClick={handleClick}
-      disabled={props.disabled &&
-        !props.clicked.includes(props.letter.id) &&
-        !props.letter.isUsed}
+      disabled={
+        !props.myTurn ||
+        (
+          !props.hasTokensLeft &&
+          (!props.letter.isUsed && !props.clicked.includes(props.letter.id))
+        )
+      }
     >
       {props.letter.letter}
     </button>

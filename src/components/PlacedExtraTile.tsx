@@ -9,6 +9,7 @@ type PlacedExtraTileProps = {
   setClicked: Setter<string[]>;
   selected: string[];
   setSelected: Setter<string[]>;
+  hasTokensLeft: boolean;
 };
 
 export default function PlacedExtraTile(props: PlacedExtraTileProps) {
@@ -27,7 +28,8 @@ export default function PlacedExtraTile(props: PlacedExtraTileProps) {
         setClicked={props.setClicked}
         selected={props.selected}
         setSelected={props.setSelected}
-        disabled={false}
+        myTurn={true}
+        hasTokensLeft={props.hasTokensLeft}
       />
       <LetterRow
         letters={[props.tile.letters[2], props.tile.letters[3]]}
@@ -35,7 +37,8 @@ export default function PlacedExtraTile(props: PlacedExtraTileProps) {
         setClicked={props.setClicked}
         selected={props.selected}
         setSelected={props.setSelected}
-        disabled={false}
+        myTurn={true}
+        hasTokensLeft={props.hasTokensLeft}
       />
     </div>
   );

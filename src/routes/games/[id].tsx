@@ -135,10 +135,8 @@ export default function Game() {
               setClicked={setClicked}
               selected={selected()}
               setSelected={setSelected}
-              disabled={
-                game()!.userData.myTokens - clicked().length === 0 ||
-                game()!.userData.winner !== null
-              }
+              myTurn={game()!.userData.myTurn && !game()!.userData.winner}
+              hasTokensLeft={game()!.userData.myTokens - clicked().length > 0}
             />
             <User
               userData={game()!.userData}

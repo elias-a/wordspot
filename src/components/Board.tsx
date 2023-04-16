@@ -1,6 +1,6 @@
 import { For, Setter } from "solid-js";
 import RowComponent from "~/components/Row";
-import type { Row, PlacedExtraTile } from "~/db/game";
+import type { Row, PlacedExtraTile, UserData } from "~/db/game";
 
 type BoardProps = {
   board: Row[];
@@ -9,7 +9,8 @@ type BoardProps = {
   setClicked: Setter<string[]>;
   selected: string[];
   setSelected: Setter<string[]>;
-  disabled: boolean;
+  myTurn: boolean;
+  hasTokensLeft: boolean;
 };
 
 export default function Board(props: BoardProps) {
@@ -25,7 +26,8 @@ export default function Board(props: BoardProps) {
                setClicked={props.setClicked}
                selected={props.selected}
                setSelected={props.setSelected}
-               disabled={props.disabled}
+               myTurn={props.myTurn}
+               hasTokensLeft={props.hasTokensLeft}
             />
           );
         }}

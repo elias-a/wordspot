@@ -3,7 +3,7 @@ import TileComponent from "~/components/Tile";
 import PlaceholderTile from "~/components/PlaceholderTile";
 import EmptyTile from "~/components/EmptyTile";
 import PlacedExtraTileComponent from "~/components/PlacedExtraTile";
-import { Row, PlacedExtraTile } from "~/db/game";
+import { Row, PlacedExtraTile, UserData } from "~/db/game";
 
 type RowProps = {
   row: Row;
@@ -12,7 +12,8 @@ type RowProps = {
   setClicked: Setter<string[]>;
   selected: string[];
   setSelected: Setter<string[]>;
-  disabled: boolean;
+  myTurn: boolean;
+  hasTokensLeft: boolean;
 };
 
 export default function RowComponent(props: RowProps) {
@@ -29,7 +30,8 @@ export default function RowComponent(props: RowProps) {
                   setClicked={props.setClicked}
                   selected={props.selected}
                   setSelected={props.setSelected}
-                  disabled={props.disabled}
+                  myTurn={props.myTurn}
+                  hasTokensLeft={props.hasTokensLeft}
                 />
               </Match>
               <Match when={tile.type === "Empty"}>
@@ -43,6 +45,7 @@ export default function RowComponent(props: RowProps) {
                     setClicked={props.setClicked}
                     selected={props.selected}
                     setSelected={props.setSelected}
+                    hasTokensLeft={props.hasTokensLeft}
                   />
                 </Show>
               </Match>

@@ -31,7 +31,7 @@ export default function Dashboard(props: DashboardProps) {
             <div class="game-card">
               <div class="game-summary">
                 <p class="game-summary-turn">
-                  <Switch fallback={`${game.opponentName}'s Turn!`}>
+                  <Switch fallback={`${game.opponentName}'s turn!`}>
                     <Match when={game.winner === game.myId}>
                       {`You won!`}
                     </Match>

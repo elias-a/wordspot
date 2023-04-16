@@ -76,11 +76,13 @@ export type UserData = {
   myId: string;
   myName: string;
   myTokens: number;
-  myTurn: number;
+  myTurn: boolean;
   opponentName: string;
   opponentTokens: number;
-  opponentTurn: number;
+  opponentTurn: boolean;
 };
+
+type SqlUserData = Omit<UserData, "myTurn" | "opponentTurn"> & { myTurn: number; opponentTurn: number };
 
 export type GameData = {
   id: string;
@@ -288,8 +290,12 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
   
   // Update player data.
   await query({
-    sql: "UPDATE Player SET tokens=tokens-? WHERE id=?",
+    sql: "UPDATE Player SET tokens=tokens-?, turn=0 WHERE id=?",
     values: [clicked.length, playerId],
+  });
+  await query({
+    sql: "UPDATE Player SET turn=1 WHERE id!=? AND gameId=?",
+    values: [playerId, gameId],
   });
 
   // Check how many tokens the user has left.
@@ -542,7 +548,7 @@ export async function getGame(gameId: string, request: Request) {
         ON my.gameId=opponent.gameId INNER JOIN Game on my.gameId=Game.id \
         WHERE Game.id=?",
     values: [user.id, user.id, gameId],
-  }) as UserData[];
+  }) as SqlUserData[];
 
   if (userData.length === 0) {
     return;
@@ -556,9 +562,15 @@ export async function getGame(gameId: string, request: Request) {
       WHERE Player.gameId="${gameId}" AND Player.userId="${user.id}"`,
   }) as SqlResultExtraTile[];
 
+  const parsedUserData: UserData = {
+    ...userData[0],
+    myTurn: Boolean(userData[0].myTurn),
+    opponentTurn: Boolean(userData[0].opponentTurn),
+  };
+
   return {
     board: convertSqlResultsToBoard(tiles),
-    userData: userData[0],
+    userData: parsedUserData,
     extraTiles: convertSqlResultsToExtraTiles(extraTiles),
   };
 }

@@ -45,7 +45,7 @@ export default function User(props: UserAreaProps) {
               {`Your turn!`}
             </Match>
             <Match when={props.userData.opponentTurn}>
-              {`${props.userData.opponentName}'s Turn!`}
+              {`${props.userData.opponentName}'s turn!`}
             </Match>
           </Switch>
         </div>
@@ -81,7 +81,7 @@ export default function User(props: UserAreaProps) {
           return (
             <ExtraTileRowComponent
               row={row}
-              disabled={props.userData.winner !== null}
+              disabled={props.userData.opponentTurn || Boolean(props.userData.winner)}
             />
           );
         }}</For>
@@ -90,6 +90,7 @@ export default function User(props: UserAreaProps) {
         name="start-game"
         class="end-turn-button"
         onClick={() => props.setIsConfirmOpen(true)}
+        disabled={props.userData.opponentTurn || Boolean(props.userData.winner)}
       >
         End Turn
       </button>

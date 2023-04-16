@@ -1,6 +1,6 @@
 import { Setter } from "solid-js";
 import LetterRow from "~/components/LetterRow";
-import type { Letter } from "~/db/game";
+import type { Letter, UserData } from "~/db/game";
 
 type TileProps = {
   letters: Letter[];
@@ -8,7 +8,8 @@ type TileProps = {
   setClicked: Setter<string[]>;
   selected: string[];
   setSelected: Setter<string[]>;
-  disabled: boolean;
+  myTurn: boolean;
+  hasTokensLeft: boolean;
 };
 
 export default function Tile(props: TileProps) {
@@ -20,7 +21,8 @@ export default function Tile(props: TileProps) {
         setClicked={props.setClicked}
         selected={props.selected}
         setSelected={props.setSelected}
-        disabled={props.disabled}
+        myTurn={props.myTurn}
+        hasTokensLeft={props.hasTokensLeft}
       />
       <LetterRow
         letters={[props.letters[2], props.letters[3]]}
@@ -28,7 +30,8 @@ export default function Tile(props: TileProps) {
         setClicked={props.setClicked}
         selected={props.selected}
         setSelected={props.setSelected}
-        disabled={props.disabled}
+        myTurn={props.myTurn}
+        hasTokensLeft={props.hasTokensLeft}
       />
     </div>
   );

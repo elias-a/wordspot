@@ -1,6 +1,6 @@
 import { Setter } from "solid-js";
 import LetterComponent from "~/components/Letter";
-import { Letter } from "~/db/game";
+import { Letter, UserData } from "~/db/game";
 
 type LetterRowProps = {
   letters: [Letter, Letter];
@@ -8,7 +8,8 @@ type LetterRowProps = {
   setClicked: Setter<string[]>;
   selected: string[];
   setSelected: Setter<string[]>;
-  disabled: boolean;
+  myTurn: boolean;
+  hasTokensLeft: boolean;
 };
 
 export default function LetterRow(props: LetterRowProps) {
@@ -20,7 +21,8 @@ export default function LetterRow(props: LetterRowProps) {
         setClicked={props.setClicked}
         selected={props.selected}
         setSelected={props.setSelected}
-        disabled={props.disabled}
+        myTurn={props.myTurn}
+        hasTokensLeft={props.hasTokensLeft}
       />
       <LetterComponent
         letter={props.letters[1]}
@@ -28,7 +30,8 @@ export default function LetterRow(props: LetterRowProps) {
         setClicked={props.setClicked}
         selected={props.selected}
         setSelected={props.setSelected}
-        disabled={props.disabled}
+        myTurn={props.myTurn}
+        hasTokensLeft={props.hasTokensLeft}
       />
     </div>
   );
