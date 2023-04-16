@@ -3,6 +3,7 @@ import { createDroppable } from "@thisbeyond/solid-dnd";
 import ExtraTileRowComponent from "~/components/ExtraTileRow";
 import type { ExtraTile, UserData, ExtraTileRow } from "~/db/game";
 import { v4 as uuidv4 } from "uuid";
+import { formatApostrophe } from "~/utils/formatApostrophe";
 
 type UserAreaProps = {
   userData: UserData;
@@ -45,7 +46,7 @@ export default function User(props: UserAreaProps) {
               {`Your turn!`}
             </Match>
             <Match when={props.userData.opponentTurn}>
-              {`${props.userData.opponentName}'s turn!`}
+              {`${formatApostrophe(props.userData.opponentName)} turn!`}
             </Match>
           </Switch>
         </div>

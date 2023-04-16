@@ -5,6 +5,7 @@ import { FaSolidPlay } from "solid-icons/fa";
 import { UserAccount } from "~/db/session";
 import { startGame } from "~/db/game";
 import type { GameData } from "~/db/game";
+import { formatApostrophe } from "~/utils/formatApostrophe";
 
 type DashboardProps = {
   user: UserAccount;
@@ -31,7 +32,7 @@ export default function Dashboard(props: DashboardProps) {
             <div class="game-card">
               <div class="game-summary">
                 <p class="game-summary-turn">
-                  <Switch fallback={`${game.opponentName}'s turn!`}>
+                  <Switch fallback={`${formatApostrophe(game.opponentName)} turn!`}>
                     <Match when={game.winner === game.myId}>
                       {`You won!`}
                     </Match>
