@@ -119,8 +119,14 @@ export async function startGame(request: Request) {
     return;
   }
 
+  const players: string[] = [import.meta.env.VITE_USER1, import.meta.env.VITE_USER2];
+
   const player1 = user.id;
-  const player2 = import.meta.env.VITE_USER2;
+  const player2 = players.find(player => player !== player1);
+
+  if (!player2) {
+    throw new Error(`Unable to select opponent. Game was not created.`);
+  }
 
   // Create game.
   const gameId = uuidv4();
@@ -288,6 +294,25 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
   // `selected` contains IDs for used letters that the user clicked.
   const lettersChosenByUser = clicked.concat(selected);
   
+  // Give the user an extra tile and two tokens for not making
+  // a valid move. A valid move requires the user to find a word
+  // spanning at least 3 letters with at least one of those letters
+  // currently unused. If a valid move has not been made, do not 
+  // add an extra tile to the board, even if the user chose to do so.
+  if (lettersChosenByUser.length < 3 || clicked.length < 1) {
+    await assignExtraTile(gameId, playerId);
+    await query({
+      sql: "UPDATE Player SET tokens=tokens+2, turn=0 WHERE id=?",
+      values: [playerId],
+    });
+    await query({
+      sql: "UPDATE Player SET turn=1 WHERE id!=? AND gameId=?",
+      values: [playerId, gameId],
+    });
+
+    return;
+  }
+
   // Update player data.
   await query({
     sql: "UPDATE Player SET tokens=tokens-?, turn=0 WHERE id=?",
@@ -323,19 +348,6 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
     });
   }
 
-  // Give the user an extra tile and two tokens for not making
-  // a move. Do not add an extra tile to the board, even if the
-  // user chose to do so.
-  if (clicked.length === 0) {
-    await assignExtraTile(gameId, playerId);
-    await query({
-      sql: "UPDATE Player SET tokens=tokens+2 WHERE id=?",
-      values: [playerId],
-    });
-
-    return;
-  } 
-  
   // Award the user an extra tile for finding a word that spans
   // more than two tiles.
   if (lettersChosenByUser.length > 2) {

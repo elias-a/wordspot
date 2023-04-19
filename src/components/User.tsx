@@ -61,18 +61,12 @@ export default function User(props: UserAreaProps) {
               </div>
             </Match>
             <Match when={props.userData.firstPlayer !== props.userData.myId}>
-            <div class="user-tokens">
-              {props.userData.opponentName}
-            </div>
-            <div class="user-tokens">
-              {props.userData.opponentTokens}
-            </div>
-            <div class="user-tokens">
-              {props.userData.myName}
-            </div>
-            <div class="user-tokens">
-              {props.userData.myTokens}
-            </div>
+              <div class="user-tokens">
+                {`${props.userData.opponentName} has ${props.userData.opponentTokens} ${props.userData.opponentTokens === 1 ? "token" : "tokens"} left`}
+              </div>
+              <div class="user-tokens">
+                {`${props.userData.myName} has ${props.userData.myTokens - props.clicked.length} ${(props.userData.myTokens - props.clicked.length) === 1 ? "token" : "tokens"} left`}
+              </div>
             </Match>
           </Switch>
         </div>
