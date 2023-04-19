@@ -18,12 +18,11 @@ export type UserAccount = {
 
 const storage = createCookieSessionStorage({
   cookie: {
-    name: "RJ_session", // TODO: Fix
+    name: "session",
     secure: true,
-    secrets: ["hello"], // TODO: Fix
+    secrets: [import.meta.env.VITE_SESSION_SECRET],
     sameSite: "lax",
     path: "/",
-    maxAge: 60 * 60 * 24 * 30,
     httpOnly: true,
   },
 });
