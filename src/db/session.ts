@@ -19,7 +19,7 @@ export type UserAccount = {
 const storage = createCookieSessionStorage({
   cookie: {
     name: "session",
-    secure: true,
+    secure: process.env.NODE_ENV === "production",
     secrets: [import.meta.env.VITE_SESSION_SECRET],
     sameSite: "lax",
     path: "/",
@@ -140,8 +140,8 @@ export async function cancelVerification(request: Request) {
   });
 }
 
-export async function createUserSession(phone: string) {
-  const session = await storage.getSession();
+export async function createUserSession(request: Request, phone: string) {
+  const session = await getUserSession(request);
 
   const user = await query({
     sql: "SELECT id FROM UserAccount WHERE phone=?",

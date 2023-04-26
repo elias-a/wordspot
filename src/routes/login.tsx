@@ -15,7 +15,7 @@ export function routeData() {}
 export default function PhoneNumber() {
   const params = useParams();
 
-  const [loggingIn, { Form }] = createServerAction$(async (form: FormData) => {
+  const [loggingIn, { Form }] = createServerAction$(async (form: FormData, { request }) => {
     const phone = form.get("phone");
     const redirectTo = form.get("redirectTo") || "/";
     if (
@@ -33,7 +33,7 @@ export default function PhoneNumber() {
       throw new FormError("Invalid phone number", { fieldErrors, fields });
     }
 
-    return createUserSession(phone);
+    return createUserSession(request, phone);
   });
 
   return (
