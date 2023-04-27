@@ -1,6 +1,6 @@
 import { redirect } from "solid-start/server";
 import { v4 as uuidv4 } from "uuid";
-import { query } from ".";
+import { query, twilioClient } from ".";
 import { getUser } from "~/db/session";
 
 const TILES = [
@@ -310,6 +310,7 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
       values: [playerId, gameId],
     });
 
+    await sendYourTurnMessage(playerId, gameId);
     return;
   }
 
@@ -424,6 +425,27 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
       }
     }
   }
+
+  await sendYourTurnMessage(playerId, gameId);
+}
+
+async function sendYourTurnMessage(playerId: string, gameId: string) {
+  const userRows = await query({
+    sql: "SELECT phone FROM UserAccount INNER JOIN Player \
+      ON Player.userId=UserAccount.id WHERE Player.id!=? \
+      AND gameId=?",
+    values: [playerId, gameId],
+  }) as { phone: string }[];
+
+  if (userRows.length !== 1) {
+    throw new Error(``);
+  }
+
+  await twilioClient.messages.create({
+    body: "Your turn in Wordspot!",
+    from: import.meta.env.VITE_TWILIO_PHONE,
+    to: `+1${userRows[0].phone}`,
+  });
 }
 
 async function assignExtraTile(gameId: string, playerId: string) {

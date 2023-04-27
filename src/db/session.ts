@@ -1,14 +1,7 @@
 import { redirect } from "solid-start/server";
 import { createCookieSessionStorage } from "solid-start/session";
 import { v4 as uuidv4 } from "uuid";
-import twilio from "twilio";
-import { query } from ".";
-
-const twilioClient = twilio(
-  import.meta.env.VITE_TWILIO_ACCOUNT_SID,
-  import.meta.env.VITE_TWILIO_AUTH_TOKEN,
-);
-const verifySid = import.meta.env.VITE_TWILIO_VERIFY_SID;
+import { query, twilioClient } from ".";
 
 export type UserAccount = {
   id: string;
@@ -91,7 +84,7 @@ export async function logout(request: Request) {
 }
 
 async function sendVerification(phone: string) {
-  return await twilioClient.verify.v2.services(verifySid)
+  return await twilioClient.verify.v2.services(import.meta.env.VITE_TWILIO_VERIFY_SID)
     .verifications.create({ to: `+1${phone}`, channel: "sms" })
     .then(res => res.sid)
     .catch(_err => {
@@ -100,7 +93,7 @@ async function sendVerification(phone: string) {
 }
 
 async function checkVerification(phone: string, code: string) {
-  await twilioClient.verify.v2.services(verifySid)
+  await twilioClient.verify.v2.services(import.meta.env.VITE_TWILIO_VERIFY_SID)
     .verificationChecks.create({ to: `+1${phone}`, code })
     .then(res => {
       if (!res.valid) {
@@ -121,7 +114,7 @@ export async function cancelVerification(request: Request) {
 
   // Use Twilio API to cancel verification request.
   try {
-    await twilioClient.verify.v2.services(verifySid)
+    await twilioClient.verify.v2.services(import.meta.env.VITE_TWILIO_VERIFY_SID)
       .verifications(verificationSid).update({ status: "canceled" });
   } catch (_err) {
     // No need to cancel, verification code has already expired.
