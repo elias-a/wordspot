@@ -289,6 +289,268 @@ function getTileFromLetter(letterId: string, board: Row[], extraTile: ExtraTile 
   throw new Error(`Tile associated with letter ID="${letterId}" was not found.`);
 }
 
+type WordLetter = {
+  tileRow: number;
+  tileColumn: number;
+  letterIndex: number;
+};
+
+function isNeighborTile(row: number, column: number) {
+  return true;
+}
+
+function getValidNextLetters(board: Row[], word: WordLetter[]) {
+  const validNextLetters: WordLetter[] = [];
+
+  if (word.length === 1) {
+    // 8 valid options
+    const letter = word[0];
+    for (let i = 0; i < 4; i++) {
+      if (i !== letter.letterIndex) {
+        validNextLetters.push({
+          tileRow: letter.tileRow,
+          tileColumn: letter.tileColumn,
+          letterIndex: i,
+        });
+      }
+    }
+    if (letter.letterIndex === 0) {
+      // Bottom row of tile above
+      if (isNeighborTile(letter.tileRow - 1, letter.tileColumn)) {
+        validNextLetters.push(...[
+          {
+            tileRow: letter.tileRow - 1,
+            tileColumn: letter.tileColumn,
+            letterIndex: 2,
+          },
+          {
+            tileRow: letter.tileRow - 1,
+            tileColumn: letter.tileColumn,
+            letterIndex: 3,
+          },
+        ]);
+      }
+
+      // Right row of tile to the left
+      if (isNeighborTile(letter.tileRow, letter.tileColumn - 1)) {
+        validNextLetters.push(...[
+          {
+            tileRow: letter.tileRow,
+            tileColumn: letter.tileColumn - 1,
+            letterIndex: 1,
+          },
+          {
+            tileRow: letter.tileRow,
+            tileColumn: letter.tileColumn - 1,
+            letterIndex: 3,
+          },
+        ]);
+      }
+
+      // Diagonal letter to the top left
+      if (isNeighborTile(letter.tileRow - 1, letter.tileColumn - 1)) {
+        validNextLetters.push({
+          tileRow: letter.tileRow - 1,
+          tileColumn: letter.tileColumn - 1,
+          letterIndex: 3,
+        });
+      }
+    } else if (letter.letterIndex === 1) {
+      // Bottom row of tile above
+      if (isNeighborTile(letter.tileRow - 1, letter.tileColumn)) {
+        validNextLetters.push(...[
+          {
+            tileRow: letter.tileRow - 1,
+            tileColumn: letter.tileColumn,
+            letterIndex: 2,
+          },
+          {
+            tileRow: letter.tileRow - 1,
+            tileColumn: letter.tileColumn,
+            letterIndex: 3,
+          },
+        ]);
+      }
+
+      // Left row of tile to the right
+      if (isNeighborTile(letter.tileRow, letter.tileColumn + 1)) {
+        validNextLetters.push(...[
+          {
+            tileRow: letter.tileRow,
+            tileColumn: letter.tileColumn + 1,
+            letterIndex: 0,
+          },
+          {
+            tileRow: letter.tileRow,
+            tileColumn: letter.tileColumn + 1,
+            letterIndex: 2,
+          },
+        ]);
+      }
+
+      // Diagonal letter to the top right
+      if (isNeighborTile(letter.tileRow + 1, letter.tileColumn - 1)) {
+        validNextLetters.push({
+          tileRow: letter.tileRow + 1,
+          tileColumn: letter.tileColumn - 1,
+          letterIndex: 2,
+        });
+      }
+    } else if (letter.letterIndex === 2) {
+      // Top row of the tile below
+      if (isNeighborTile(letter.tileRow + 1, letter.tileColumn)) {
+        validNextLetters.push(...[
+          {
+            tileRow: letter.tileRow + 1,
+            tileColumn: letter.tileColumn,
+            letterIndex: 0,
+          },
+          {
+            tileRow: letter.tileRow + 1,
+            tileColumn: letter.tileColumn,
+            letterIndex: 1,
+          },
+        ]);
+      }
+
+      // Right row of tile to the left
+      if (isNeighborTile(letter.tileRow, letter.tileColumn - 1)) {
+        validNextLetters.push(...[
+          {
+            tileRow: letter.tileRow,
+            tileColumn: letter.tileColumn - 1,
+            letterIndex: 1,
+          },
+          {
+            tileRow: letter.tileRow,
+            tileColumn: letter.tileColumn - 1,
+            letterIndex: 3,
+          },
+        ]);
+      }
+
+      // Diagonal letter to the bottom left
+      if (isNeighborTile(letter.tileRow + 1, letter.tileColumn - 1)) {
+        validNextLetters.push({
+          tileRow: letter.tileRow + 1,
+          tileColumn: letter.tileColumn - 1,
+          letterIndex: 1,
+        });
+      }
+    } else if (letter.letterIndex === 3) {
+      // Top row of the tile below
+      if (isNeighborTile(letter.tileRow + 1, letter.tileColumn)) {
+        validNextLetters.push(...[
+          {
+            tileRow: letter.tileRow + 1,
+            tileColumn: letter.tileColumn,
+            letterIndex: 0,
+          },
+          {
+            tileRow: letter.tileRow + 1,
+            tileColumn: letter.tileColumn,
+            letterIndex: 1,
+          },
+        ]);
+      }
+
+      // Left row of tile to the right
+      if (isNeighborTile(letter.tileRow, letter.tileColumn + 1)) {
+        validNextLetters.push(...[
+          {
+            tileRow: letter.tileRow,
+            tileColumn: letter.tileColumn + 1,
+            letterIndex: 0,
+          },
+          {
+            tileRow: letter.tileRow,
+            tileColumn: letter.tileColumn + 1,
+            letterIndex: 2,
+          },
+        ]);
+      }
+
+      // Diagonal letter to the bottom right
+      if (isNeighborTile(letter.tileRow + 1, letter.tileColumn + 1)) {
+        validNextLetters.push({
+          tileRow: letter.tileRow + 1,
+          tileColumn: letter.tileColumn + 1,
+          letterIndex: 0,
+        });
+      }
+    } else {
+      throw new Error(`Letter index must be between 0 and 3: letterIndex=${letter.letterIndex}.`)
+    }
+  } else {
+    // 2 valid options
+
+    // Take first and last letters since they are in a line
+    const firstLetter = word[0];
+    const lastLetter = word[word.length - 1];
+    
+    if (firstLetter.tileColumn === lastLetter.tileColumn) {
+      // Case 1: letters are in same column
+    } else if (firstLetter.tileRow === lastLetter.tileRow) {
+      // Case 2: letters are in same row
+    } else {
+      
+    }
+  }
+
+  return validNextLetters;
+}
+
+/* 
+(tile.row, tile.column, letter.index)[]
+As we construct the graph, we can only search the first and last 
+nodes for neighbors - can't insert node into middle of chain
+
+* Each time we add a tile to graph,
+* remove the tile from tiles array
+
+* Initialize
+graph = [tiles.pop()]
+while tiles.length > 0
+  * Check if first and last node have neighbors
+  for t in new Set(graph[0], graph[graph.length - 1])
+    for i in tiles.length
+      if isNeighbor(tile, tiles[i])
+        graph.push(tiles.splice(i, 1))
+        break
+      else
+        continue
+--------------------------------
+
+Example: 
+0 1 2 3
+4 5 6 7
+8 9 
+
+Say word crosses 8-4-5.
+clicked tiles = [8, 4, 5]
+
+graph = [8]
+while [4, 5].length > 0
+  for t in Set(8)
+    t = 8
+    for i in in [4, 5]
+
+*/
+
+/*
+0 1 2 3
+4 5 6 7
+8 9 
+
+Say word crosses 8-4-5:
+xx xx xx xx
+xx xx xx xx
+ab Ab xx xx
+cD cd xx xx
+Ab xx xx xx
+cd xx xx xx
+*/
+
 export async function endTurn(gameId: string, playerId: string, clicked: string[], selected: string[], extraTile: PlacedExtraTile | undefined, board: Row[]) {
   // `clicked` contains IDs for unused letters that the user clicked.
   // `selected` contains IDs for used letters that the user clicked.
