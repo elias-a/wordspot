@@ -45,7 +45,7 @@ export default function Game() {
   const [selected, setSelected] = createSignal<string[]>([], { equals: false });
   const [extraTile, setExtraTile] = createSignal<PlacedExtraTile>();
   const [isConfirmOpen, setIsConfirmOpen] = createSignal(false);
-  const [_, { Form }] = createServerAction$(async (form: FormData) => {
+  const [submitting, { Form }] = createServerAction$(async (form: FormData) => {
     const formGameId = form.get("gameId");
     const formPlayerId = form.get("playerId");
     const formClicked = form.get("clicked");
@@ -135,7 +135,7 @@ export default function Game() {
               setClicked={setClicked}
               selected={selected()}
               setSelected={setSelected}
-              myTurn={game()!.userData.myTurn && !game()!.userData.winner}
+              myTurn={!submitting.pending && game()!.userData.myTurn && !game()!.userData.winner}
               hasTokensLeft={game()!.userData.myTokens - clicked().length > 0}
             />
             <User
@@ -173,6 +173,7 @@ export default function Game() {
                       id="cancel-end-turn"
                       class="end-turn-button confirm-button"
                       onClick={() => setIsConfirmOpen(false)}
+                      disabled={submitting.pending}
                     >
                       Cancel
                     </button>
@@ -211,6 +212,7 @@ export default function Game() {
                         name="start-game"
                         type="submit"
                         class="end-turn-button confirm-button"
+                        disabled={submitting.pending}
                       >
                         End Turn
                       </button>
