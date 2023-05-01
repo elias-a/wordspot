@@ -289,7 +289,7 @@ function getTileFromLetter(letterId: string, board: Row[], extraTile: ExtraTile 
   throw new Error(`Tile associated with letter ID="${letterId}" was not found.`);
 }
 
-type WordLetter = {
+export type WordLetter = {
   tileRow: number;
   tileColumn: number;
   letterIndex: number;
@@ -317,7 +317,7 @@ function getLetterPosition(row: number, column: number, index: number): Coordina
   };
 }
 
-function isStraightLine(word: WordLetter[]) {
+export function isStraightLine(word: WordLetter[]) {
   const positions = word.map(w => {
     return getLetterPosition(w.tileRow, w.tileColumn, w.letterIndex);
   });
