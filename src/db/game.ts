@@ -310,6 +310,10 @@ function computeDeterminant(coordinates: Line) {
   return x1 * y2 - y1 * x2 - x0 * y2 + y0 * x2 + x0 * y1 - y0 * x1;
 }
 
+function computeDistance(coordinates: Coordinate[]) {
+  //return Math.sqrt(Math.pow(, 2) + Math.pow(, 2));
+};
+
 function getLetterPosition(row: number, column: number, index: number): Coordinate {
   return {
     x: 2 * row + (index < 2 ? 0 : 1),
@@ -317,11 +321,38 @@ function getLetterPosition(row: number, column: number, index: number): Coordina
   };
 }
 
-export function isStraightLine(word: WordLetter[]) {
+// Convert the coordinates of each letter to a numeric index.
+function getLetterIndex(letter: WordLetter, rowLength: number) {
+  return 4 * rowLength * letter.tileRow +
+    2 * letter.tileColumn + letter.tileColumn % 2 +
+    (letter.letterIndex < 2 ? 0 : 2 * rowLength);
+}
+
+export function sortLetters(word: WordLetter[], rowLength: number) {
+  word.sort((a, b) => getLetterIndex(a, rowLength) - getLetterIndex(b, rowLength));
+  return word;
+}
+
+export function isValidWord(word: WordLetter[]) {
   const positions = word.map(w => {
     return getLetterPosition(w.tileRow, w.tileColumn, w.letterIndex);
   });
 
+  if (
+    isStraightLine(positions) &&
+    computeDistance(positions) === positions.length
+  ) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+export async function checkWord(letters: string[]) {
+
+}
+
+function isStraightLine(positions: Coordinate[]) {
   for (let i = 0; i < positions.length - 2; i++) {
     if (computeDeterminant(positions.slice(i, i + 3) as Line) !== 0) {
       return false;
