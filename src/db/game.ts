@@ -289,6 +289,10 @@ function getTileFromLetter(letterId: string, board: Row[], extraTile: ExtraTile 
   throw new Error(`Tile associated with letter ID="${letterId}" was not found.`);
 }
 
+async function isEnglishWord() {
+
+}
+
 export type WordLetter = {
   tileRow: number;
   tileColumn: number;
@@ -311,7 +315,10 @@ function computeDeterminant(coordinates: Line) {
 }
 
 function computeDistance(coordinates: Coordinate[]) {
-  //return Math.sqrt(Math.pow(, 2) + Math.pow(, 2));
+  const firstPoint = coordinates[0];
+  const lastPoint = coordinates[coordinates.length - 1];
+  return Math.sqrt(Math.pow(lastPoint.x - firstPoint.x, 2) +
+    Math.pow(lastPoint.y - firstPoint.y, 2));
 };
 
 function getLetterPosition(row: number, column: number, index: number): Coordinate {
@@ -322,18 +329,13 @@ function getLetterPosition(row: number, column: number, index: number): Coordina
 }
 
 // Convert the coordinates of each letter to a numeric index.
-function getLetterIndex(letter: WordLetter, rowLength: number) {
-  return 4 * rowLength * letter.tileRow +
+function getLetterIndex(letter: WordLetter, columnLength: number) {
+  return 4 * columnLength * letter.tileRow +
     2 * letter.tileColumn + letter.tileColumn % 2 +
-    (letter.letterIndex < 2 ? 0 : 2 * rowLength);
+    (letter.letterIndex < 2 ? 0 : 2 * columnLength);
 }
 
-export function sortLetters(word: WordLetter[], rowLength: number) {
-  word.sort((a, b) => getLetterIndex(a, rowLength) - getLetterIndex(b, rowLength));
-  return word;
-}
-
-export function isValidWord(word: WordLetter[]) {
+export function isValidMove(word: WordLetter[]) {
   const positions = word.map(w => {
     return getLetterPosition(w.tileRow, w.tileColumn, w.letterIndex);
   });
@@ -348,8 +350,35 @@ export function isValidWord(word: WordLetter[]) {
   }
 }
 
-export async function checkWord(letters: string[]) {
+export async function checkWord(letters: string[], board: Row[]) {
+  const word: WordLetter[] = [];
+  letters.forEach(letterId => {
+    for (let i = 0; i < board.length; i++) {
+      for (let j = 0; j < board[i].tiles.length; j++) {
+        const matchingLetter = board[i].tiles[j].letters.find(letter => letter.id === letterId);
+        if (matchingLetter) {
+          word.push({
+            tileRow: board[i].tiles[j].row,
+            tileColumn: board[i].tiles[j].column,
+            letterIndex: matchingLetter.letterIndex,
+          });
+        }
+      }
+    }
+  });
 
+  // 
+  word.sort((a, b) => 
+    getLetterIndex(a, board[0].tiles.length) -
+    getLetterIndex(b, board[0].tiles.length));
+
+  // 
+  if (!isValidMove(word)) {
+    return false;
+  }
+
+  // Check if word is a valid English word.
+  isEnglishWord();
 }
 
 function isStraightLine(positions: Coordinate[]) {
