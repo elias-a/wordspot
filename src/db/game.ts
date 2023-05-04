@@ -2,6 +2,7 @@ import { redirect } from "solid-start/server";
 import { v4 as uuidv4 } from "uuid";
 import { query, twilioClient } from ".";
 import { getUser } from "~/db/session";
+import { isEnglishWord } from "~/db/dictionary";
 
 const TILES = [
   "SGPU", "HEAS", "XAIY",
@@ -289,10 +290,6 @@ function getTileFromLetter(letterId: string, board: Row[], extraTile: ExtraTile 
   throw new Error(`Tile associated with letter ID="${letterId}" was not found.`);
 }
 
-async function isEnglishWord() {
-
-}
-
 export type WordLetter = {
   tileRow: number;
   tileColumn: number;
@@ -349,17 +346,20 @@ export function isValidMove(word: WordLetter[]) {
   }
 }
 
+type Word = WordLetter & { letter: string };
+
 export async function checkWord(letters: string[], board: Row[]) {
-  const word: WordLetter[] = [];
+  const wordPosition: Word[] = [];
   letters.forEach(letterId => {
     for (let i = 0; i < board.length; i++) {
       for (let j = 0; j < board[i].tiles.length; j++) {
         const matchingLetter = board[i].tiles[j].letters.find(letter => letter.id === letterId);
         if (matchingLetter) {
-          word.push({
+          wordPosition.push({
             tileRow: board[i].tiles[j].row,
             tileColumn: board[i].tiles[j].column,
             letterIndex: matchingLetter.letterIndex,
+            letter: matchingLetter.letter,
           });
         }
       }
@@ -367,17 +367,33 @@ export async function checkWord(letters: string[], board: Row[]) {
   });
 
   // 
-  word.sort((a, b) => 
+  wordPosition.sort((a, b) => 
     getLetterIndex(a, board[0].tiles.length) -
     getLetterIndex(b, board[0].tiles.length));
 
   // 
-  if (!isValidMove(word)) {
+  if (!isValidMove(wordPosition)) {
     return false;
   }
 
   // Check if word is a valid English word.
-  isEnglishWord();
+  // Check the word both forward and backward.
+  let possibleWord1 = "";
+  let possibleWord2 = "";
+  for (let i = 0; i < wordPosition.length; i++) {
+    possibleWord1 += wordPosition[i].letter;
+    possibleWord2 += wordPosition[wordPosition.length - 1 - i].letter;
+  }
+
+  if (await isEnglishWord(possibleWord1)) {
+    return true;
+  }
+
+  if (await isEnglishWord(possibleWord2)) {
+    return true;
+  }
+
+  return false;
 }
 
 function isStraightLine(positions: Coordinate[]) {
