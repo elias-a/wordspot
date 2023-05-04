@@ -315,10 +315,9 @@ function computeDeterminant(coordinates: Line) {
 }
 
 function computeDistance(coordinates: Coordinate[]) {
-  const firstPoint = coordinates[0];
-  const lastPoint = coordinates[coordinates.length - 1];
-  return Math.sqrt(Math.pow(lastPoint.x - firstPoint.x, 2) +
-    Math.pow(lastPoint.y - firstPoint.y, 2));
+  const { x: x0, y: y0 } = coordinates[0];
+  const { x: x1, y: y1 } = coordinates[coordinates.length - 1];
+  return y1 !== y0 ? y1 - y0 + 1 : x1 - x0;
 };
 
 function getLetterPosition(row: number, column: number, index: number): Coordinate {
