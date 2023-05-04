@@ -317,7 +317,7 @@ function computeDeterminant(coordinates: Line) {
 function computeDistance(coordinates: Coordinate[]) {
   const { x: x0, y: y0 } = coordinates[0];
   const { x: x1, y: y1 } = coordinates[coordinates.length - 1];
-  return y1 !== y0 ? y1 - y0 + 1 : x1 - x0;
+  return (y1 !== y0 ? y1 - y0 : x1 - x0) + 1;
 };
 
 function getLetterPosition(row: number, column: number, index: number): Coordinate {

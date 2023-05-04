@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { isValidMove, WordLetter } from "~/db/game"
 
-test("is straight line", () => {
+test("check if move is valid", () => {
   const word_000_001_010: WordLetter[] = [
     { tileRow: 0, tileColumn: 0, letterIndex: 0 },
     { tileRow: 0, tileColumn: 0, letterIndex: 1 },
@@ -60,4 +60,20 @@ test("is straight line", () => {
     { tileRow: 2, tileColumn: 2, letterIndex: 0 },
   ];
   expect(isValidMove(word_000_003_110_220)).toBe(false);
+
+  // Check a valid vertical placement.
+  const word_202_300_302: WordLetter[] = [
+    { tileRow: 2, tileColumn: 0, letterIndex: 2 },
+    { tileRow: 3, tileColumn: 0, letterIndex: 0 },
+    { tileRow: 3, tileColumn: 0, letterIndex: 2 },
+  ];
+  expect(isValidMove(word_202_300_302)).toBe(true);
+
+  // Check an invalid vertical placement.
+  const word_200_300_302: WordLetter[] = [
+    { tileRow: 2, tileColumn: 0, letterIndex: 0 },
+    { tileRow: 3, tileColumn: 0, letterIndex: 0 },
+    { tileRow: 3, tileColumn: 0, letterIndex: 2 },
+  ];
+  expect(isValidMove(word_200_300_302)).toBe(false);
 });
