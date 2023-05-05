@@ -7,20 +7,6 @@ test("insert into trie", () => {
   expect(trie.search("word")).toBe(true);
 });
 
-test("build trie", () => {
-  const trie_words = [
-    "firstword", "secondword", "thirdword",
-    "fourthword", "fifthword", "sixthword",
-  ];
-
-  const trie = new DictionaryTrie();
-  trie.build(trie_words);
-
-  trie_words.forEach(word => {
-    expect(trie.search(word)).toBe(true);
-  });
-});
-
 test("search trie", () => {
   const trie = new DictionaryTrie();
   trie.insert("word");

@@ -1,6 +1,9 @@
 import mysql from "mysql2";
 import { promisify } from "util";
 import twilio from "twilio";
+import { createTrie } from "~/db/dictionary";
+
+export const dictionaryTrie = createTrie("data/english_dictionary.txt");
 
 const connection = mysql.createConnection(import.meta.env.VITE_DATABASE_CONNECTION);
 export const query = promisify(connection.query).bind(connection);

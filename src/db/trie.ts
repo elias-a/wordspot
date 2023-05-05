@@ -21,12 +21,6 @@ export class DictionaryTrie {
     pointer.isEndOfWord = true;
   }
 
-  build(words: string[]) {
-    for (let i = 0; i < words.length; i++) {
-      this.insert(words[i]);
-    }
-  }
-
   search(word: string) {
     let pointer = this.root;
 
