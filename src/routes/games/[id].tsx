@@ -6,7 +6,7 @@ import {
 } from "solid-js";
 import { Portal } from "solid-js/web";
 import { useRouteData, RouteDataArgs, useParams } from "solid-start";
-import { createServerData$, createServerAction$  } from "solid-start/server";
+import { createServerData$, createServerAction$ } from "solid-start/server";
 import { FormError } from "solid-start/data";
 import {
   DragDropProvider,
@@ -20,7 +20,12 @@ import Board from "~/components/Board";
 import User from "~/components/User";
 import MovingExtraTile from "~/components/MovingExtraTile";
 import NotFound from "../[...404]";
-import { getGame, endTurn, PlacedExtraTile } from "~/db/game";
+import {
+  getGame,
+  endTurn,
+  PlacedExtraTile,
+  checkWord,
+} from "~/db/game";
 
 declare module "solid-js" {
   namespace JSX {
@@ -73,7 +78,13 @@ export default function Game() {
       : undefined;
     const board = JSON.parse(formBoard);
 
-    await endTurn(gameId, playerId, clicked, selected, extraTile, board);
+    try {
+      await endTurn(gameId, playerId, clicked, selected, extraTile, board);
+    } catch (error) {
+      throw new FormError("Could not complete your turn!");
+    }
+    
+
   });
 
   createEffect(() => {
@@ -158,7 +169,12 @@ export default function Game() {
           <Show when={isConfirmOpen()}>
             <Portal>
               <div class="confirm-modal-overlay">
-                <div class="confirm-modal">
+                <div
+                  class="confirm-modal"
+                  classList={{
+                    "error-content": submitting.error,
+                  }}
+                >
                   <div class="header"></div>
                   <div class="confirm-message">
                     <Show
@@ -168,6 +184,11 @@ export default function Game() {
                       <p>{`Are you sure you want to end your turn?`}</p>
                     </Show>
                   </div>
+                  <Show when={submitting.error}>
+                    <div class="authentication-field error-message">
+                      {submitting.error.message}
+                    </div>
+                  </Show>
                   <div class="confirm-buttons">
                     <button
                       id="cancel-end-turn"

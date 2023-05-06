@@ -44,7 +44,7 @@ export default function VerificationCode() {
       <div 
         class="authentication-content"
         classList={{
-          authErrorContent: loggingIn.error,
+          "error-content": loggingIn.error,
         }}
       >
         <div class="authentication-field authentication-title">
@@ -60,7 +60,7 @@ export default function VerificationCode() {
             <input name="code" placeholder="Verification Code" autocomplete="off" />
           </div>
           <Show when={loggingIn.error}>
-            <div class="authentication-field authentication-error">
+            <div class="authentication-field error-message">
               {loggingIn.error.message}
             </div>
           </Show>

@@ -42,7 +42,7 @@ export default function PhoneNumber() {
       <div
         class="authentication-content"
         classList={{
-          authErrorContent: loggingIn.error,
+          "error-content": loggingIn.error,
         }}
       >
         <div class="authentication-field authentication-title">
@@ -58,7 +58,7 @@ export default function PhoneNumber() {
             <input name="phone" placeholder="Phone Number" autocomplete="off" />
           </div>
           <Show when={loggingIn.error}>
-            <div class="authentication-field authentication-error">
+            <div class="authentication-field error-message">
               {loggingIn.error.message}
             </div>
           </Show>

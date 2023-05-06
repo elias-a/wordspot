@@ -381,8 +381,8 @@ export async function checkWord(letters: string[], board: Row[]) {
   let possibleWord1 = "";
   let possibleWord2 = "";
   for (let i = 0; i < wordPosition.length; i++) {
-    possibleWord1 += wordPosition[i].letter;
-    possibleWord2 += wordPosition[wordPosition.length - 1 - i].letter;
+    possibleWord1 += wordPosition[i].letter.toLowerCase();
+    possibleWord2 += wordPosition[wordPosition.length - 1 - i].letter.toLowerCase();
   }
 
   if (await isEnglishWord(possibleWord1)) {
@@ -410,7 +410,7 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
   // `clicked` contains IDs for unused letters that the user clicked.
   // `selected` contains IDs for used letters that the user clicked.
   const lettersChosenByUser = clicked.concat(selected);
-  
+
   // Give the user an extra tile and two tokens for not making
   // a valid move. A valid move requires the user to find a word
   // spanning at least 3 letters with at least one of those letters
@@ -429,6 +429,12 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
 
     await sendYourTurnMessage(playerId, gameId);
     return;
+  }
+
+  // Check if the user submitted a valid word.
+  const isValidWord = await checkWord(lettersChosenByUser, board);
+  if (!isValidWord) {
+    throw new Error(`You did not make a valid move!`);
   }
 
   // Update player data.
