@@ -41,12 +41,7 @@ export default function VerificationCode() {
   return (
     <div class="app">
       <div class="authentication-screen" />
-      <div 
-        class="authentication-content"
-        classList={{
-          "error-content": loggingIn.error,
-        }}
-      >
+      <div class="authentication-content">
         <div class="authentication-field authentication-title">
           <h1>Login to Wordspot</h1>
         </div>
@@ -60,23 +55,25 @@ export default function VerificationCode() {
             <input name="code" placeholder="Verification Code" autocomplete="off" />
           </div>
           <Show when={loggingIn.error}>
-            <div class="authentication-field error-message">
+            <div class="error-message">
               {loggingIn.error.message}
             </div>
           </Show>
-          <button
-            type="submit"
-            disabled={loggingIn.pending}
-            class="authentication-button"
-          >
-            <Show
-              when={!loggingIn.pending}
-              fallback={<Spinner />}
-            >Continue</Show>
-          </button>
+          <div class="authentication-field buttons-section">
+            <button
+              type="submit"
+              disabled={loggingIn.pending}
+              class="submit-button authentication-button"
+            >
+              <Show
+                when={!loggingIn.pending}
+                fallback={<Spinner />}
+              >Continue</Show>
+            </button>
+          </div>
         </LogInForm.Form>
         <CancelForm.Form>
-          <div class="authentication-field">
+          <div class="authentication-field buttons-section">
             <button type="submit" class="authentication-cancel-button">
               Use a different phone number
             </button>

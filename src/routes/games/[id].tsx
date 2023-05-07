@@ -170,7 +170,6 @@ export default function Game() {
             <Portal>
               <div class="confirm-modal-overlay">
                 <div class="confirm-modal">
-                  <div class="header"></div>
                   <div class="confirm-message">
                     <Show
                       when={clicked().length + selected().length >= 3}
@@ -186,8 +185,7 @@ export default function Game() {
                   </Show>
                   <div class="confirm-buttons">
                     <button
-                      id="cancel-end-turn"
-                      class="end-turn-button confirm-button"
+                      class="submit-button confirm-button"
                       onClick={() => setIsConfirmOpen(false)}
                       disabled={submitting.pending}
                     >
@@ -227,7 +225,7 @@ export default function Game() {
                       <button
                         name="start-game"
                         type="submit"
-                        class="end-turn-button confirm-button"
+                        class="submit-button confirm-button"
                         disabled={submitting.pending}
                       >
                         End Turn
