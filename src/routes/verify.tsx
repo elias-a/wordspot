@@ -41,8 +41,8 @@ export default function VerificationCode() {
   return (
     <div class="app">
       <div class="authentication-screen" />
-      <div class="authentication-content">
-        <div class="authentication-field authentication-title">
+      <div class="modal">
+        <div class="modal-content modal-title">
           <h1>Login to Wordspot</h1>
         </div>
         <LogInForm.Form>
@@ -51,7 +51,7 @@ export default function VerificationCode() {
             name="redirectTo"
             value={params.redirectTo ?? "/"}
           />
-          <div class="authentication-field">
+          <div class="modal-content">
             <input name="code" placeholder="Verification Code" autocomplete="off" />
           </div>
           <Show when={loggingIn.error}>
@@ -59,11 +59,11 @@ export default function VerificationCode() {
               {loggingIn.error.message}
             </div>
           </Show>
-          <div class="authentication-field buttons-section">
+          <div class="modal-content buttons-section">
             <button
               type="submit"
               disabled={loggingIn.pending}
-              class="submit-button authentication-button"
+              class="modal-button"
             >
               <Show
                 when={!loggingIn.pending}
@@ -73,7 +73,7 @@ export default function VerificationCode() {
           </div>
         </LogInForm.Form>
         <CancelForm.Form>
-          <div class="authentication-field buttons-section">
+          <div class="modal-content buttons-section">
             <button type="submit" class="authentication-cancel-button">
               Use a different phone number
             </button>

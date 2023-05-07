@@ -169,8 +169,8 @@ export default function Game() {
           <Show when={isConfirmOpen()}>
             <Portal>
               <div class="confirm-modal-overlay">
-                <div class="confirm-modal">
-                  <div class="confirm-message">
+                <div class="modal">
+                  <div class="modal-content">
                     <Show
                       when={clicked().length + selected().length >= 3}
                       fallback={<p>{`Are you sure you want to end your turn without making a move? Your word must include at least 3 letters. If you end your turn now, you will be given 2 tokens and 1 extra tile.`}</p>}
@@ -185,7 +185,7 @@ export default function Game() {
                   </Show>
                   <div class="confirm-buttons">
                     <button
-                      class="submit-button confirm-button"
+                      class="modal-button confirm-button"
                       onClick={() => setIsConfirmOpen(false)}
                       disabled={submitting.pending}
                     >
@@ -225,7 +225,7 @@ export default function Game() {
                       <button
                         name="start-game"
                         type="submit"
-                        class="submit-button confirm-button"
+                        class="modal-button confirm-button"
                         disabled={submitting.pending}
                       >
                         End Turn

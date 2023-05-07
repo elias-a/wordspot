@@ -39,8 +39,8 @@ export default function PhoneNumber() {
   return (
     <div class="app">
       <div class="authentication-screen" />
-      <div class="authentication-content">
-        <div class="authentication-field authentication-title">
+      <div class="modal">
+        <div class="modal-content modal-title">
           <h1>Login to Wordspot</h1>
         </div>
         <Form>
@@ -49,7 +49,7 @@ export default function PhoneNumber() {
             name="redirectTo"
             value={params.redirectTo ?? "/"}
           />
-          <div class="authentication-field">
+          <div class="modal-content">
             <input name="phone" placeholder="Phone Number" autocomplete="off" />
           </div>
           <Show when={loggingIn.error}>
@@ -57,11 +57,11 @@ export default function PhoneNumber() {
               {loggingIn.error.message}
             </div>
           </Show>
-          <div class="authentication-field buttons-section">
+          <div class="modal-content buttons-section">
             <button
               type="submit"
               disabled={loggingIn.pending}
-              class="authentication-button"
+              class="modal-button"
             >
               <Show
                 when={!loggingIn.pending}
