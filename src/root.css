@@ -64,9 +64,13 @@ div {
 .error-message {
   color: #cc0000;
   font-size: 22px;
-  height: 60px;
-  margin: 0;
+  min-width: 500px;
+  max-width: 500px;
   text-align: center;
+  flex: 1;
+  justify-content: center;
+  padding: 20px;
+  padding-top: 0;
 }
 
 .authentication-screen {
@@ -406,33 +410,13 @@ div {
 }
 
 .confirm-modal {
-  /* position: absolute;
-  top: 50%;
-  left: 50%;
-  margin-right: -50%;
-  transform: translate(-50%, -50%);
-  min-width: 500px;
-  max-width: 500px;
-  min-height: 250px;
-  max-height: 250px;
-  backdrop-filter: blur(17px) saturate(200%);
-  -webkit-backdrop-filter: blur(17px) saturate(200%);
-  background-color: rgba(190, 190, 190, 0.44);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.125);
-  border-radius: 10px;
-  box-shadow: 0 3px 10px rgb(0 0 0 / 0.5);
-  display: flex;
-  flex: 1;
-  flex-direction: column; */
   display: flex;
   flex-direction: column;
   align-self: center;
-  width: 500px;
-  height: 300px;
+  min-width: 500px;
+  max-width: 500px;
   margin: auto;
   margin-top: 10%;
-  padding: 5px;
   backdrop-filter: blur(17px) saturate(200%);
   -webkit-backdrop-filter: blur(17px) saturate(200%);
   background-color: rgba(190, 190, 190, 0.44);
@@ -446,19 +430,17 @@ div {
   justify-content: center;
   min-width: 500px;
   max-width: 500px;
-  min-height: 180px;
-  max-height: 180px;
   font-size: 28px;
+  padding: 20px;
   color: #fff;
   text-align: center;
-  border: 1px solid red;
 }
 
 .confirm-buttons {
   flex: 1;
   align-self: flex-end;
-  min-width: 500px;
-  max-width: 500px;
+  align-self: stretch;
+  justify-content: space-evenly;
   min-height: 70px;
   max-height: 70px;
 }
@@ -466,7 +448,6 @@ div {
 .confirm-button {
   min-width: 235px;
   max-width: 235px;
-  margin: 10px 0 10px 10px;
 }
 
 .user-area {

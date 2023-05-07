@@ -169,12 +169,7 @@ export default function Game() {
           <Show when={isConfirmOpen()}>
             <Portal>
               <div class="confirm-modal-overlay">
-                <div
-                  class="confirm-modal"
-                  classList={{
-                    "error-content": submitting.error,
-                  }}
-                >
+                <div class="confirm-modal">
                   <div class="header"></div>
                   <div class="confirm-message">
                     <Show
@@ -185,8 +180,8 @@ export default function Game() {
                     </Show>
                   </div>
                   <Show when={submitting.error}>
-                    <div class="authentication-field error-message">
-                      {submitting.error.message}
+                    <div class="error-message">
+                      <p>{submitting.error.message}</p>
                     </div>
                   </Show>
                   <div class="confirm-buttons">
