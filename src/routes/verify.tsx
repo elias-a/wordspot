@@ -40,7 +40,7 @@ export default function VerificationCode() {
 
   return (
     <div class="app">
-      <div class="authentication-screen" />
+      <div class="background" />
       <div class="modal">
         <div class="modal-content modal-title">
           <h1>Login to Wordspot</h1>
@@ -63,7 +63,7 @@ export default function VerificationCode() {
             <button
               type="submit"
               disabled={loggingIn.pending}
-              class="modal-button"
+              class="submit-button modal-button"
             >
               <Show
                 when={!loggingIn.pending}

@@ -11,7 +11,11 @@ import {
   Scripts,
   Title,
 } from "solid-start";
-import "./root.css";
+import "./css/root.css";
+import "./css/header.css";
+import "./css/modal.css";
+import "./css/dashboard.css";
+import "./css/game.css";
 
 export default function Root() {
   return (

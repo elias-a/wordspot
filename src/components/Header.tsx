@@ -21,14 +21,14 @@ export default function Header(props: HeaderProps) {
       </A>
       <div
         classList={{
-          menuModal: isMenuOpen(),
+          "menu-modal": isMenuOpen(),
         }}
         onClick={() => setIsMenuOpen(false)}
       />
       <button
         class="menu-icon"
         classList={{
-          menuOpen: isMenuOpen(),
+          "menu-open": isMenuOpen(),
         }}
         onClick={() => setIsMenuOpen(!isMenuOpen())}
       >

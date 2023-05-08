@@ -1,0 +1,76 @@
+.dashboard {
+  width: 100vw;
+  height: 80vh;
+  position: absolute;
+  top: 15vh;
+  left: 0;
+  display: inline-block;
+  align-items: center;
+}
+
+.user-games {
+  width: 100vw;
+  height: 70vh;
+  position: absolute;
+  top: 12vh;
+  left: 0;
+  display: block;
+  overflow: scroll;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.user-games::-webkit-scrollbar {
+  display: none;
+}
+
+.start-game-button {
+  height: 60px;
+  width: 600px;
+}
+
+.game-card {
+  width: 600px;
+  height: 100px;
+  display: block;
+  color: #fff;
+  background-color: #B07C4F;
+  display: flex;
+  flex-direction: row;
+  align-self: center;
+  margin: auto;
+  margin-top: 20px;
+  border-radius: 10px;
+}
+
+.start-game-card {
+  background-color: inherit;
+  height: 60px;
+}
+
+.game-summary {
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  margin-left: 10px;
+  font-size: 20px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.game-summary-turn {
+  font-size: 32px;
+}
+
+.game-summary-item {
+  font-size: 18px;
+}
+
+.play-game-button {
+  min-width: 50px;
+  max-width: 50px;
+  margin-right: 10px;
+}

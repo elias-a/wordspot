@@ -83,7 +83,7 @@ export default function User(props: UserAreaProps) {
       </div>
       <button
         name="start-game"
-        class="end-turn-button"
+        class="submit-button end-turn-button"
         onClick={() => props.setIsConfirmOpen(true)}
         disabled={props.userData.opponentTurn || Boolean(props.userData.winner)}
       >

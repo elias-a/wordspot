@@ -1,0 +1,58 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  min-width: 100vw;
+  max-width: 100vw;
+  min-height: 100vh;
+  max-height: 100vh;
+}
+
+div {
+  display: flex;
+  align-items: center;
+}
+
+.app {
+  min-width: 100vw;
+  max-width: 100vw;
+  min-height: 100vh;
+  max-height: 100vh;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.spinner {
+  color: #fff;
+  height: 36px;
+  margin-top: 7px;
+}
+
+.background {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("/images/wordspot.jpg");
+  background-size: contain;
+  filter: blur(2px);
+}
+
+.submit-button {
+  cursor: pointer;
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 30px;
+  background-color: #2b2218;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
+  text-transform: uppercase;
+}

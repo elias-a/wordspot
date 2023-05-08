@@ -135,10 +135,10 @@ export default function Game() {
     <DragDropProvider onDragEnd={onDragEnd}>
       <DragDropSensors />
       <div class="app">
-        <div class="authentication-screen" />
+        <div class="background" />
         <Show when={game()} fallback={<NotFound />}>
           <Header name={game()!.userData.myName} />
-          <div class="content">
+          <div class="game-content">
             <Board
               board={game()!.board}
               extraTile={extraTile()}
@@ -185,7 +185,7 @@ export default function Game() {
                   </Show>
                   <div class="confirm-buttons">
                     <button
-                      class="modal-button confirm-button"
+                      class="submit-button modal-button confirm-button"
                       onClick={() => setIsConfirmOpen(false)}
                       disabled={submitting.pending}
                     >
@@ -225,7 +225,7 @@ export default function Game() {
                       <button
                         name="start-game"
                         type="submit"
-                        class="modal-button confirm-button"
+                        class="submit-button modal-button confirm-button"
                         disabled={submitting.pending}
                       >
                         End Turn

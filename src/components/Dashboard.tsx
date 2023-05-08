@@ -21,7 +21,11 @@ export default function Dashboard(props: DashboardProps) {
     <div class="dashboard">
       <div class="game-card start-game-card">
         <Form>
-          <button name="start-game" type="submit" class="start-game-button">
+          <button
+            name="start-game"
+            type="submit"
+            class="submit-button start-game-button"
+          >
             Start New Game
           </button>
         </Form>
@@ -53,9 +57,9 @@ export default function Dashboard(props: DashboardProps) {
                 </p>
                 <p class="game-summary-item">{`Game started on ${game.dateCreated}`}</p>
               </div>
-                <A href={`/games/${game.id}`} class="play-game-button">
-                  <FaSolidPlay color="#2b2218" size={50} />
-                </A>
+              <A href={`/games/${game.id}`} class="play-game-button">
+                <FaSolidPlay color="#2b2218" size={50} />
+              </A>
             </div>
           );
         }}
