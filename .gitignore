@@ -1,7 +1,6 @@
 .env
 *.sh
 sql_helpers
-data/
 
 dist
 .solid
