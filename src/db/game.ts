@@ -327,7 +327,7 @@ function getLetterPosition(row: number, column: number, index: number): Coordina
 // Convert the coordinates of each letter to a numeric index.
 function getLetterIndex(letter: WordLetter, columnLength: number) {
   return 4 * columnLength * letter.tileRow +
-    2 * letter.tileColumn + letter.tileColumn % 2 +
+    2 * letter.tileColumn + letter.letterIndex % 2 +
     (letter.letterIndex < 2 ? 0 : 2 * columnLength);
 }
 
@@ -348,7 +348,7 @@ export function isValidMove(word: WordLetter[]) {
 
 type Word = WordLetter & { letter: string };
 
-export async function checkWord(letters: string[], board: Row[]) {
+export async function checkWord(letters: string[], board: Row[]): Promise<string> {
   const wordPosition: Word[] = [];
   letters.forEach(letterId => {
     for (let i = 0; i < board.length; i++) {
@@ -366,14 +366,16 @@ export async function checkWord(letters: string[], board: Row[]) {
     }
   });
 
-  // 
+  // Sort the letters by position in order to check if
+  // the move is valid.
   wordPosition.sort((a, b) => 
     getLetterIndex(a, board[0].tiles.length) -
     getLetterIndex(b, board[0].tiles.length));
 
-  // 
+  // Checks that the letters are arranged in a straight line and
+  // that there are no gaps between letters.
   if (!isValidMove(wordPosition)) {
-    return false;
+    throw new Error("Your word is not valid. Make sure that your word is arranged in a straight line.");
   }
 
   // Check if word is a valid English word.
@@ -385,15 +387,18 @@ export async function checkWord(letters: string[], board: Row[]) {
     possibleWord2 += wordPosition[wordPosition.length - 1 - i].letter.toLowerCase();
   }
 
-  if (await isEnglishWord(possibleWord1)) {
-    return true;
-  }
+  try {
+    const isWord1Valid = await isEnglishWord(possibleWord1);
+    const isWord2Valid = await isEnglishWord(possibleWord2) 
 
-  if (await isEnglishWord(possibleWord2)) {
-    return true;
-  }
+    if (!isWord1Valid && !isWord2Valid) {
+      throw new Error(`Your word is not valid. Neither ${possibleWord1.toUpperCase()} nor ${possibleWord2.toUpperCase()} is in the English dictionary.`);
+    }
 
-  return false;
+    return isWord1Valid ? possibleWord1.toUpperCase() : possibleWord2.toUpperCase();
+  } catch (error) {
+    throw new Error("Could not determine if your word is in the English dictionary. Please try again.");
+  }
 }
 
 function isStraightLine(positions: Coordinate[]) {
@@ -432,10 +437,7 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
   }
 
   // Check if the user submitted a valid word.
-  const isValidWord = await checkWord(lettersChosenByUser, board);
-  if (!isValidWord) {
-    throw new Error(`You did not make a valid move!`);
-  }
+  const validWord = await checkWord(lettersChosenByUser, board);
 
   // Update player data.
   await query({

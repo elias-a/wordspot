@@ -4,7 +4,13 @@ import { dictionaryTrie } from ".";
 import { DictionaryTrie } from "~/db/trie";
 
 export async function isEnglishWord(word: string): Promise<boolean> {
-  const trie = await dictionaryTrie;
+  let trie: DictionaryTrie;
+  try {
+    trie = await dictionaryTrie;
+  } catch(error) {
+    throw new Error(`Could not read English dictionary: "${error}"`);
+  }
+
   return trie.search(word);
 }
 

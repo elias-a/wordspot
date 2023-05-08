@@ -81,10 +81,8 @@ export default function Game() {
     try {
       await endTurn(gameId, playerId, clicked, selected, extraTile, board);
     } catch (error) {
-      throw new FormError("Could not complete your turn!");
+      throw new FormError(error);
     }
-    
-
   });
 
   createEffect(() => {
@@ -186,7 +184,10 @@ export default function Game() {
                   <div class="confirm-buttons">
                     <button
                       class="submit-button modal-button confirm-button"
-                      onClick={() => setIsConfirmOpen(false)}
+                      onClick={() => {
+                        setIsConfirmOpen(false);
+                        submitting.clear();
+                      }}
                       disabled={submitting.pending}
                     >
                       Cancel
