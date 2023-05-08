@@ -81,7 +81,11 @@ export default function Game() {
     try {
       await endTurn(gameId, playerId, clicked, selected, extraTile, board);
     } catch (error) {
-      throw new FormError(error);
+      if (error instanceof Error) {
+        throw new FormError(error.message);
+      } else {
+        throw new FormError("Error ending your turn. Please try again.");
+      }
     }
   });
 
