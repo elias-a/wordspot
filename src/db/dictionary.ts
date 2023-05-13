@@ -1,6 +1,5 @@
 import fs from "fs";
 import readline from "readline";
-import { dictionaryTrie } from ".";
 import { DictionaryTrie } from "~/db/trie";
 
 export async function isEnglishWord(word: string): Promise<boolean> {
@@ -8,7 +7,11 @@ export async function isEnglishWord(word: string): Promise<boolean> {
   try {
     trie = await dictionaryTrie;
   } catch(error) {
-    throw new Error(`Could not read English dictionary: "${error}"`);
+    if (error instanceof Error) {
+      throw new Error(`Could not read English dictionary: "${error.message}"`);
+    } else {
+      throw new Error("Unknown error: Could not read English dictionary.");
+    }
   }
 
   return trie.search(word);
@@ -28,3 +31,5 @@ export async function createTrie(fileName: string) {
 
   return trie;
 }
+
+export const dictionaryTrie = createTrie("data/english_dictionary.txt");
