@@ -174,8 +174,11 @@ export default function Game() {
                 <div class="modal">
                   <div class="modal-content">
                     <Show
-                      when={clicked().length + selected().length >= 3}
-                      fallback={<p>{`Are you sure you want to end your turn without making a move? Your word must include at least 3 letters. If you end your turn now, you will be given 2 tokens and 1 extra tile.`}</p>}
+                      when={
+                        clicked().length + selected().length >= 3 &&
+                        clicked().length > 0
+                      }
+                      fallback={<p>{`Are you sure you want to end your turn without making a move? Your word must span at least 3 letters, and you must use at least 1 token. If you end your turn now, you will be given 2 tokens and 1 extra tile.`}</p>}
                     >
                       <p>{`Are you sure you want to end your turn?`}</p>
                     </Show>
