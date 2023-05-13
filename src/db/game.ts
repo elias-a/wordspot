@@ -303,6 +303,16 @@ type Coordinate = {
 
 type Line = [Coordinate, Coordinate, Coordinate];
 
+function isStraightLine(positions: Coordinate[]) {
+  for (let i = 0; i < positions.length - 2; i++) {
+    if (computeDeterminant(positions.slice(i, i + 3) as Line) !== 0) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 function computeDeterminant(coordinates: Line) {
   const { x: x0, y: y0 } = coordinates[0];
   const { x: x1, y: y1 } = coordinates[1];
@@ -314,7 +324,7 @@ function computeDeterminant(coordinates: Line) {
 function computeDistance(coordinates: Coordinate[]) {
   const { x: x0, y: y0 } = coordinates[0];
   const { x: x1, y: y1 } = coordinates[coordinates.length - 1];
-  return (y1 !== y0 ? y1 - y0 : x1 - x0) + 1;
+  return Math.abs(y1 !== y0 ? y1 - y0 : x1 - x0) + 1;
 };
 
 function getLetterPosition(row: number, column: number, index: number): Coordinate {
@@ -348,7 +358,7 @@ export function isValidMove(word: WordLetter[]) {
 
 type Word = WordLetter & { letter: string };
 
-export async function checkWord(letters: string[], board: Row[]): Promise<string> {
+export async function checkWord(letters: string[], board: Row[], extraTile: Tile | undefined): Promise<string> {
   const wordPosition: Word[] = [];
   letters.forEach(letterId => {
     for (let i = 0; i < board.length; i++) {
@@ -362,6 +372,18 @@ export async function checkWord(letters: string[], board: Row[]): Promise<string
             letter: matchingLetter.letter,
           });
         }
+      }
+    }
+
+    if (extraTile) {
+      const matchingLetter = extraTile.letters.find(letter => letter.id === letterId);
+      if (matchingLetter) {
+        wordPosition.push({
+          tileRow: extraTile.row,
+          tileColumn: extraTile.column,
+          letterIndex: matchingLetter.letterIndex,
+          letter: matchingLetter.letter,
+        });
       }
     }
   });
@@ -387,34 +409,37 @@ export async function checkWord(letters: string[], board: Row[]): Promise<string
     possibleWord2 += wordPosition[wordPosition.length - 1 - i].letter.toLowerCase();
   }
 
+  let isWord1Valid = false;
+  let isWord2Valid = false;
   try {
-    const isWord1Valid = await isEnglishWord(possibleWord1);
-    const isWord2Valid = await isEnglishWord(possibleWord2) 
-
-    if (!isWord1Valid && !isWord2Valid) {
-      throw new Error(`Your word is not valid. Neither ${possibleWord1.toUpperCase()} nor ${possibleWord2.toUpperCase()} is in the English dictionary.`);
-    }
-
-    return isWord1Valid ? possibleWord1.toUpperCase() : possibleWord2.toUpperCase();
+    isWord1Valid = await isEnglishWord(possibleWord1);
+    isWord2Valid = await isEnglishWord(possibleWord2);
   } catch (error) {
     throw new Error("Could not determine if your word is in the English dictionary. Please try again.");
   }
-}
 
-function isStraightLine(positions: Coordinate[]) {
-  for (let i = 0; i < positions.length - 2; i++) {
-    if (computeDeterminant(positions.slice(i, i + 3) as Line) !== 0) {
-      return false;
-    }
+  if (!isWord1Valid && !isWord2Valid) {
+    throw new Error(`Your word is not valid. Neither ${possibleWord1.toUpperCase()} nor ${possibleWord2.toUpperCase()} is in the English dictionary.`);
   }
 
-  return true;
+  return isWord1Valid ? possibleWord1.toUpperCase() : possibleWord2.toUpperCase();
 }
 
 export async function endTurn(gameId: string, playerId: string, clicked: string[], selected: string[], extraTile: PlacedExtraTile | undefined, board: Row[]) {
   // `clicked` contains IDs for unused letters that the user clicked.
   // `selected` contains IDs for used letters that the user clicked.
   const lettersChosenByUser = clicked.concat(selected);
+
+  const playerName = await query({
+    sql: "SELECT User.userName AS name FROM Player INNER JOIN \
+      UserAccount AS User ON User.id=Player.userId \
+      WHERE Player.id=?",
+    values: [playerId],
+  }) as { name: string }[];
+
+  if (playerName.length !== 1) {
+    throw new Error("There was an issue finding your information!");
+  }
 
   // Give the user an extra tile and two tokens for not making
   // a valid move. A valid move requires the user to find a word
@@ -432,12 +457,34 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
       values: [playerId, gameId],
     });
 
-    await sendYourTurnMessage(playerId, gameId);
+    const message = `${playerName[0].name} did not make a move and received 2 tokens and an extra tile. Your turn in Wordspot!`;
+    await sendYourTurnMessage(playerId, gameId, message);
     return;
   }
 
+  let placedExtraTile: Tile | undefined = undefined;
+  if (extraTile) {
+    // Find row and column of the extra tile that has been placed on the board.
+    const extraTileLocation = await query({
+      sql: "SELECT rowIndex, columnIndex FROM Tile WHERE id=?",
+      values: [extraTile.tileId],
+    }) as { rowIndex: number, columnIndex: number }[];
+
+    if (extraTileLocation.length !== 1) {
+      throw new Error(`Error querying the database for the row and column location of the extra tile placed on the board.`);
+    }
+
+    placedExtraTile = {
+      id: extraTile.id,
+      letters: extraTile.letters,
+      type: "Extra",
+      row: extraTileLocation[0].rowIndex,
+      column: extraTileLocation[0].columnIndex,
+    };
+  }
+
   // Check if the user submitted a valid word.
-  const validWord = await checkWord(lettersChosenByUser, board);
+  const validWord = await checkWord(lettersChosenByUser, board, placedExtraTile);
 
   // Update player data.
   await query({
@@ -455,11 +502,13 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
     values: [playerId],
   }) as { tokens: number }[];
 
+  let didPlayerLose = false;
   if (playerTokens.length === 0) {
     throw new Error(`Can't find database record for player with ID=${playerId}`);
   } else if (playerTokens[0].tokens < 0) {
     throw new Error(`Player with ID=${playerId} has negative tokens.`);
   } else if (playerTokens[0].tokens === 0) {
+    didPlayerLose = true;
     await query({
       sql: "UPDATE Game SET winner=? WHERE id=?",
       values: [playerId, gameId],
@@ -476,6 +525,7 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
 
   // Award the user an extra tile for finding a word that spans
   // more than two tiles.
+  let awardedExtraTile = false;
   if (lettersChosenByUser.length > 2) {
     const tiles = new Set<string>();
     lettersChosenByUser.forEach(letter => {
@@ -483,31 +533,14 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
     });
 
     if (tiles.size > 2) {
+      awardedExtraTile = true;
       await assignExtraTile(gameId, playerId);
     }
   }
 
   // If the user placed an extra tile on the board, iterate over
   // the board to update the layout.
-  if (extraTile) {
-    // Find row and column of the extra tile that has been placed on the board.
-    const extraTileLocation = await query({
-      sql: "SELECT rowIndex, columnIndex FROM Tile WHERE id=?",
-      values: [extraTile.tileId],
-    }) as { rowIndex: number, columnIndex: number }[];
-
-    if (extraTileLocation.length !== 1) {
-      throw new Error(`Error querying the database for the row and column location of the extra tile placed on the board.`);
-    }
-
-    const placedExtraTile: Tile = {
-      id: extraTile.id,
-      letters: extraTile.letters,
-      type: "Extra",
-      row: extraTileLocation[0].rowIndex,
-      column: extraTileLocation[0].columnIndex,
-    };
-
+  if (placedExtraTile) {
     const { row, column } = placedExtraTile;
     for (let i = Math.min(board[0].tiles[0].row, row - 1); i <= Math.max(board[board.length - 1].tiles[0].row, row + 1); i++) {
       for (let j = Math.min(board[0].tiles[0].column, column - 1); j <= Math.max(board[0].tiles[board[0].tiles.length - 1].column, column + 1); j++) {
@@ -551,26 +584,38 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
     }
   }
 
-  await sendYourTurnMessage(playerId, gameId);
+  let message = `${playerName[0].name} played ${validWord}`;
+  if (didPlayerLose) {
+    message += " and beat you in Wordspot. Better luck next time!";
+  } else if (awardedExtraTile) {
+    message += ` and used ${clicked.length} ${clicked.length === 1 ? "token" : "tokens"} and was awarded an extra tile. Your turn in Wordspot!`;
+  } else {
+    message += ` and used ${clicked.length} ${clicked.length === 1 ? "token" : "tokens"}. Your turn in Wordspot!`;
+  }
+  await sendYourTurnMessage(playerId, gameId, message);
 }
 
-async function sendYourTurnMessage(playerId: string, gameId: string) {
-  const userRows = await query({
-    sql: "SELECT phone FROM UserAccount INNER JOIN Player \
-      ON Player.userId=UserAccount.id WHERE Player.id!=? \
-      AND gameId=?",
-    values: [playerId, gameId],
-  }) as { phone: string }[];
-
-  if (userRows.length !== 1) {
-    throw new Error(``);
+async function sendYourTurnMessage(playerId: string, gameId: string, message: string) {
+  try {
+    const userRows = await query({
+      sql: "SELECT phone FROM UserAccount INNER JOIN Player \
+        ON Player.userId=UserAccount.id WHERE Player.id!=? \
+        AND gameId=?",
+      values: [playerId, gameId],
+    }) as { phone: string }[];
+  
+    if (userRows.length !== 1) {
+      throw new Error();
+    }
+  
+    await twilioClient.messages.create({
+      body: message,
+      from: import.meta.env.VITE_TWILIO_PHONE,
+      to: `+1${userRows[0].phone}`,
+    });
+  } catch (error) {
+    throw new Error("Could not send text message to your opponent. Please notify them yourself!");
   }
-
-  await twilioClient.messages.create({
-    body: "Your turn in Wordspot!",
-    from: import.meta.env.VITE_TWILIO_PHONE,
-    to: `+1${userRows[0].phone}`,
-  });
 }
 
 async function assignExtraTile(gameId: string, playerId: string) {

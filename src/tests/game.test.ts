@@ -76,4 +76,11 @@ test("check if move is valid", () => {
     { tileRow: 3, tileColumn: 0, letterIndex: 2 },
   ];
   expect(isValidMove(word_200_300_302)).toBe(false);
+
+  const word_321_322_411: WordLetter[] = [
+    { tileRow: 3, tileColumn: 2, letterIndex: 1 },
+    { tileRow: 3, tileColumn: 2, letterIndex: 2 },
+    { tileRow: 4, tileColumn: 1, letterIndex: 1 },
+  ];
+  expect(isValidMove(word_321_322_411)).toBe(true);
 });
