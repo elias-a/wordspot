@@ -1,9 +1,13 @@
-import mysql from "mysql2";
+import { Pool } from "pg";
 import { promisify } from "util";
 import twilio from "twilio";
 
-const connection = mysql.createConnection(import.meta.env.VITE_DATABASE_CONNECTION);
-export const query = promisify(connection.query).bind(connection);
+export const pool = new Pool({
+  host: import.meta.env.VITE_DATABASE_HOST,
+  user: import.meta.env.VITE_DATABASE_USER,
+  password: import.meta.env.VITE_DATABASE_PASSWORD,
+  database: import.meta.env.VITE_DATABASE_NAME,
+});
 
 export const twilioClient = twilio(
   import.meta.env.VITE_TWILIO_ACCOUNT_SID,

@@ -1,6 +1,6 @@
 import { redirect } from "solid-start/server";
 import { v4 as uuidv4 } from "uuid";
-import { query, twilioClient } from ".";
+import { pool, twilioClient } from ".";
 import { getUser } from "~/db/session";
 import { isEnglishWord } from "~/db/dictionary";
 
@@ -97,20 +97,25 @@ export type GameData = {
 };
 
 export async function getGames(userId: string) {
-  return await query({
-    sql: "SELECT Game.id, DATE_FORMAT(Game.dateCreated, '%m/%d/%Y') AS dateCreated, \
-    IF(my.firstMove, my.id, opponent.id) AS firstPlayer, Game.winner, my.id AS myId, my.name AS myName, \
+  const client = await pool.connect();
+
+  const games = await client.query({
+    text: "SELECT game.id, DATE_FORMAT(game.date_created, '%m/%d/%Y') AS dateCreated, \
+    IF(my.first_move, my.id, opponent.id) AS firstPlayer, Game.winner, my.id AS myId, my.name AS myName, \
     my.turn AS myTurn, opponent.name AS opponentName \
-    FROM (SELECT Player.id AS id, gameId, UserAccount.userName AS name, tokens, turn, firstMove \
-      FROM Player INNER JOIN UserAccount ON Player.userId=UserAccount.id \
-      WHERE userId=?) AS my INNER JOIN \
-      (SELECT Player.id AS id, gameId, UserAccount.userName AS name, tokens, turn, firstMove FROM Player \
-        INNER JOIN UserAccount on Player.userId=UserAccount.id \
-        WHERE userId!=?) AS opponent \
-        ON my.gameId=opponent.gameId INNER JOIN Game ON my.gameId=Game.id \
-        ORDER BY Game.dateCreated DESC",
+    FROM (SELECT player.id AS id, game_id AS gameId, user_account.user_name AS name, tokens, turn, first_move AS firstMove \ FROM Player INNER JOIN user_account ON player.user_id=user_account.id \
+      WHERE user_id=$1) AS my INNER JOIN \
+      (SELECT player.id AS id, game_id AS gameId, user_account.user_name AS name, tokens, turn, first_move AS firstMove FROM Player \
+        INNER JOIN user_account on player.user_id=user_account.id \
+        WHERE user_id!=$2) AS opponent \
+        ON my.game_id=opponent.game_id INNER JOIN game ON my.game_id=game.id \
+        ORDER BY game.date_created DESC",
     values: [userId, userId],
   }) as GameData[];
+
+  await client.release();
+
+  return games.rows;
 }
 
 export async function startGame(request: Request) {
@@ -129,12 +134,14 @@ export async function startGame(request: Request) {
     throw new Error(`Unable to select opponent. Game was not created.`);
   }
 
+  const client = await pool.connect();
+
   // Create game.
   const gameId = uuidv4();
-  await query({
-    sql: "INSERT INTO Game (id, winner, \
+  await client.query({
+    text: "INSERT INTO Game (id, winner, \
       dateCreated, dateModified, createdBy) VALUES \
-      (?, ?, ?, ?, ?)",
+      ($1, $2, $3, $4, $5)",
     values: [
       gameId,
       null,
@@ -144,12 +151,12 @@ export async function startGame(request: Request) {
     ],
   });
 
-  await query({
-    sql: "INSERT INTO Player VALUES ?",
-    values: [[
+  await client.query({
+    text: "INSERT INTO Player VALUES $1",
+    values: [formatPostgresArray([
       [uuidv4(), player1, gameId, 26, true, true],
       [uuidv4(), player2, gameId, 25, false, false],
-    ]],
+    ])],
   });
 
   // Set up board.
@@ -158,18 +165,20 @@ export async function startGame(request: Request) {
     letters,
     tileLetterMap,
   } = setUpBoard(gameId);
-  await query({
-    sql: "INSERT INTO Tile VALUES ?",
-    values: [tiles],
+  await client.query({
+    text: "INSERT INTO tile VALUES $1",
+    values: [formatPostgresArray(tiles)],
   });
-  await query({
-    sql: "INSERT INTO Letter VALUES ?",
-    values: [letters],
+  await client.query({
+    text: "INSERT INTO letter VALUES $1",
+    values: [formatPostgresArray(letters)],
   });
-  await query({
-    sql: "INSERT INTO TileLetterMap VALUES ?",
-    values: [tileLetterMap],
+  await client.query({
+    text: "INSERT INTO tile_letter_map VALUES $1",
+    values: [formatPostgresArray(tileLetterMap)],
   });
+
+  await client.release();
 
   return redirect(`/games/${gameId}`);
 }
@@ -430,14 +439,14 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
   // `selected` contains IDs for used letters that the user clicked.
   const lettersChosenByUser = clicked.concat(selected);
 
-  const playerName = await query({
-    sql: "SELECT User.userName AS name FROM Player INNER JOIN \
-      UserAccount AS User ON User.id=Player.userId \
-      WHERE Player.id=?",
+  const playerName = await client.query({
+    text: "SELECT User.user_name AS name FROM player INNER JOIN \
+      user_account AS User ON User.id=player.user_id \
+      WHERE player.id=$1",
     values: [playerId],
-  }) as { name: string }[];
+  }) as { rows: { name: string }[] };
 
-  if (playerName.length !== 1) {
+  if (playerName.rows.length !== 1) {
     throw new Error("There was an issue finding your information!");
   }
 
@@ -448,16 +457,16 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
   // add an extra tile to the board, even if the user chose to do so.
   if (lettersChosenByUser.length < 3 || clicked.length < 1) {
     await assignExtraTile(gameId, playerId);
-    await query({
-      sql: "UPDATE Player SET tokens=tokens+2, turn=0 WHERE id=?",
+    await client.query({
+      text: "UPDATE player SET tokens=tokens+2, turn=0 WHERE id=$1",
       values: [playerId],
     });
-    await query({
-      sql: "UPDATE Player SET turn=1 WHERE id!=? AND gameId=?",
+    await client.query({
+      text: "UPDATE player SET turn=1 WHERE id!=$1 AND game_id=$2",
       values: [playerId, gameId],
     });
 
-    const message = `${playerName[0].name} did not make a move and received 2 tokens and an extra tile. Your turn in Wordspot!`;
+    const message = `${playerName.rows[0].name} did not make a move and received 2 tokens and an extra tile. Your turn in Wordspot!`;
     await sendYourTurnMessage(playerId, gameId, message);
     return;
   }
@@ -465,12 +474,12 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
   let placedExtraTile: Tile | undefined = undefined;
   if (extraTile) {
     // Find row and column of the extra tile that has been placed on the board.
-    const extraTileLocation = await query({
-      sql: "SELECT rowIndex, columnIndex FROM Tile WHERE id=?",
+    const extraTileLocation = await client.query({
+      text: "SELECT row_index AS rowIndex, column_index AS columnIndex FROM tile WHERE id=$1",
       values: [extraTile.tileId],
-    }) as { rowIndex: number, columnIndex: number }[];
+    }) as { rows: { rowIndex: number, columnIndex: number }[] };
 
-    if (extraTileLocation.length !== 1) {
+    if (extraTileLocation.rows.length !== 1) {
       throw new Error(`Error querying the database for the row and column location of the extra tile placed on the board.`);
     }
 
@@ -478,8 +487,8 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
       id: extraTile.id,
       letters: extraTile.letters,
       type: "Extra",
-      row: extraTileLocation[0].rowIndex,
-      column: extraTileLocation[0].columnIndex,
+      row: extraTileLocation.rows[0].rowIndex,
+      column: extraTileLocation.rows[0].columnIndex,
     };
   }
 
@@ -487,38 +496,38 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
   const validWord = await checkWord(lettersChosenByUser, board, placedExtraTile);
 
   // Update player data.
-  await query({
-    sql: "UPDATE Player SET tokens=tokens-?, turn=0 WHERE id=?",
+  await client.query({
+    text: "UPDATE player SET tokens=tokens-$1, turn=0 WHERE id=$2",
     values: [clicked.length, playerId],
   });
-  await query({
-    sql: "UPDATE Player SET turn=1 WHERE id!=? AND gameId=?",
+  await client.query({
+    text: "UPDATE player SET turn=1 WHERE id!=$1 AND game_id=$2",
     values: [playerId, gameId],
   });
 
   // Check how many tokens the user has left.
-  const playerTokens = await query({
-    sql: "SELECT tokens FROM Player WHERE id=?",
+  const playerTokens = await client.query({
+    text: "SELECT tokens FROM player WHERE id=$1",
     values: [playerId],
-  }) as { tokens: number }[];
+  }) as { rows: { tokens: number }[] };
 
   let didPlayerLose = false;
-  if (playerTokens.length === 0) {
+  if (playerTokens.rows.length === 0) {
     throw new Error(`Can't find database record for player with ID=${playerId}`);
-  } else if (playerTokens[0].tokens < 0) {
+  } else if (playerTokens.rows[0].tokens < 0) {
     throw new Error(`Player with ID=${playerId} has negative tokens.`);
-  } else if (playerTokens[0].tokens === 0) {
+  } else if (playerTokens.rows[0].tokens === 0) {
     didPlayerLose = true;
-    await query({
-      sql: "UPDATE Game SET winner=? WHERE id=?",
+    await client.query({
+      text: "UPDATE game SET winner=$1 WHERE id=$2",
       values: [playerId, gameId],
     });
   }
 
   // Update letters that have been clicked.
   for (let i = 0; i < clicked.length; i++) {
-    await query({
-      sql: "UPDATE Letter SET isUsed=1 WHERE id=?",
+    await client.query({
+      text: "UPDATE letter SET is_used=1 WHERE id=$1",
       values: clicked[i],
     });
   }
@@ -548,18 +557,18 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
 
         if (tileAtLocation) {
           if (extraTile && i === row && j === column) {
-            await query({
-              sql: "UPDATE Tile SET rowIndex=?, columnIndex=?, tileType=?, ownerId=? WHERE id=?",
+            await client.query({
+              text: "UPDATE tile SET row_index=$1, column_index=$2, tile_type=$3, owner_id=$4 WHERE id=$5",
               values: [i, j, "Tile", gameId, extraTile.id],
             });
-            await query({
-              sql: "DELETE FROM Tile WHERE id=?",
+            await client.query({
+              text: "DELETE FROM tile WHERE id=$1",
               values: [tileAtLocation.id],
             });
           } else {
             if (tileAtLocation.type === "Empty" || tileAtLocation.type === "Placeholder") {
-              await query({
-                sql: "UPDATE Tile SET tileType=? WHERE id=?",
+              await client.query({
+                text: "UPDATE tile SET tile_type=$1 WHERE id=$2",
                 values: [
                   checkNeighbors(i, j, board, placedExtraTile) ? "Empty" : "Placeholder",
                   tileAtLocation.id,
@@ -569,8 +578,8 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
           }
         } else {
           // Create a new tile - either an empty tile or a placeholder.
-          await query({
-            sql: "INSERT INTO Tile (id, rowIndex, columnIndex, tileType, ownerId) VALUES (?, ?, ?, ?, ?)",
+          await client.query({
+            text: "INSERT INTO tile (id, row_index, column_index, tile_type, owner_id) VALUES ($1, $2, $3, $4, $5)",
             values: [
               uuidv4(),
               i,
@@ -597,21 +606,21 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
 
 async function sendYourTurnMessage(playerId: string, gameId: string, message: string) {
   try {
-    const userRows = await query({
-      sql: "SELECT phone FROM UserAccount INNER JOIN Player \
-        ON Player.userId=UserAccount.id WHERE Player.id!=? \
-        AND gameId=?",
+    const userRows = await client.query({
+      text: "SELECT phone FROM user_account INNER JOIN player \
+        ON player.user_id=user_account.id WHERE player.id!=$1 \
+        AND game_id=$2",
       values: [playerId, gameId],
-    }) as { phone: string }[];
+    }) as { rows: { phone: string }[] };
   
-    if (userRows.length !== 1) {
+    if (userRows.rows.length !== 1) {
       throw new Error();
     }
   
     await twilioClient.messages.create({
       body: message,
       from: import.meta.env.VITE_TWILIO_PHONE,
-      to: `+1${userRows[0].phone}`,
+      to: `+1${userRows.rows[0].phone}`,
     });
   } catch (error) {
     throw new Error("Could not send text message to your opponent. Please notify them yourself!");
@@ -619,18 +628,19 @@ async function sendYourTurnMessage(playerId: string, gameId: string, message: st
 }
 
 async function assignExtraTile(gameId: string, playerId: string) {
-  const rows = await query({
-    sql: "SELECT id FROM Tile WHERE tileType='Option' AND ownerId=? ORDER BY RAND() LIMIT 1",
+  const rows = await client.query({
+    text: "SELECT id FROM tile WHERE tile_type='Option' AND owner_id=$1 ORDER BY RAND() LIMIT 1",
     values: [gameId],
-  }) as { id: string }[];
+  }) as { rows: { id: string }[] };
 
-  if (rows.length === 0) {
+  if (rows.rows.length === 0) {
     throw new Error("No extra tiles left to assign!");
   }
 
-  const newExtraTileId = rows[0];
-  await query({
-    sql: `UPDATE Tile SET tileType="Extra", ownerId="${playerId}" WHERE id="${newExtraTileId.id}"`,
+  const newExtraTileId = rows.rows[0];
+  await client.query({
+    text: "UPDATE tile SET tile_type=$1, ownerId=$2 WHERE id=$3",
+    values: ["Extra", playerId, newExtraTileId.id],
   });
 }
 
@@ -729,52 +739,56 @@ export async function getGame(gameId: string, request: Request) {
     return;
   }
 
-  const tiles = await query({
-    sql: `SELECT Tile.id AS tileId, Tile.rowIndex, Tile.columnIndex, \
-      Tile.tileType, Letter.id AS letterId, Letter.letterIndex, \
-      Letter.letter, Letter.isUsed FROM Tile LEFT JOIN \
-      TileLetterMap ON Tile.id=TileLetterMap.tileId LEFT JOIN Letter \
-      ON TileLetterMap.letterId=Letter.id WHERE Tile.tileType != "Option" \
-      AND Tile.tileType != "Extra" AND Tile.ownerId="${gameId}"`,
-  }) as SqlResultBoard[];
+  const client = await pool.connect();
 
-  const userData = await query({
-    sql: "SELECT IF(my.firstMove, my.playerId, opponent.playerId) AS firstPlayer, my.playerId, Game.winner, my.playerId AS myId, \
+  const tiles = await client.query({
+    text: `SELECT tile.id AS tileId, tile.row_index AS rowIndex, tile.column_index AS columnIndex, \
+      tile.tile_type AS tileType, letter.id AS letterId, letter.letter_index AS letterIndex, \
+      letter.letter, letter.is_used AS isUsed FROM tile LEFT JOIN \
+      tile_letter_map ON tile.id=tile_letter_map.tile_id LEFT JOIN letter \
+      ON tile_letter_map.letter_id=letter.id WHERE tile.tile_type != "Option" \
+      AND tile.tile_type != "Extra" AND tile.owner_id="${gameId}"`,
+  }) as { rows: SqlResultBoard[] };
+
+  const userData = await client.query({
+    text: "SELECT IF(my.first_move, my.player_id, opponent.player_id) AS firstPlayer, my.player_id AS playerId, game.winner, my.player_id AS myId, \
     my.name AS myName, my.tokens AS myTokens, \
     my.turn AS myTurn, opponent.name AS opponentName, \
     opponent.tokens AS opponentTokens, opponent.turn AS opponentTurn \
-    FROM (SELECT gameId, Player.id AS playerId, UserAccount.userName AS name, tokens, turn, firstMove \
-      FROM Player INNER JOIN UserAccount ON Player.userId=UserAccount.id \
-      WHERE userId=?) AS my INNER JOIN \
-      (SELECT gameId, Player.id AS playerId, UserAccount.userName AS name, tokens, turn FROM Player \
-        INNER JOIN UserAccount on Player.userId=UserAccount.id \
-        WHERE userId!=?) AS opponent \
-        ON my.gameId=opponent.gameId INNER JOIN Game on my.gameId=Game.id \
-        WHERE Game.id=?",
+    FROM (SELECT game_id, player.id AS playerId, user_account.user_name AS name, tokens, turn, first_move AS firstMove \
+      FROM player INNER JOIN user_account ON player.user_id=user_account.id \
+      WHERE user_id=$1) AS my INNER JOIN \
+      (SELECT game_id AS gameId, player.id AS playerId, user_account.user_name AS name, tokens, turn FROM player \
+        INNER JOIN user_account on player.user_id=user_account.id \
+        WHERE user_id!=$2) AS opponent \
+        ON my.game_id=opponent.game_id INNER JOIN game on my.game_id=game.id \
+        WHERE game.id=$3",
     values: [user.id, user.id, gameId],
-  }) as SqlUserData[];
+  }) as { rows: SqlUserData[] };
 
-  if (userData.length === 0) {
+  if (userData.rows.length === 0) {
     return;
   }
 
-  const extraTiles = await query({
-    sql: `SELECT Tile.id AS tileId, Letter.id AS letterId, \
-      Letter.letterIndex, Letter.letter FROM Tile INNER JOIN Player ON \
-      Player.id=Tile.ownerId LEFT JOIN TileLetterMap ON \
-      Tile.id=TileLetterMap.tileId LEFT JOIN Letter ON TileLetterMap.letterId=Letter.id \
-      WHERE Player.gameId="${gameId}" AND Player.userId="${user.id}"`,
-  }) as SqlResultExtraTile[];
+  const extraTiles = await client.query({
+    text: `SELECT tile.id AS tileId, letter.id AS letterId, \
+      letter.letter_index AS letterIndex, letter.letter FROM tile INNER JOIN player ON \
+      player.id=tile.owner_id LEFT JOIN tile_letter_map ON \
+      tile.id=tile_letter_map.tile_id LEFT JOIN letter ON tile_letter_map.letter_id=letter.id \
+      WHERE player.game_id="${gameId}" AND player.user_id="${user.id}"`,
+  }) as { rows: SqlResultExtraTile[] };
+
+  await client.release();
 
   const parsedUserData: UserData = {
-    ...userData[0],
-    myTurn: Boolean(userData[0].myTurn),
-    opponentTurn: Boolean(userData[0].opponentTurn),
+    ...userData.rows[0],
+    myTurn: Boolean(userData.rows[0].myTurn),
+    opponentTurn: Boolean(userData.rows[0].opponentTurn),
   };
 
   return {
-    board: convertSqlResultsToBoard(tiles),
+    board: convertSqlResultsToBoard(tiles.rows),
     userData: parsedUserData,
-    extraTiles: convertSqlResultsToExtraTiles(extraTiles),
+    extraTiles: convertSqlResultsToExtraTiles(extraTiles.rows),
   };
 }

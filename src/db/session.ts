@@ -1,7 +1,7 @@
 import { redirect } from "solid-start/server";
 import { createCookieSessionStorage } from "solid-start/session";
 import { v4 as uuidv4 } from "uuid";
-import { query, twilioClient } from ".";
+import { pool, twilioClient } from ".";
 
 export type UserAccount = {
   id: string;
@@ -37,15 +37,19 @@ export async function getUserId(request: Request) {
     return null;
   }
 
-  const user = await query({
-    sql: "SELECT id, userName, phone FROM UserAccount WHERE sessionId=?",
+  const client = await pool.connect();
+
+  const user = await client.query({
+    text: "SELECT id, user_name, phone FROM user_account WHERE session_id=$1",
     values: [sessionId],
-  }) as UserAccount[];
-  
-  if (user.length !== 1) {
+  }) as { rows: UserAccount[] };
+
+  await client.release();
+
+  if (user.rows.length !== 1) {
     return null;
   } else {
-    return user[0].id;
+    return user.rows[0].id;
   }
 }
 
@@ -55,15 +59,19 @@ export async function getUser(request: Request) {
     return null;
   }
 
-  const user = await query({
-    sql: "SELECT id, userName, phone FROM UserAccount WHERE sessionId=?",
+  const client = await pool.connect();
+
+  const user = await client.query({
+    text: "SELECT id, user_name, phone FROM user_account WHERE session_id=$1",
     values: [sessionId],
-  }) as UserAccount[];
-  
-  if (user.length !== 1) {
+  }) as { rows: UserAccount[] };
+
+  await client.release();
+
+  if (user.rows.length !== 1) {
     throw logout(request);
   } else {
-    return user[0];
+    return user.rows[0];
   }
 }
 
@@ -71,10 +79,14 @@ export async function logout(request: Request) {
   const session = await storage.getSession(request.headers.get("Cookie"));
   const phone = session.get("phone");
 
-  await query({
-    sql: "UPDATE UserAccount SET unverifiedId=?, sessionId=? WHERE phone=?",
+  const client = await pool.connect();
+
+  await client.query({
+    text: "UPDATE user_account SET unverified_id=$1, session_id=$2 WHERE phone=$3",
     values: [null, null, phone],
   });
+
+  await client.release();
 
   return redirect("/login", {
     headers: {
@@ -120,12 +132,16 @@ export async function cancelVerification(request: Request) {
     // No need to cancel, verification code has already expired.
   }
 
+  const client = await pool.connect();
+
   // Set user's unverified ID in the database to null.
-  await query({
-    sql: "UPDATE UserAccount SET unverifiedId=NULL WHERE phone=?",
+  await client.query({
+    text: "UPDATE user_account SET unverified_id=NULL WHERE phone=$1",
     values: [phone],
   });
-  
+
+  await client.release();
+
   return redirect("/login", {
     headers: {
       "Set-Cookie": await storage.destroySession(session),
@@ -136,20 +152,24 @@ export async function cancelVerification(request: Request) {
 export async function createUserSession(request: Request, phone: string) {
   const session = await getUserSession(request);
 
-  const user = await query({
-    sql: "SELECT id FROM UserAccount WHERE phone=?",
+  const client = await pool.connect();
+
+  const user = await client.query({
+    text: "SELECT id FROM user_account WHERE phone=$1",
     values: [phone],
-  }) as UserAccount[];
+  }) as { rows: UserAccount[] };
 
   const unverifiedId = uuidv4();
-  if (user.length === 1) {
-    await query({
-      sql: "UPDATE UserAccount SET unverifiedId=? WHERE phone=?",
+  if (user.rows.length === 1) {
+    await client.query({
+      text: "UPDATE user_account SET unverified_id=$1 WHERE phone=$2",
       values: [unverifiedId, phone],
     });
   } else {
     throw new Error(`Error logging in.`);
   }
+
+  await client.release();
 
   const verificationSid = await sendVerification(phone);
 
@@ -176,11 +196,15 @@ export async function getUnverifiedUser(request: Request) {
     return null;
   }
 
+  const client = await pool.connect();
+
   // Check database to ensure the unverified user ID matches with the account.
-  const id = await query({
-    sql: "SELECT id FROM UserAccount WHERE unverifiedId=? AND phone=?",
+  const id = await client.query({
+    text: "SELECT id FROM user_account WHERE unverified_id=$1 AND phone=$2",
     values: [unverifiedId, phone],
   }) as string[];
+
+  await client.release();
 
   if (id.length !== 1) {
     return null;
@@ -195,11 +219,15 @@ export async function login(request: Request, code: string) {
 
   await checkVerification(phone, code);
 
+  const client = await pool.connect();
+
   const sessionId = uuidv4();
-  await query({
-    sql: "UPDATE UserAccount SET unverifiedId=?, sessionId=? WHERE phone=?",
+  await client.query({
+    text: "UPDATE user_account SET unverified_id=$1, session_id=$2 WHERE phone=$3",
     values: [null, sessionId, phone],
   });
+
+  await client.release();
 
   session.set("unverifiedId", undefined);
   session.set("sessionId", sessionId);
