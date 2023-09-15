@@ -13,6 +13,10 @@ function formatPostgresArray<T>(array: T[]) {
   return `{${array.map(obj => `"${formatPostgresObject(obj)}"`).join(',')}}`
 }
 
+function formatPostgresArrayOfArrays<T>(array: T[]) {
+  return `{${array.map(inner => `"(${inner.join(',')})"`)}}`;
+}
+
 const TILES = [
   "SGPU", "HEAS", "XAIY",
   "LIEL", "RNAD", "OPPE",
@@ -114,10 +118,10 @@ export async function getGames(userId: string) {
     Game.winner, my.id AS \"myId\", my.name AS \"myName\", \
     my.turn AS \"myTurn\", opponent.name AS \"opponentName\" \
     FROM (SELECT player.id AS id, game_id, user_account.user_name AS name, \
-          tokens, turn, first_move FROM Player INNER JOIN user_account ON player.user_id=user_account.id \
+          tokens, turn, first_move FROM player INNER JOIN user_account ON player.user_id=user_account.id \
       WHERE user_id=$1) AS my INNER JOIN \
       (SELECT player.id AS id, game_id, user_account.user_name AS name, \
-       tokens, turn, first_move FROM Player \
+       tokens, turn, first_move FROM player \
         INNER JOIN user_account on player.user_id=user_account.id \
         WHERE user_id!=$2) AS opponent \
         ON my.game_id=opponent.game_id INNER JOIN game ON my.game_id=game.id \
@@ -139,55 +143,55 @@ export async function startGame(request: Request) {
 
   const players: string[] = [import.meta.env.VITE_USER1, import.meta.env.VITE_USER2];
 
-  const player1 = user.id;
-  const player2 = players.find(player => player !== player1);
+  const player1Id = user.id;
+  const player2Id = players.find(player => player !== player1Id);
 
-  if (!player2) {
+  if (!player2Id) {
     throw new Error(`Unable to select opponent. Game was not created.`);
   }
 
+  const gameId = uuidv4();
+
+  const game = {
+    id: gameId,
+    winner: null,
+    dateCreated: new Date().toISOString(),
+    dateModified: new Date().toISOString(),
+    createdBy: player1Id,
+  };
+
+  const player1 = {
+    id: uuidv4(),
+    userId: player1Id,
+    gameId: gameId,
+    tokens: 26,
+    turn: true,
+    firstMove: true,
+  };
+
+  const player2 = {
+    id: uuidv4(),
+    userId: player2Id,
+    gameId: gameId,
+    tokens: 25,
+    turn: false,
+    firstMove: false,
+  };
+
+  const { tiles, letters, tileLetterMap } = setUpBoard(gameId);
+
   const client = await pool.connect();
 
-  // Create game.
-  const gameId = uuidv4();
-  await client.query({
-    text: "INSERT INTO game (id, winner, \
-      date_created, date_modified, created_by) VALUES \
-      ($1, $2, $3, $4, $5)",
+  const createdGameId = await client.query({
+    text: "SELECT create_game($1, $2, $3, $4, $5, $6)",
     values: [
-      gameId,
-      null,
-      new Date(),
-      new Date(),
-      player1,
+        formatPostgresObject(game),
+        formatPostgresObject(player1),
+        formatPostgresObject(player2),
+        formatPostgresArrayOfArrays(tiles),
+        formatPostgresArrayOfArrays(letters),
+        formatPostgresArrayOfArrays(tileLetterMap),
     ],
-  });
-
-  await client.query({
-    text: "INSERT INTO player VALUES $1",
-    values: [formatPostgresArray([
-      [uuidv4(), player1, gameId, 26, true, true],
-      [uuidv4(), player2, gameId, 25, false, false],
-    ])],
-  });
-
-  // Set up board.
-  const {
-    tiles,
-    letters,
-    tileLetterMap,
-  } = setUpBoard(gameId);
-  await client.query({
-    text: "INSERT INTO tile VALUES $1",
-    values: [formatPostgresArray(tiles)],
-  });
-  await client.query({
-    text: "INSERT INTO letter VALUES $1",
-    values: [formatPostgresArray(letters)],
-  });
-  await client.query({
-    text: "INSERT INTO tile_letter_map VALUES $1",
-    values: [formatPostgresArray(tileLetterMap)],
   });
 
   await client.release();
@@ -451,6 +455,8 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
   // `selected` contains IDs for used letters that the user clicked.
   const lettersChosenByUser = clicked.concat(selected);
 
+  const client = await pool.connect();
+
   const playerName = await client.query({
     text: "SELECT user.user_name AS name FROM player INNER JOIN \
       user_account AS user ON user.id=player.user_id \
@@ -470,11 +476,11 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
   if (lettersChosenByUser.length < 3 || clicked.length < 1) {
     await assignExtraTile(gameId, playerId);
     await client.query({
-      text: "UPDATE player SET tokens=tokens+2, turn=0 WHERE id=$1",
+      text: "UPDATE player SET tokens=tokens+2, turn=FALSE WHERE id=$1",
       values: [playerId],
     });
     await client.query({
-      text: "UPDATE player SET turn=1 WHERE id!=$1 AND game_id=$2",
+      text: "UPDATE player SET turn=TRUE WHERE id!=$1 AND game_id=$2",
       values: [playerId, gameId],
     });
 
@@ -509,11 +515,11 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
 
   // Update player data.
   await client.query({
-    text: "UPDATE player SET tokens=tokens-$1, turn=0 WHERE id=$2",
+    text: "UPDATE player SET tokens=tokens-$1, turn=FALSE WHERE id=$2",
     values: [clicked.length, playerId],
   });
   await client.query({
-    text: "UPDATE player SET turn=1 WHERE id!=$1 AND game_id=$2",
+    text: "UPDATE player SET turn=TRUE WHERE id!=$1 AND game_id=$2",
     values: [playerId, gameId],
   });
 
@@ -604,6 +610,8 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
       }
     }
   }
+
+  await client.release();
 
   let message = `${playerName[0].name} played ${validWord}`;
   if (didPlayerLose) {
