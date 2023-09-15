@@ -40,7 +40,7 @@ export async function getUserId(request: Request) {
   const client = await pool.connect();
 
   const user = await client.query({
-    text: "SELECT id, user_name, phone FROM user_account WHERE session_id=$1",
+    text: "SELECT id, user_name AS \"userName\", phone FROM user_account WHERE session_id=$1",
     values: [sessionId],
   }) as { rows: UserAccount[] };
 
@@ -62,7 +62,7 @@ export async function getUser(request: Request) {
   const client = await pool.connect();
 
   const user = await client.query({
-    text: "SELECT id, user_name, phone FROM user_account WHERE session_id=$1",
+    text: "SELECT id, user_name AS \"userName\", phone FROM user_account WHERE session_id=$1",
     values: [sessionId],
   }) as { rows: UserAccount[] };
 
