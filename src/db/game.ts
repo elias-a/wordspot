@@ -450,6 +450,24 @@ export async function checkWord(letters: string[], board: Row[], extraTile: Tile
   return isWord1Valid ? possibleWord1.toUpperCase() : possibleWord2.toUpperCase();
 }
 
+type SqlExtraTile = {
+  id: string;
+  rowIndex: number;
+  columnIndex: number;
+};
+
+type SqlUpdatedTile = {
+  tileId: string;
+  tileType: string;
+};
+
+type SqlNewTile = {
+  tileId: string;
+  tileType: string;
+  rowIndex: number;
+  columnIndex: number;
+};
+
 export async function endTurn(gameId: string, playerId: string, clicked: string[], selected: string[], extraTile: PlacedExtraTile | undefined, board: Row[]) {
   // `clicked` contains IDs for unused letters that the user clicked.
   // `selected` contains IDs for used letters that the user clicked.
@@ -458,8 +476,8 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
   const client = await pool.connect();
 
   const playerName = await client.query({
-    text: "SELECT user.user_name AS name FROM player INNER JOIN \
-      user_account AS user ON user.id=player.user_id \
+    text: "SELECT user_account.user_name AS name FROM player INNER JOIN \
+      user_account ON user_account.id=player.user_id \
       WHERE player.id=$1",
     values: [playerId],
   }) as { rows: { name: string }[] };
@@ -468,6 +486,7 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
     throw new Error("There was an issue finding your information!");
   }
 
+  // TODO: Use separate SQL function
   // Give the user an extra tile and two tokens for not making
   // a valid move. A valid move requires the user to find a word
   // spanning at least 3 letters with at least one of those letters
@@ -513,6 +532,7 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
   // Check if the user submitted a valid word.
   const validWord = await checkWord(lettersChosenByUser, board, placedExtraTile);
 
+  /*
   // Update player data.
   await client.query({
     text: "UPDATE player SET tokens=tokens-$1, turn=FALSE WHERE id=$2",
@@ -549,6 +569,7 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
       values: clicked[i],
     });
   }
+  */
 
   // Award the user an extra tile for finding a word that spans
   // more than two tiles.
@@ -565,6 +586,10 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
     }
   }
 
+  const sqlExtraTiles: SqlExtraTile[] = [];
+  const sqlUpdatedTiles: SqlUpdatedTile[] = [];
+  const sqlNewTiles: SqlNewTile[] = [];
+
   // If the user placed an extra tile on the board, iterate over
   // the board to update the layout.
   if (placedExtraTile) {
@@ -575,6 +600,13 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
 
         if (tileAtLocation) {
           if (extraTile && i === row && j === column) {
+            sqlExtraTiles.push({
+              id: extraTile.id,
+              rowIndex: i,
+              columnIndex: j,
+            });
+
+            /*
             await client.query({
               text: "UPDATE tile SET row_index=$1, column_index=$2, tile_type=$3, owner_id=$4 WHERE id=$5",
               values: [i, j, "Tile", gameId, extraTile.id],
@@ -583,8 +615,22 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
               text: "DELETE FROM tile WHERE id=$1",
               values: [tileAtLocation.id],
             });
+            */
           } else {
             if (tileAtLocation.type === "Empty" || tileAtLocation.type === "Placeholder") {
+              const tileType = checkNeighbors(i, j, board, placedExtraTile)
+                ? "Empty" : "Placeholder";
+
+              if (tileAtLocation.type !== tileType) {
+                sqlUpdatedTiles.push({
+                  tileId: tileAtLocation.id,
+                  tileType: tileType,
+                });
+              }
+
+              // Need to check if the type of tile changed. Maybe the addition 
+              // of the extra tile changed this from Empty to Placeholder.
+              /*
               await client.query({
                 text: "UPDATE tile SET tile_type=$1 WHERE id=$2",
                 values: [
@@ -592,10 +638,19 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
                   tileAtLocation.id,
                 ],
               });
+              */
             }
           }
         } else {
           // Create a new tile - either an empty tile or a placeholder.
+          sqlNewTiles.push({
+            id: uuidv4(),
+            tileType: checkNeighbors(i, j, board, placedExtraTile)
+                ? "Empty" : "Placeholder",
+            rowIndex: i,
+            columnIndex: j,
+          });
+          /*
           await client.query({
             text: "INSERT INTO tile (id, row_index, column_index, tile_type, owner_id) VALUES ($1, $2, $3, $4, $5)",
             values: [
@@ -606,10 +661,16 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
               gameId,
             ],
           });
+          */
         }
       }
     }
   }
+
+  await client.query({
+    text: "SELECT end_turn($1, $2, $3, $4)",
+    values: [gameId, clicked, updatedTiles, newTiles],
+  });
 
   await client.release();
 
