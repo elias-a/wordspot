@@ -508,6 +508,7 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
     return;
   }
 
+  let sqlExtraTile = null;
   let placedExtraTile: Tile | undefined = undefined;
   if (extraTile) {
     // Find row and column of the extra tile that has been placed on the board.
@@ -519,6 +520,12 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
     if (extraTileLocation.rows.length !== 1) {
       throw new Error(`Error querying the database for the row and column location of the extra tile placed on the board.`);
     }
+
+    sqlExtraTile = {
+        id: extraTile.id,
+        row: extraTileLocation.rows[0].rowIndex,
+        column: extraTileLocation.rows[0].columnIndex,
+    };
 
     placedExtraTile = {
       id: extraTile.id,
@@ -668,13 +675,19 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
   }
 
   await client.query({
-    text: "SELECT end_turn($1, $2, $3, $4)",
-    values: [gameId, clicked, updatedTiles, newTiles],
+    text: "SELECT end_turn($1, $2, $3, $4, $5)",
+    values: [
+        gameId,
+        formatPostgresArray(clicked),
+        sqlExtraTile ? formatPostgresObject(sqlExtraTile) : null,
+        formatPostgresArray(sqlUpdatedTiles),
+        formatPostgresArray(sqlNewTiles),
+    ],
   });
 
   await client.release();
 
-  let message = `${playerName[0].name} played ${validWord}`;
+  let message = `${playerName.rows[0].name} played ${validWord}`;
   if (didPlayerLose) {
     message += " and beat you in Wordspot. Better luck next time!";
   } else if (awardedExtraTile) {
