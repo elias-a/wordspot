@@ -1,7 +1,7 @@
 import { redirect } from "solid-start/server";
 import { createCookieSessionStorage } from "solid-start/session";
 import { v4 as uuidv4 } from "uuid";
-import { pool, twilioClient } from ".";
+import { query, twilioClient } from ".";
 
 export type UserAccount = {
   id: string;
@@ -37,19 +37,15 @@ export async function getUserId(request: Request) {
     return null;
   }
 
-  const client = await pool.connect();
-
-  const user = await client.query({
+  const user = await query({
     text: "SELECT id, user_name AS \"userName\", phone FROM user_account WHERE session_id=$1",
     values: [sessionId],
-  }) as { rows: UserAccount[] };
+  }) as UserAccount[];
 
-  await client.release();
-
-  if (user.rows.length !== 1) {
+  if (user.length !== 1) {
     return null;
   } else {
-    return user.rows[0].id;
+    return user[0].id;
   }
 }
 
@@ -59,19 +55,15 @@ export async function getUser(request: Request) {
     return null;
   }
 
-  const client = await pool.connect();
-
-  const user = await client.query({
+  const user = await query({
     text: "SELECT id, user_name AS \"userName\", phone FROM user_account WHERE session_id=$1",
     values: [sessionId],
-  }) as { rows: UserAccount[] };
+  }) as UserAccount[];
 
-  await client.release();
-
-  if (user.rows.length !== 1) {
+  if (user.length !== 1) {
     throw logout(request);
   } else {
-    return user.rows[0];
+    return user[0];
   }
 }
 
@@ -79,14 +71,10 @@ export async function logout(request: Request) {
   const session = await storage.getSession(request.headers.get("Cookie"));
   const phone = session.get("phone");
 
-  const client = await pool.connect();
-
-  await client.query({
+  await query({
     text: "UPDATE user_account SET unverified_id=$1, session_id=$2 WHERE phone=$3",
     values: [null, null, phone],
   });
-
-  await client.release();
 
   return redirect("/login", {
     headers: {
@@ -132,15 +120,11 @@ export async function cancelVerification(request: Request) {
     // No need to cancel, verification code has already expired.
   }
 
-  const client = await pool.connect();
-
   // Set user's unverified ID in the database to null.
-  await client.query({
+  await query({
     text: "UPDATE user_account SET unverified_id=NULL WHERE phone=$1",
     values: [phone],
   });
-
-  await client.release();
 
   return redirect("/login", {
     headers: {
@@ -152,24 +136,20 @@ export async function cancelVerification(request: Request) {
 export async function createUserSession(request: Request, phone: string) {
   const session = await getUserSession(request);
 
-  const client = await pool.connect();
-
-  const user = await client.query({
+  const user = await query({
     text: "SELECT id FROM user_account WHERE phone=$1",
     values: [phone],
-  }) as { rows: UserAccount[] };
+  }) as UserAccount[];
 
   const unverifiedId = uuidv4();
-  if (user.rows.length === 1) {
-    await client.query({
+  if (user.length === 1) {
+    await query({
       text: "UPDATE user_account SET unverified_id=$1 WHERE phone=$2",
       values: [unverifiedId, phone],
     });
   } else {
     throw new Error(`Error logging in.`);
   }
-
-  await client.release();
 
   const verificationSid = await sendVerification(phone);
 
@@ -196,15 +176,11 @@ export async function getUnverifiedUser(request: Request) {
     return null;
   }
 
-  const client = await pool.connect();
-
   // Check database to ensure the unverified user ID matches with the account.
-  const id = await client.query({
+  const id = await query({
     text: "SELECT id FROM user_account WHERE unverified_id=$1 AND phone=$2",
     values: [unverifiedId, phone],
   }) as string[];
-
-  await client.release();
 
   if (id.length !== 1) {
     return null;
@@ -219,15 +195,11 @@ export async function login(request: Request, code: string) {
 
   await checkVerification(phone, code);
 
-  const client = await pool.connect();
-
   const sessionId = uuidv4();
-  await client.query({
+  await query({
     text: "UPDATE user_account SET unverified_id=$1, session_id=$2 WHERE phone=$3",
     values: [null, sessionId, phone],
   });
-
-  await client.release();
 
   session.set("unverifiedId", undefined);
   session.set("sessionId", sessionId);

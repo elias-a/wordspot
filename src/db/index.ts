@@ -2,7 +2,7 @@ import { Pool } from "pg";
 import { promisify } from "util";
 import twilio from "twilio";
 
-export const pool = new Pool({
+const pool = new Pool({
   host: import.meta.env.VITE_DATABASE_HOST,
   user: import.meta.env.VITE_DATABASE_USER,
   password: import.meta.env.VITE_DATABASE_PASSWORD,
@@ -14,3 +14,14 @@ export const twilioClient = twilio(
   import.meta.env.VITE_TWILIO_AUTH_TOKEN,
 );
 
+type Query = {
+  text: string,
+  values: (number | string | boolean | null)[],
+};
+
+export async function query(query: Query) {
+  const client = await pool.connect();
+  const response = await client.query(query) as { rows: unknown[] };
+  await client.release();
+  return response.rows;
+}
