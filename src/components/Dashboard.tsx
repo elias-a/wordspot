@@ -1,6 +1,6 @@
 import { For, Switch, Match } from "solid-js";
 import { A } from "solid-start";
-import { createServerAction$ } from "solid-start/server";
+import { createServerAction$, redirect } from "solid-start/server";
 import { FaSolidPlay } from "solid-icons/fa";
 import { getUser, type UserAccount } from "~/db/session";
 import { startGame } from "~/db/game";

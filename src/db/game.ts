@@ -1,4 +1,3 @@
-import { redirect } from "solid-start/server";
 import { v4 as uuidv4 } from "uuid";
 import { query, twilioClient } from ".";
 import { getUser, type UserAccount } from "~/db/session";
