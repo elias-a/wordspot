@@ -2,7 +2,7 @@ import { For, Switch, Match } from "solid-js";
 import { A } from "solid-start";
 import { createServerAction$ } from "solid-start/server";
 import { FaSolidPlay } from "solid-icons/fa";
-import { UserAccount } from "~/db/session";
+import { getUser, type UserAccount } from "~/db/session";
 import { startGame } from "~/db/game";
 import type { GameData } from "~/db/game";
 import { formatApostrophe } from "~/utils/formatApostrophe";
@@ -14,7 +14,9 @@ type DashboardProps = {
 
 export default function Dashboard(props: DashboardProps) {
   const [, { Form }] = createServerAction$(async (_form: FormData, { request }) => {
-    return await startGame(request);
+    const user = await getUser(request);
+    const gameId = await startGame(user);
+    return redirect(`/games/${gameId}`);
   });
 
   return (

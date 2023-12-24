@@ -1,5 +1,4 @@
 import { Pool } from "pg";
-import { promisify } from "util";
 import twilio from "twilio";
 
 const pool = new Pool({

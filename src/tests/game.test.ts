@@ -1,5 +1,7 @@
 import { test, expect } from "vitest";
-import { isValidMove, WordLetter } from "~/db/game"
+import { type UserAccount } from "~/db/session";
+import { isValidMove, startGame, type WordLetter } from "~/db/game"
+import { cleanUpDatabase } from "~/tests/helpers/cleanUpDatabase";
 
 test("check if move is valid", () => {
   // Valid word moving horizontally to the right.
@@ -104,4 +106,17 @@ test("check if move is valid", () => {
     { tileRow: 4, tileColumn: 1, letterIndex: 1 },
   ];
   expect(isValidMove(word_330_321_322_411)).toBe(false);
+});
+
+test("test startGame function", async () => {
+  await cleanUpDatabase();
+
+  const user: UserAccount = {
+    id: import.meta.env.VITE_USER1,
+    userName: "test",
+    phone: "test",
+  };
+  expect(await startGame(user)).toBeTypeOf("string");
+
+  await cleanUpDatabase();
 });

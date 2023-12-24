@@ -1,9 +1,8 @@
 import { redirect } from "solid-start/server";
 import { v4 as uuidv4 } from "uuid";
 import { query, twilioClient } from ".";
-import { getUser } from "~/db/session";
+import { getUser, type UserAccount } from "~/db/session";
 import { isEnglishWord } from "~/db/dictionary";
-
 
 function formatPostgresObject<T>(obj: T) {
   return `(${Object.values(obj).join(',')})`;
@@ -130,13 +129,7 @@ export async function getGames(userId: string) {
   return games;
 }
 
-export async function startGame(request: Request) {
-  // Get user who started the game.
-  const user = await getUser(request);
-  if (!user) {
-    return;
-  }
-
+export async function startGame(user: UserAccount) {
   const players: string[] = [import.meta.env.VITE_USER1, import.meta.env.VITE_USER2];
 
   const player1Id = user.id;
@@ -188,7 +181,11 @@ export async function startGame(request: Request) {
     ],
   });
 
-  return redirect(`/games/${gameId}`);
+  if (createdGameId.length !== 1) {
+    throw new Error(`"create_game" SQL function completed without errors, but ${createdGameId.length} IDs were returned, instead of 1 ID`);
+  }
+
+  return createdGameId[0].create_game;
 }
 
 function setUpBoard(gameId: string) {
