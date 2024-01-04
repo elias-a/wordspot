@@ -450,13 +450,32 @@ type SqlNewTile = {
 };
 
 export async function endTurn(
-    gameId: string,
-    playerId: string,
-    clicked: string[],
-    selected: string[],
-    extraTile: PlacedExtraTile | undefined,
-    board: Row[]) {
+  gameId: string,
+  playerId: string,
+  clicked: string[],
+  selected: string[],
+  extraTile: PlacedExtraTile | undefined,
+  board: Row[],
+) {
+  const message = await saveTurn(
+    gameId,
+    playerId,
+    clicked,
+    selected,
+    extraTile,
+    board);
+  await sendYourTurnMessage(playerId, gameId, message);
+  return;
+}
 
+export async function saveTurn(
+  gameId: string,
+  playerId: string,
+  clicked: string[],
+  selected: string[],
+  extraTile: PlacedExtraTile | undefined,
+  board: Row[],
+) {
   // `clicked` contains IDs for unused letters that the user clicked.
   // `selected` contains IDs for used letters that the user clicked.
   const lettersChosenByUser = clicked.concat(selected);
@@ -481,9 +500,7 @@ export async function endTurn(
       values: [gameId, playerId],
     });
 
-    const message = `${playerName[0].name} did not make a move and received 2 tokens and an extra tile. Your turn in Wordspot!`;
-    await sendYourTurnMessage(playerId, gameId, message);
-    return;
+    return `${playerName[0].name} did not make a move and received 2 tokens and an extra tile. Your turn in Wordspot!`;
   }
 
   let sqlExtraTile = null;
@@ -635,10 +652,14 @@ export async function endTurn(
   } else {
     message += ` and used ${clicked.length} ${clicked.length === 1 ? "token" : "tokens"}. Your turn in Wordspot!`;
   }
-  await sendYourTurnMessage(playerId, gameId, message);
+  return message;
 }
 
-async function sendYourTurnMessage(playerId: string, gameId: string, message: string) {
+async function sendYourTurnMessage(
+  playerId: string,
+  gameId: string,
+  message: string,
+) {
   try {
     const userRows = await query({
       text: "SELECT phone FROM user_account INNER JOIN player \

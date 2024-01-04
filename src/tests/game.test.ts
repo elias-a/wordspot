@@ -4,7 +4,7 @@ import {
   isValidMove,
   startGame,
   getGame,
-  endTurn,
+  saveTurn,
   type WordLetter,
 } from "~/db/game";
 import { cleanUpDatabase } from "~/tests/helpers/cleanUpDatabase";
@@ -139,21 +139,21 @@ test("test endTurn function", async () => {
     phone: import.meta.env.VITE_TEST_USER1_PHONE,
   };
   const gameId = await startGame(user);
-  const { tiles, board, userData } = await getGame(gameId, user.id);
+  const { board, userData } = await getGame(gameId, user.id);
 
   const clicked: string[] = [];
   const selected: string[] = [];
   const extraTile: PlacedExtraTile | undefined = undefined;
 
   expect(
-    await endTurn(
+    await saveTurn(
       gameId,
       userData.my_id,
       clicked,
       selected,
       extraTile,
       board,
-    )).toBe(false);
+    )).toBe(`${import.meta.env.VITE_TEST_USER1_NAME} did not make a move and received 2 tokens and an extra tile. Your turn in Wordspot!`);
 
   await cleanUpDatabase();
 });
