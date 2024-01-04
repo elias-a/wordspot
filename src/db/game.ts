@@ -2,18 +2,11 @@ import { v4 as uuidv4 } from "uuid";
 import { query, twilioClient } from ".";
 import { getUser, type UserAccount } from "~/db/session";
 import { isEnglishWord } from "~/db/dictionary";
-
-function formatPostgresObject<T>(obj: T) {
-  return `(${Object.values(obj).join(',')})`;
-}
-
-function formatPostgresArray<T>(array: T[]) {
-  return `{${array.map(obj => `"${formatPostgresObject(obj)}"`).join(',')}}`
-}
-
-function formatPostgresArrayOfArrays<T>(array: T[]) {
-  return `{${array.map(inner => `"(${inner.join(',')})"`)}}`;
-}
+import {
+  formatPostgresObject,
+  formatPostgresArray,
+  formatPostgresArrayOfArrays,
+} from "~/utils/postgresFormatting";
 
 const TILES = [
   "SGPU", "HEAS", "XAIY",
@@ -456,19 +449,24 @@ type SqlNewTile = {
   columnIndex: number;
 };
 
-export async function endTurn(gameId: string, playerId: string, clicked: string[], selected: string[], extraTile: PlacedExtraTile | undefined, board: Row[]) {
+export async function endTurn(
+    gameId: string,
+    playerId: string,
+    clicked: string[],
+    selected: string[],
+    extraTile: PlacedExtraTile | undefined,
+    board: Row[]) {
+
   // `clicked` contains IDs for unused letters that the user clicked.
   // `selected` contains IDs for used letters that the user clicked.
   const lettersChosenByUser = clicked.concat(selected);
 
   const playerName = await query({
-    text: "SELECT user_account.user_name AS name FROM player INNER JOIN \
-      user_account ON user_account.id=player.user_id \
-      WHERE player.id=$1",
+    text: "SELECT name FROM get_player WHERE player_id=$1",
     values: [playerId],
   }) as { name: string }[];
 
-  if (playerName.rows.length !== 1) {
+  if (playerName.length !== 1) {
     throw new Error("There was an issue finding your information!");
   }
 
@@ -489,7 +487,7 @@ export async function endTurn(gameId: string, playerId: string, clicked: string[
       values: [playerId, gameId],
     });
 
-    const message = `${playerName.rows[0].name} did not make a move and received 2 tokens and an extra tile. Your turn in Wordspot!`;
+    const message = `${playerName[0].name} did not make a move and received 2 tokens and an extra tile. Your turn in Wordspot!`;
     await sendYourTurnMessage(playerId, gameId, message);
     return;
   }
@@ -772,40 +770,19 @@ function convertSqlResultsToExtraTiles(sqlExtraTiles: SqlResultExtraTile[]) {
   return extraTiles;
 }
 
-export async function getGame(gameId: string, request: Request) {
-  const user = await getUser(request);
-  if (!user) {
-    return;
-  }
-
+export async function getGame(gameId: string, userId: string) {
   const tiles = await query({
-    text: "SELECT tile.id AS \"tileId\", tile.row_index AS \"rowIndex\", tile.column_index AS \"columnIndex\", \
-      tile.tile_type AS \"tileType\", letter.id AS \"letterId\", letter.letter_index AS \"letterIndex\", \
-      letter.letter, letter.is_used AS \"isUsed\" FROM tile LEFT JOIN \
-      tile_letter_map ON tile.id=tile_letter_map.tile_id LEFT JOIN letter \
-      ON tile_letter_map.letter_id=letter.id WHERE tile.tile_type != $1 \
-      AND tile.tile_type != $2 AND tile.owner_id=$3",
-    values: ["Option", "Extra", gameId],
+    text: "SELECT * FROM get_tiles WHERE owner_id=$1",
+    values: [gameId],
   }) as SqlResultBoard[];
 
   const userData = await query({
-    text: "SELECT CASE WHEN my.first_move THEN my.player_id ELSE opponent.player_id END AS \"firstPlayer\", \
-        my.player_id AS \"playerId\", game.winner, my.player_id AS \"myId\", \
-      my.name AS \"myName\", my.tokens AS \"myTokens\", \
-      my.turn AS \"myTurn\", opponent.name AS \"opponentName\", \
-      opponent.tokens AS \"opponentTokens\", opponent.turn AS \"opponentTurn\" \
-      FROM (SELECT game_id, player.id AS player_id, user_account.user_name AS name, tokens, turn, first_move \
-      FROM player INNER JOIN user_account ON player.user_id=user_account.id \
-      WHERE user_id=$1) AS my INNER JOIN \
-      (SELECT game_id, player.id AS player_id, user_account.user_name AS name, tokens, turn FROM player \
-        INNER JOIN user_account on player.user_id=user_account.id \
-        WHERE user_id!=$2) AS opponent \
-        ON my.game_id=opponent.game_id INNER JOIN game on my.game_id=game.id \
-        WHERE game.id=$3",
-    values: [user.id, user.id, gameId],
+    text: "SELECT * FROM get_game_players($1, $2)",
+    values: [userId, gameId],
   }) as SqlUserData[];
 
   if (userData.length === 0) {
+    // TODO: Throw error?
     return;
   }
 
@@ -815,7 +792,7 @@ export async function getGame(gameId: string, request: Request) {
       player.id=tile.owner_id LEFT JOIN tile_letter_map ON \
       tile.id=tile_letter_map.tile_id LEFT JOIN letter ON tile_letter_map.letter_id=letter.id \
       WHERE player.game_id=$1 AND player.user_id=$2",
-    values: [gameId, user.id],
+    values: [gameId, userId],
   }) as SqlResultExtraTile[];
 
   const parsedUserData: UserData = {

@@ -20,6 +20,7 @@ import Board from "~/components/Board";
 import User from "~/components/User";
 import MovingExtraTile from "~/components/MovingExtraTile";
 import NotFound from "../[...404]";
+import { getUser } from "~/db/session";
 import {
   getGame,
   endTurn,
@@ -38,7 +39,10 @@ declare module "solid-js" {
 
 export function routeData({ params }: RouteDataArgs) {
   return createServerData$(
-    async ({ id }, { request }) => await getGame(id, request),
+    async ({ id }, { request }) => {
+      const user = await getUser(request);
+      return await getGame(id, user.id);
+    },
     { key: () => { return { id: params.id } } }
   );
 }

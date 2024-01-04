@@ -1,7 +1,14 @@
 import { test, expect } from "vitest";
 import { type UserAccount } from "~/db/session";
-import { isValidMove, startGame, type WordLetter } from "~/db/game"
+import {
+  isValidMove,
+  startGame,
+  getGame,
+  endTurn,
+  type WordLetter,
+} from "~/db/game";
 import { cleanUpDatabase } from "~/tests/helpers/cleanUpDatabase";
+import { initializeDatabase } from "~/tests/helpers/initializeDatabase";
 
 test("check if move is valid", () => {
   // Valid word moving horizontally to the right.
@@ -117,6 +124,36 @@ test("test startGame function", async () => {
     phone: "test",
   };
   expect(await startGame(user)).toBeTypeOf("string");
+
+  await cleanUpDatabase();
+});
+
+test("test endTurn function", async () => {
+  await cleanUpDatabase();
+  await initializeDatabase();
+
+  // Create game to prime database for calling endTurn function.
+  const user: UserAccount = {
+    id: import.meta.env.VITE_TEST_USER1_ID,
+    userName: import.meta.env.VITE_TEST_USER1_NAME,
+    phone: import.meta.env.VITE_TEST_USER1_PHONE,
+  };
+  const gameId = await startGame(user);
+  const { tiles, board, userData } = await getGame(gameId, user.id);
+
+  const clicked: string[] = [];
+  const selected: string[] = [];
+  const extraTile: PlacedExtraTile | undefined = undefined;
+
+  expect(
+    await endTurn(
+      gameId,
+      userData.my_id,
+      clicked,
+      selected,
+      extraTile,
+      board,
+    )).toBe(false);
 
   await cleanUpDatabase();
 });
