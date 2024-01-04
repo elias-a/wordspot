@@ -8,3 +8,4 @@
 \i load_users.sql;
 \i get_game_players.sql;
 \i assign_extra_tile.sql;
+\i skip_turn.sql;

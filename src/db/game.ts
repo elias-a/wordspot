@@ -470,21 +470,15 @@ export async function endTurn(
     throw new Error("There was an issue finding your information!");
   }
 
-  // TODO: Use separate SQL function
   // Give the user an extra tile and two tokens for not making
   // a valid move. A valid move requires the user to find a word
   // spanning at least 3 letters with at least one of those letters
   // currently unused. If a valid move has not been made, do not 
   // add an extra tile to the board, even if the user chose to do so.
   if (lettersChosenByUser.length < 3 || clicked.length < 1) {
-    await assignExtraTile(gameId, playerId);
     await query({
-      text: "UPDATE player SET tokens=tokens+2, turn=FALSE WHERE id=$1",
-      values: [playerId],
-    });
-    await query({
-      text: "UPDATE player SET turn=TRUE WHERE id!=$1 AND game_id=$2",
-      values: [playerId, gameId],
+      text: "CALL skip_turn($1, $2)",
+      values: [gameId, playerId],
     });
 
     const message = `${playerName[0].name} did not make a move and received 2 tokens and an extra tile. Your turn in Wordspot!`;
@@ -534,7 +528,10 @@ export async function endTurn(
 
     if (tiles.size > 2) {
       awardedExtraTile = true;
-      await assignExtraTile(gameId, playerId);
+      await query({
+        text: "CALL assign_extra_tile($1, $2)",
+        values: [gameId, playerId],
+      });
     }
   }
 
@@ -662,23 +659,6 @@ async function sendYourTurnMessage(playerId: string, gameId: string, message: st
   } catch (error) {
     throw new Error("Could not send text message to your opponent. Please notify them yourself!");
   }
-}
-
-async function assignExtraTile(gameId: string, playerId: string) {
-  const rows = await query({
-    text: "SELECT id FROM tile WHERE tile_type=$1 AND owner_id=$2 ORDER BY RANDOM() LIMIT 1",
-    values: ["Option", gameId],
-  }) as { id: string }[];
-
-  if (rows.length === 0) {
-    throw new Error("No extra tiles left to assign!");
-  }
-
-  const newExtraTileId = rows[0];
-  await query({
-    text: "UPDATE tile SET tile_type=$1, ownerId=$2 WHERE id=$3",
-    values: ["Extra", playerId, newExtraTileId.id],
-  });
 }
 
 function convertSqlResultsToBoard(sqlTiles: SqlResultBoard[]) {
