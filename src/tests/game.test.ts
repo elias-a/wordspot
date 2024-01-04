@@ -9,6 +9,7 @@ import {
 } from "~/db/game";
 import { cleanUpDatabase } from "~/tests/helpers/cleanUpDatabase";
 import { initializeDatabase } from "~/tests/helpers/initializeDatabase";
+import { createTestGame } from "~/tests/helpers/createTestGame";
 
 test("check if move is valid", () => {
   // Valid word moving horizontally to the right.
@@ -131,15 +132,7 @@ test("test startGame function", async () => {
 test("test endTurn function", async () => {
   await cleanUpDatabase();
   await initializeDatabase();
-
-  // Create game to prime database for calling endTurn function.
-  const user: UserAccount = {
-    id: import.meta.env.VITE_TEST_USER1_ID,
-    userName: import.meta.env.VITE_TEST_USER1_NAME,
-    phone: import.meta.env.VITE_TEST_USER1_PHONE,
-  };
-  const gameId = await startGame(user);
-  const { board, userData } = await getGame(gameId, user.id);
+  const { gameId, board, userData } = await createTestGame();
 
   const clicked: string[] = [];
   const selected: string[] = [];
