@@ -458,6 +458,7 @@ export async function endTurn(
   extraTile: PlacedExtraTile | undefined,
   board: Row[],
 ) {
+  // TODO: Can user cheat by sending a fake board? Or other fake data?
   const message = await saveTurn(
     gameId,
     playerId,
@@ -634,8 +635,8 @@ export async function saveTurn(
     }
   }
 
-  await query({
-    text: "SELECT end_turn($1, $2, $3, $4, $5)",
+  const sqlWinner = await query({
+    text: "SELECT * FROM end_turn($1, $2, $3, $4, $5)",
     values: [
         gameId,
         formatPostgresArray(clicked),
@@ -643,10 +644,14 @@ export async function saveTurn(
         formatPostgresArray(sqlUpdatedTiles),
         formatPostgresArray(sqlNewTiles),
     ],
-  });
+  }) as { winner_id: string }[];
+
+  if (sqlWinner.length !== 1) {
+    throw new Error('Did not receive expected return value from SQL "end_turn" function');
+  }
 
   let message = `${playerName[0].name} played ${validWord}`;
-  if (didPlayerLose) {
+  if (sqlWinner[0].winner_id === playerId) {
     message += " and beat you in Wordspot. Better luck next time!";
   } else if (awardedExtraTile) {
     message += ` and used ${clicked.length} ${clicked.length === 1 ? "token" : "tokens"} and was awarded an extra tile. Your turn in Wordspot!`;

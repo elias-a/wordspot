@@ -28,6 +28,14 @@ EXCEPTION
     WHEN duplicate_object THEN NULL;
 END $$;
 
+DO $$ BEGIN
+    CREATE TYPE type_end_turn_return AS (
+        winner_id VARCHAR(255)
+    );
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END $$;
+
 CREATE OR REPLACE FUNCTION end_turn (
     updated_game_id VARCHAR(255),
     clicked_letter_ids VARCHAR(255)[],
@@ -35,7 +43,7 @@ CREATE OR REPLACE FUNCTION end_turn (
     updated_tiles updated_tile[],
     new_tiles new_tile[]
 )
-RETURNS VARCHAR(255) AS $$
+RETURNS type_end_turn_return AS $$
 DECLARE
     player1_id VARCHAR(255);
     player2_id VARCHAR(255);

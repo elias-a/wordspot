@@ -10,7 +10,6 @@ import {
 } from "~/db/game";
 import { cleanUpDatabase } from "~/tests/helpers/cleanUpDatabase";
 import { initializeDatabase } from "~/tests/helpers/initializeDatabase";
-import { createTestGame } from "~/tests/helpers/createTestGame";
 
 test("check if move is valid", () => {
   // Valid word moving horizontally to the right.
@@ -133,12 +132,19 @@ test("test startGame function", async () => {
 test("test `saveTurn` function - nothing selected", async () => {
   await cleanUpDatabase();
   await initializeDatabase();
-  const { gameId, board, userData } = await createTestGame();
+
+  const user: UserAccount = {
+    id: import.meta.env.VITE_TEST_USER1_ID,
+    userName: import.meta.env.VITE_TEST_USER1_NAME,
+    phone: import.meta.env.VITE_TEST_USER1_PHONE,
+  };
+  const gameId = await startGame(user);
 
   const clicked: string[] = [];
   const selected: string[] = [];
   const extraTile: PlacedExtraTile | undefined = undefined;
 
+  const { board, userData } = await getGame(gameId, user.id);
   expect(
     await saveTurn(
       gameId,
@@ -155,25 +161,31 @@ test("test `saveTurn` function - nothing selected", async () => {
 test("test `saveTurn` function - valid move", async () => {
   await cleanUpDatabase();
   await initializeDatabase();
-  const { gameId, board, userData } = await createTestGame();
+  const user: UserAccount = {
+    id: import.meta.env.VITE_TEST_USER1_ID,
+    userName: import.meta.env.VITE_TEST_USER1_NAME,
+    phone: import.meta.env.VITE_TEST_USER1_PHONE,
+  };
+  const gameId = await startGame(user);
 
   const clicked: string[] = [
     (await query({
-      text: "SELECT * FROM get_tiles_by_indices($1, $2, $3, $4)",
-      values: [1, 1, 0, gameId],
+      text: "SELECT * FROM get_letter_by_indices($1, $2, $3, $4, $5)",
+      values: [1, 1, 0, gameId, "l"],
     }))[0].letter_id,
     (await query({
-      text: "SELECT * FROM get_tiles_by_indices($1, $2, $3, $4)",
-      values: [1, 1, 2, gameId],
+      text: "SELECT * FROM get_letter_by_indices($1, $2, $3, $4, $5)",
+      values: [1, 1, 2, gameId, "e"],
     }))[0].letter_id,
     (await query({
-      text: "SELECT * FROM get_tiles_by_indices($1, $2, $3, $4)",
-      values: [2, 1, 0, gameId],
+      text: "SELECT * FROM get_letter_by_indices($1, $2, $3, $4, $5)",
+      values: [2, 1, 0, gameId, "t"],
     }))[0].letter_id,
   ];
   const selected: string[] = [];
   const extraTile: PlacedExtraTile | undefined = undefined;
 
+  const { board, userData } = await getGame(gameId, user.id);
   expect(
     await saveTurn(
       gameId,
@@ -182,7 +194,6 @@ test("test `saveTurn` function - valid move", async () => {
       selected,
       extraTile,
       board,
-    )).toBe(`${import.meta.env.VITE_TEST_USER1_NAME} did not make a move and received 2 tokens and an extra tile. Your turn in Wordspot!`);
-
+    )).toBe(`${import.meta.env.VITE_TEST_USER1_NAME} played LET and used 3 tokens. Your turn in Wordspot!`);
   await cleanUpDatabase();
 });
