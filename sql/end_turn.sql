@@ -44,8 +44,8 @@ DECLARE
     replaced_tile_id VARCHAR(255);
     updated_tile_i updated_tile;
     new_tile_i new_tile;
+    v_winner_id VARCHAR(255) := NULL;
 BEGIN
-
     /*
     Update player1's tokens and change turn to false.
     */
@@ -66,7 +66,8 @@ BEGIN
     If the player now has 0 tokens, declare them the winner.
     */
     IF remaining_tokens = 0 THEN
-        UPDATE game SET winner=player1_id WHERE id=updated_game_id;
+        UPDATE game SET winner=player1_id WHERE id=updated_game_id
+            RETURNING winner INTO v_winner_id;
     END IF;
 
     /*
@@ -129,8 +130,6 @@ BEGIN
 
     END IF;
 
-    RETURN updated_game_id;
-
+    RETURN v_winner_id;
 END;
-
 $$ LANGUAGE plpgsql;

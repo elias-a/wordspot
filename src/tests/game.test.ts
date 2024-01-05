@@ -1,4 +1,5 @@
 import { test, expect } from "vitest";
+import { query } from "~/db";
 import { type UserAccount } from "~/db/session";
 import {
   isValidMove,
@@ -129,12 +130,47 @@ test("test startGame function", async () => {
   await cleanUpDatabase();
 });
 
-test("test endTurn function", async () => {
+test("test `saveTurn` function - nothing selected", async () => {
   await cleanUpDatabase();
   await initializeDatabase();
   const { gameId, board, userData } = await createTestGame();
 
   const clicked: string[] = [];
+  const selected: string[] = [];
+  const extraTile: PlacedExtraTile | undefined = undefined;
+
+  expect(
+    await saveTurn(
+      gameId,
+      userData.my_id,
+      clicked,
+      selected,
+      extraTile,
+      board,
+    )).toBe(`${import.meta.env.VITE_TEST_USER1_NAME} did not make a move and received 2 tokens and an extra tile. Your turn in Wordspot!`);
+
+  await cleanUpDatabase();
+});
+
+test("test `saveTurn` function - valid move", async () => {
+  await cleanUpDatabase();
+  await initializeDatabase();
+  const { gameId, board, userData } = await createTestGame();
+
+  const clicked: string[] = [
+    (await query({
+      text: "SELECT * FROM get_tiles_by_indices($1, $2, $3, $4)",
+      values: [1, 1, 0, gameId],
+    }))[0].letter_id,
+    (await query({
+      text: "SELECT * FROM get_tiles_by_indices($1, $2, $3, $4)",
+      values: [1, 1, 2, gameId],
+    }))[0].letter_id,
+    (await query({
+      text: "SELECT * FROM get_tiles_by_indices($1, $2, $3, $4)",
+      values: [2, 1, 0, gameId],
+    }))[0].letter_id,
+  ];
   const selected: string[] = [];
   const extraTile: PlacedExtraTile | undefined = undefined;
 

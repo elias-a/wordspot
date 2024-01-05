@@ -9,3 +9,4 @@
 \i get_game_players.sql;
 \i assign_extra_tile.sql;
 \i skip_turn.sql;
+\i tests/get_letters_by_indices.sql;

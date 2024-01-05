@@ -57,14 +57,15 @@ type SqlLetter = [string, number, string, boolean, string];
 type SqlTileLetterMap = [string, string, string, string];
 
 type SqlResultBoard = {
-  tileId: string;
-  rowIndex: number;
-  columnIndex: number;
-  tileType: Omit<TileType, "Option">;
-  letterId: string;
-  letterIndex: number;
+  tile_id: string;
+  row_index: number;
+  column_index: number;
+  tile_type: Omit<TileType, "Option">;
+  letter_id: string;
+  letter_index: number;
   letter: string;
-  isUsed: boolean;
+  is_used: boolean;
+  owner_id: string;
 };
 
 type SqlResultExtraTile = {
@@ -684,34 +685,34 @@ async function sendYourTurnMessage(
 
 function convertSqlResultsToBoard(sqlTiles: SqlResultBoard[]) {
   const board: Row[] = [];
-  const minRow = Math.min(...sqlTiles.map(t => t.rowIndex));
-  const maxRow = Math.max(...sqlTiles.map(t => t.rowIndex));
-  const minColumn = Math.min(...sqlTiles.map(t => t.columnIndex));
-  const maxColumn = Math.max(...sqlTiles.map(t => t.columnIndex));
+  const minRow = Math.min(...sqlTiles.map(t => t.row_index));
+  const maxRow = Math.max(...sqlTiles.map(t => t.row_index));
+  const minColumn = Math.min(...sqlTiles.map(t => t.column_index));
+  const maxColumn = Math.max(...sqlTiles.map(t => t.column_index));
 
   for (let i = minRow; i <= maxRow; i++) {
     const tiles: Tile[] = [];
 
     for (let j = minColumn; j <= maxColumn; j++) {
-      const sqlLetters = sqlTiles.filter(t => t.rowIndex === i && t.columnIndex === j);
+      const sqlLetters = sqlTiles.filter(t => t.row_index === i && t.column_index=== j);
       
       if (sqlLetters.length === 0) {
         throw new Error(`Expecting data for row index=${i} and column index=${j}.`);
       }
 
-      const tileType = sqlLetters[0].tileType;
+      const tileType = sqlLetters[0].tile_type;
       if (tileType === "Tile" && sqlLetters.length === 4) {
         const letters: Letter[] = sqlLetters.map(l => {
           return {
-            id: l.letterId,
-            letterIndex: l.letterIndex,
+            id: l.letter_id,
+            letterIndex: l.letter_index,
             letter: l.letter,
-            isUsed: l.isUsed,
+            isUsed: l.is_used,
           };
         }).sort((a, b) => a.letterIndex - b.letterIndex);
 
         tiles.push({
-          id: sqlLetters[0].tileId,
+          id: sqlLetters[0].tile_id,
           letters: letters,
           row: i,
           column: j,
@@ -721,7 +722,7 @@ function convertSqlResultsToBoard(sqlTiles: SqlResultBoard[]) {
         sqlLetters.length === 1
       ) {
         tiles.push({
-          id: sqlLetters[0].tileId,
+          id: sqlLetters[0].tile_id,
           letters: [],
           row: i,
           column: j,
@@ -772,6 +773,7 @@ function convertSqlResultsToExtraTiles(sqlExtraTiles: SqlResultExtraTile[]) {
 }
 
 export async function getGame(gameId: string, userId: string) {
+  // TODO: Check user 
   const tiles = await query({
     text: "SELECT * FROM get_tiles WHERE owner_id=$1",
     values: [gameId],
