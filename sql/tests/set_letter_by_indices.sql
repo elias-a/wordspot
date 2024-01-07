@@ -7,11 +7,11 @@ EXCEPTION
 END $$;
 
 CREATE OR REPLACE FUNCTION set_letter_by_indices (
+    v_letter VARCHAR(255),
     v_row_index INT,
     v_column_index INT,
     v_letter_index INT,
-    v_game_id VARCHAR(255),
-    v_letter VARCHAR(255)
+    v_game_id VARCHAR(255)
 ) RETURNS SETOF type_letter_id AS $$
     UPDATE letter SET letter=v_letter WHERE id=(
         SELECT letter.id AS letter_id FROM letter 

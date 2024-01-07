@@ -11,6 +11,12 @@ import {
 } from "~/db/game";
 import { cleanUpDatabase } from "~/tests/helpers/cleanUpDatabase";
 import { initializeDatabase } from "~/tests/helpers/initializeDatabase";
+import { testStartGame } from "~/tests/helpers/testStartGame";
+import { testAssignExtraTile } from "~/tests/helpers/testAssignExtraTile";
+import { testSetLetterByIndices } from "~/tests/helpers/testSetLetterByIndices";
+import { testSetLetterByTileId } from "~/tests/helpers/testSetLetterByTileId";
+import { testGetPlacedExtraTile } from "~/tests/helpers/testGetPlacedExtraTile";
+import { testSetPlayerTokens } from "~/tests/helpers/testSetPlayerTokens";
 
 test("check if move is valid", () => {
   // Valid word moving horizontally to the right.
@@ -133,28 +139,21 @@ test("test startGame function", async () => {
 test("test `saveTurn` function - nothing selected", async () => {
   await cleanUpDatabase();
   await initializeDatabase();
-
-  const user: UserAccount = {
-    id: import.meta.env.VITE_TEST_USER1_ID,
-    userName: import.meta.env.VITE_TEST_USER1_NAME,
-    phone: import.meta.env.VITE_TEST_USER1_PHONE,
-  };
-  const gameId = await startGame(user);
-
+  const { gameId, userId, userName, playerId } = await testStartGame();
   const clicked: string[] = [];
   const selected: string[] = [];
   const extraTile: PlacedExtraTile | undefined = undefined;
 
-  const { board, userData } = await getGame(gameId, user.id);
+  const { board } = await getGame(gameId, userId);
   expect(
     await saveTurn(
       gameId,
-      userData.my_id,
+      playerId,
       clicked,
       selected,
       extraTile,
       board,
-    )).toBe(`${user.userName} did not make a move and received 2 tokens and an extra tile. Your turn in Wordspot!`);
+    )).toBe(`${userName} did not make a move and received 2 tokens and an extra tile. Your turn in Wordspot!`);
 
   await cleanUpDatabase();
 });
@@ -162,112 +161,87 @@ test("test `saveTurn` function - nothing selected", async () => {
 test("test `saveTurn` function - valid move", async () => {
   await cleanUpDatabase();
   await initializeDatabase();
-  const user: UserAccount = {
-    id: import.meta.env.VITE_TEST_USER1_ID,
-    userName: import.meta.env.VITE_TEST_USER1_NAME,
-    phone: import.meta.env.VITE_TEST_USER1_PHONE,
-  };
-  const gameId = await startGame(user);
-
-  const clicked: string[] = [
-    (await query({
-      text: "SELECT * FROM set_letter_by_indices($1, $2, $3, $4, $5)",
-      values: [1, 1, 0, gameId, "l"],
-    }))[0].letter_id,
-    (await query({
-      text: "SELECT * FROM set_letter_by_indices($1, $2, $3, $4, $5)",
-      values: [1, 1, 2, gameId, "e"],
-    }))[0].letter_id,
-    (await query({
-      text: "SELECT * FROM set_letter_by_indices($1, $2, $3, $4, $5)",
-      values: [2, 1, 0, gameId, "t"],
-    }))[0].letter_id,
+  const { gameId, userId, userName, playerId } = await testStartGame();
+  const extraTile: PlacedExtraTile | undefined = undefined;
+  const clicked = [
+    await testSetLetterByIndices("L", 1, 1, 0, gameId),
+    await testSetLetterByIndices("E", 1, 1, 2, gameId),
+    await testSetLetterByIndices("T", 2, 1, 0, gameId),
   ];
   const selected: string[] = [];
-  const extraTile: PlacedExtraTile | undefined = undefined;
 
-  const { board, userData } = await getGame(gameId, user.id);
+  const { board } = await getGame(gameId, userId);
   expect(
     await saveTurn(
       gameId,
-      userData.my_id,
+      playerId,
       clicked,
       selected,
       extraTile,
       board,
-    )).toBe(`${user.userName} played LET and used 3 tokens. Your turn in Wordspot!`);
+    )).toBe(`${userName} played LET and used 3 tokens. Your turn in Wordspot!`);
   await cleanUpDatabase();
 });
 
 test("test `saveTurn` function - valid move, added extra tile", async () => {
   await cleanUpDatabase();
   await initializeDatabase();
-  const user: UserAccount = {
-    id: import.meta.env.VITE_TEST_USER1_ID,
-    userName: import.meta.env.VITE_TEST_USER1_NAME,
-    phone: import.meta.env.VITE_TEST_USER1_PHONE,
-  };
-  const gameId = await startGame(user);
-  const { userData } = await getGame(gameId, user.id)
-  const sqlExtraTileId = await query({
-    text: "SELECT * FROM assign_extra_tile($1, $2)",
-    values: [gameId, userData.my_id],
-  });
-  const extraTileId = Object.values(sqlExtraTileId[0])[0];
-
-  const clicked: string[] = [
-    (await query({
-      text: "SELECT * FROM set_letter_by_tile_id($1, $2, $3)",
-      values: ["T", 1, extraTileId],
-    }))[0].letter_id,
-    (await query({
-      text: "SELECT * FROM set_letter_by_indices($1, $2, $3, $4, $5)",
-      values: [1, 1, 0, gameId, "E"],
-    }))[0].letter_id,
-    (await query({
-      text: "SELECT * FROM set_letter_by_indices($1, $2, $3, $4, $5)",
-      values: [1, 1, 1, gameId, "S"],
-    }))[0].letter_id,
-    (await query({
-      text: "SELECT * FROM set_letter_by_indices($1, $2, $3, $4, $5)",
-      values: [1, 2, 0, gameId, "T"],
-    }))[0].letter_id,
+  const { gameId, userId, userName, playerId } = await testStartGame();
+  const { extraTileId } = await testAssignExtraTile(gameId, playerId);
+  const clicked = [
+    await testSetLetterByTileId("T", extraTileId, 1),
+    await testSetLetterByIndices("E", 1, 1, 0, gameId),
+    await testSetLetterByIndices("S", 1, 1, 1, gameId),
+    await testSetLetterByIndices("T", 1, 2, 0, gameId),
   ];
   const selected: string[] = [];
+  const extraTile: PlacedExtraTile = 
+    await testGetPlacedExtraTile(extraTileId, 1, 0);
 
-  const sqlTileId = await query({
-    text: "SELECT id FROM tile WHERE row_index=$1 AND column_index=$2",
-    values: [1, 0],
-  }) as { id: string }[];
-  const tileId = sqlTileId[0].id;
-  const sqlExtraTileLetters = await query({
-    text: "SELECT * FROM get_tile_letters($1)",
-    values: [extraTileId],
-  }) as { letter: string, letterIndex: int }[];
-
-  const extraTile: PlacedExtraTile = {
-    id: extraTileId,
-    letters: sqlExtraTileLetters.map(l => {
-      return {
-        id: l.v_id,
-        letter: l.v_letter,
-        letterIndex: l.v_letter_index,
-        isUsed: l.v_is_used,
-      };
-    }),
-    tileId: tileId,
-  };
-
-  const { board } = await getGame(gameId, user.id);
+  const { board } = await getGame(gameId, userId);
   expect(
     await saveTurn(
       gameId,
-      userData.my_id,
+      playerId,
       clicked,
       selected,
       extraTile,
       board,
-    )).toBe(`${user.userName} played TEST and used 4 tokens and was awarded an extra tile. Your turn in Wordspot!`);
+    )).toBe(`${userName} played TEST and used 4 tokens and was awarded an extra tile. Your turn in Wordspot!`);
+
+  const sqlTokens = await query({
+    text: "SELECT tokens FROM player WHERE id=$1",
+    values: [playerId],
+    rowMode: "array",
+  }) as [[number]];
+  expect(sqlTokens[0][0]).toBe(22);
+
+  await cleanUpDatabase();
+});
+
+test("test `saveTurn` function - mix of clicked and selected", async () => {
+  await cleanUpDatabase();
+  await initializeDatabase();
+  const { gameId, userId, userName, playerId } = await testStartGame();
+  const extraTile: PlacedExtraTile | undefined = undefined;
+  const clicked = [
+    await testSetLetterByIndices("E", 1, 1, 2, gameId),
+    await testSetLetterByIndices("T", 2, 1, 0, gameId),
+  ];
+  const selected = [
+    await testSetLetterByIndices("L", 1, 1, 0, gameId),
+  ];
+
+  const { board } = await getGame(gameId, userId);
+  expect(
+    await saveTurn(
+      gameId,
+      playerId,
+      clicked,
+      selected,
+      extraTile,
+      board,
+    )).toBe(`${userName} played LET and used 2 tokens. Your turn in Wordspot!`);
 
   await cleanUpDatabase();
 });
@@ -275,45 +249,26 @@ test("test `saveTurn` function - valid move, added extra tile", async () => {
 test("test `saveTurn` function - game over", async () => {
   await cleanUpDatabase();
   await initializeDatabase();
-  const user: UserAccount = {
-    id: import.meta.env.VITE_TEST_USER1_ID,
-    userName: import.meta.env.VITE_TEST_USER1_NAME,
-    phone: import.meta.env.VITE_TEST_USER1_PHONE,
-  };
-  const gameId = await startGame(user);
-
-  const clicked: string[] = [
-    (await query({
-      text: "SELECT * FROM set_letter_by_indices($1, $2, $3, $4, $5)",
-      values: [1, 1, 0, gameId, "L"],
-    }))[0].letter_id,
-    (await query({
-      text: "SELECT * FROM set_letter_by_indices($1, $2, $3, $4, $5)",
-      values: [1, 1, 1, gameId, "E"],
-    }))[0].letter_id,
-    (await query({
-      text: "SELECT * FROM set_letter_by_indices($1, $2, $3, $4, $5)",
-      values: [1, 2, 0, gameId, "T"],
-    }))[0].letter_id,
+  const { gameId, userId, userName, playerId } = await testStartGame();
+  const extraTile: PlacedExtraTile | undefined = undefined;
+  const clicked = [
+    await testSetLetterByIndices("L", 1, 1, 0, gameId),
+    await testSetLetterByIndices("E", 1, 1, 1, gameId),
+    await testSetLetterByIndices("T", 1, 2, 0, gameId),
   ];
   const selected: string[] = [];
-  const extraTile: PlacedExtraTile | undefined = undefined;
+  await testSetPlayerTokens(3, playerId);
 
-  await query({
-    text: "UPDATE player SET tokens=3 WHERE user_id=$1",
-    values: [user.id],
-  });
-
-  const { board, userData } = await getGame(gameId, user.id);
+  const { board } = await getGame(gameId, userId);
   expect(
     await saveTurn(
       gameId,
-      userData.my_id,
+      playerId,
       clicked,
       selected,
       extraTile,
       board,
-    )).toBe(`${user.userName} played LET and beat you in Wordspot. Better luck next time!`);
+    )).toBe(`${userName} played LET and beat you in Wordspot. Better luck next time!`);
 
   await cleanUpDatabase();
 });

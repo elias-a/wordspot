@@ -1,7 +1,7 @@
 CREATE OR REPLACE FUNCTION set_letter_by_tile_id (
     v_letter VARCHAR(255),
-    v_letter_index INT,
-    v_tile_id VARCHAR(255)
+    v_tile_id VARCHAR(255),
+    v_letter_index INT
 ) RETURNS SETOF type_letter_id AS $$
     UPDATE letter SET letter=v_letter WHERE id=(
         SELECT letter.id AS letter_id FROM letter 
