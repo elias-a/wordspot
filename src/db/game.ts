@@ -644,14 +644,18 @@ export async function saveTurn(
         formatPostgresArray(sqlUpdatedTiles),
         formatPostgresArray(sqlNewTiles),
     ],
-  }) as { winner_id: string }[];
+    rowMode: "array",
+  }) as [[string]];
 
-  if (sqlWinner.length !== 1) {
-    throw new Error('Did not receive expected return value from SQL "end_turn" function');
+  let winnerId: string = null;
+  try {
+    winnerId = sqlWinner[0][0];
+  } catch (err) {
+    throw new Error("Error setting ID of the winning player", { cause: err });
   }
 
   let message = `${playerName[0].name} played ${validWord}`;
-  if (sqlWinner[0].winner_id === playerId) {
+  if (winnerId === playerId) {
     message += " and beat you in Wordspot. Better luck next time!";
   } else if (awardedExtraTile) {
     message += ` and used ${clicked.length} ${clicked.length === 1 ? "token" : "tokens"} and was awarded an extra tile. Your turn in Wordspot!`;

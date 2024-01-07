@@ -43,7 +43,7 @@ CREATE OR REPLACE FUNCTION end_turn (
     updated_tiles updated_tile[],
     new_tiles new_tile[]
 )
-RETURNS type_end_turn_return AS $$
+RETURNS VARCHAR(255) AS $$
 DECLARE
     player1_id VARCHAR(255);
     player2_id VARCHAR(255);
