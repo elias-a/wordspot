@@ -1,7 +1,7 @@
-CREATE OR REPLACE PROCEDURE assign_extra_tile (
+CREATE OR REPLACE FUNCTION assign_extra_tile (
     v_game_id VARCHAR(255),
     v_player_id VARCHAR(255)
-) AS $$
+) RETURNS VARCHAR(255) AS $$
 DECLARE
     v_tile_id VARCHAR(255);
 BEGIN 
@@ -15,5 +15,7 @@ BEGIN
     IF v_tile_id IS NULL THEN
         RAISE EXCEPTION 'No extra tiles left to assign';
     END IF;
+
+    RETURN v_tile_id;
 END;
 $$ LANGUAGE plpgsql;

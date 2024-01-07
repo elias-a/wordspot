@@ -548,7 +548,7 @@ export async function saveTurn(
     if (tiles.size > 2) {
       awardedExtraTile = true;
       await query({
-        text: "CALL assign_extra_tile($1, $2)",
+        text: "SELECT assign_extra_tile($1, $2)",
         values: [gameId, playerId],
       });
     }

@@ -6,7 +6,7 @@ EXCEPTION
     WHEN duplicate_object THEN NULL;
 END $$;
 
-CREATE OR REPLACE FUNCTION get_letter_by_indices (
+CREATE OR REPLACE FUNCTION set_letter_by_indices (
     v_row_index INT,
     v_column_index INT,
     v_letter_index INT,

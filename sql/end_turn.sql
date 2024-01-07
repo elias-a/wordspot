@@ -91,7 +91,7 @@ BEGIN
     /*
     Get the previous tile ID at the location where the extra tile was placed.
     */
-    SELECT id INTO replaced_tile_id FROM tile WHERE game_id=updated_game_id 
+    SELECT id INTO replaced_tile_id FROM tile WHERE owner_id=updated_game_id 
         AND row_index=placed_extra_tile.row_index 
         AND column_index=placed_extra_tile.column_index;
 
@@ -103,8 +103,8 @@ BEGIN
     UPDATE tile SET 
         row_index=placed_extra_tile.row_index,
         column_index=placed_extra_tile.column_index,
-        tile_type="Tile",
-        game_id=updated_game_id WHERE id=placed_extra_tile.id;
+        tile_type='Tile',
+        owner_id=updated_game_id WHERE id=placed_extra_tile.id;
 
     /*
     Delete the tile at the location where the extra tile was placed.
@@ -133,7 +133,7 @@ BEGIN
                 new_tile_i.tile_type,
                 new_tile_i.row_index,
                 new_tile_i.column_index,
-                owner_id=updated_game_id);
+                updated_game_id);
     END LOOP;
 
     END IF;

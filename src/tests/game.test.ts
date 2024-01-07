@@ -7,6 +7,7 @@ import {
   getGame,
   saveTurn,
   type WordLetter,
+  type PlacedExtraTile,
 } from "~/db/game";
 import { cleanUpDatabase } from "~/tests/helpers/cleanUpDatabase";
 import { initializeDatabase } from "~/tests/helpers/initializeDatabase";
@@ -153,7 +154,7 @@ test("test `saveTurn` function - nothing selected", async () => {
       selected,
       extraTile,
       board,
-    )).toBe(`${import.meta.env.VITE_TEST_USER1_NAME} did not make a move and received 2 tokens and an extra tile. Your turn in Wordspot!`);
+    )).toBe(`${user.userName} did not make a move and received 2 tokens and an extra tile. Your turn in Wordspot!`);
 
   await cleanUpDatabase();
 });
@@ -170,15 +171,15 @@ test("test `saveTurn` function - valid move", async () => {
 
   const clicked: string[] = [
     (await query({
-      text: "SELECT * FROM get_letter_by_indices($1, $2, $3, $4, $5)",
+      text: "SELECT * FROM set_letter_by_indices($1, $2, $3, $4, $5)",
       values: [1, 1, 0, gameId, "l"],
     }))[0].letter_id,
     (await query({
-      text: "SELECT * FROM get_letter_by_indices($1, $2, $3, $4, $5)",
+      text: "SELECT * FROM set_letter_by_indices($1, $2, $3, $4, $5)",
       values: [1, 1, 2, gameId, "e"],
     }))[0].letter_id,
     (await query({
-      text: "SELECT * FROM get_letter_by_indices($1, $2, $3, $4, $5)",
+      text: "SELECT * FROM set_letter_by_indices($1, $2, $3, $4, $5)",
       values: [2, 1, 0, gameId, "t"],
     }))[0].letter_id,
   ];
@@ -194,6 +195,79 @@ test("test `saveTurn` function - valid move", async () => {
       selected,
       extraTile,
       board,
-    )).toBe(`${import.meta.env.VITE_TEST_USER1_NAME} played LET and used 3 tokens. Your turn in Wordspot!`);
+    )).toBe(`${user.userName} played LET and used 3 tokens. Your turn in Wordspot!`);
+  await cleanUpDatabase();
+});
+
+test("test `saveTurn` function - valid move, added extra tile", async () => {
+  await cleanUpDatabase();
+  await initializeDatabase();
+  const user: UserAccount = {
+    id: import.meta.env.VITE_TEST_USER1_ID,
+    userName: import.meta.env.VITE_TEST_USER1_NAME,
+    phone: import.meta.env.VITE_TEST_USER1_PHONE,
+  };
+  const gameId = await startGame(user);
+  const { userData } = await getGame(gameId, user.id)
+  const sqlExtraTileId = await query({
+    text: "SELECT * FROM assign_extra_tile($1, $2)",
+    values: [gameId, userData.my_id],
+  });
+  const extraTileId = Object.values(sqlExtraTileId[0])[0];
+
+  const clicked: string[] = [
+    (await query({
+      text: "SELECT * FROM set_letter_by_tile_id($1, $2, $3)",
+      values: ["T", 1, extraTileId],
+    }))[0].letter_id,
+    (await query({
+      text: "SELECT * FROM set_letter_by_indices($1, $2, $3, $4, $5)",
+      values: [1, 1, 0, gameId, "E"],
+    }))[0].letter_id,
+    (await query({
+      text: "SELECT * FROM set_letter_by_indices($1, $2, $3, $4, $5)",
+      values: [1, 1, 1, gameId, "S"],
+    }))[0].letter_id,
+    (await query({
+      text: "SELECT * FROM set_letter_by_indices($1, $2, $3, $4, $5)",
+      values: [1, 2, 0, gameId, "T"],
+    }))[0].letter_id,
+  ];
+  const selected: string[] = [];
+
+  const sqlTileId = await query({
+    text: "SELECT id FROM tile WHERE row_index=$1 AND column_index=$2",
+    values: [1, 0],
+  }) as { id: string }[];
+  const tileId = sqlTileId[0].id;
+  const sqlExtraTileLetters = await query({
+    text: "SELECT * FROM get_tile_letters($1)",
+    values: [extraTileId],
+  }) as { letter: string, letterIndex: int }[];
+
+  const extraTile: PlacedExtraTile = {
+    id: extraTileId,
+    letters: sqlExtraTileLetters.map(l => {
+      return {
+        id: l.v_id,
+        letter: l.v_letter,
+        letterIndex: l.v_letter_index,
+        isUsed: l.v_is_used,
+      };
+    }),
+    tileId: tileId,
+  };
+
+  const { board } = await getGame(gameId, user.id);
+  expect(
+    await saveTurn(
+      gameId,
+      userData.my_id,
+      clicked,
+      selected,
+      extraTile,
+      board,
+    )).toBe(`${user.userName} played TEST and used 4 tokens and was awarded an extra tile. Your turn in Wordspot!`);
+
   await cleanUpDatabase();
 });
