@@ -17,6 +17,9 @@ import { testSetLetterByIndices } from "~/tests/helpers/testSetLetterByIndices";
 import { testSetLetterByTileId } from "~/tests/helpers/testSetLetterByTileId";
 import { testGetPlacedExtraTile } from "~/tests/helpers/testGetPlacedExtraTile";
 import { testSetPlayerTokens } from "~/tests/helpers/testSetPlayerTokens";
+import { testGetNumExtraTiles } from "~/tests/helpers/testGetNumExtraTiles";
+import { testGetTokens } from "~/tests/helpers/testGetTokens";
+import { testGetWinner } from "~/tests/helpers/testGetWinner";
 
 test("check if move is valid", () => {
   // Valid word moving horizontally to the right.
@@ -154,6 +157,8 @@ test("test `saveTurn` function - nothing selected", async () => {
       extraTile,
       board,
     )).toBe(`${userName} did not make a move and received 2 tokens and an extra tile. Your turn in Wordspot!`);
+  expect(await testGetNumExtraTiles(playerId)).toBe(1);
+  expect(await testGetTokens(playerId)).toBe(28);
 
   await cleanUpDatabase();
 });
@@ -180,10 +185,12 @@ test("test `saveTurn` function - valid move", async () => {
       extraTile,
       board,
     )).toBe(`${userName} played LET and used 3 tokens. Your turn in Wordspot!`);
+  expect(await testGetTokens(playerId)).toBe(23);
+
   await cleanUpDatabase();
 });
 
-test("test `saveTurn` function - valid move, added extra tile", async () => {
+test("test `saveTurn` function - valid move, added extra tile and earned extra tile", async () => {
   await cleanUpDatabase();
   await initializeDatabase();
   const { gameId, userId, userName, playerId } = await testStartGame();
@@ -208,13 +215,8 @@ test("test `saveTurn` function - valid move, added extra tile", async () => {
       extraTile,
       board,
     )).toBe(`${userName} played TEST and used 4 tokens and was awarded an extra tile. Your turn in Wordspot!`);
-
-  const sqlTokens = await query({
-    text: "SELECT tokens FROM player WHERE id=$1",
-    values: [playerId],
-    rowMode: "array",
-  }) as [[number]];
-  expect(sqlTokens[0][0]).toBe(22);
+  expect(await testGetNumExtraTiles(playerId)).toBe(1);
+  expect(await testGetTokens(playerId)).toBe(22);
 
   await cleanUpDatabase();
 });
@@ -242,6 +244,37 @@ test("test `saveTurn` function - mix of clicked and selected", async () => {
       extraTile,
       board,
     )).toBe(`${userName} played LET and used 2 tokens. Your turn in Wordspot!`);
+  expect(await testGetTokens(playerId)).toBe(24);
+
+  await cleanUpDatabase();
+});
+
+test("test `saveTurn` function - mix of clicked and selected, earned extra tile", async () => {
+  await cleanUpDatabase();
+  await initializeDatabase();
+  const { gameId, userId, userName, playerId } = await testStartGame();
+  const clicked = [
+    await testSetLetterByIndices("E", 1, 2, 0, gameId),
+    await testSetLetterByIndices("S", 1, 2, 1, gameId),
+    await testSetLetterByIndices("T", 1, 3, 0, gameId),
+  ];
+  const selected = [
+    await testSetLetterByIndices("T", 1, 1, 1, gameId),
+  ];
+  const extraTile: PlacedExtraTile | undefined = undefined;
+
+  const { board } = await getGame(gameId, userId);
+  expect(
+    await saveTurn(
+      gameId,
+      playerId,
+      clicked,
+      selected,
+      extraTile,
+      board,
+    )).toBe(`${userName} played TEST and used 3 tokens and was awarded an extra tile. Your turn in Wordspot!`);
+  expect(await testGetNumExtraTiles(playerId)).toBe(1);
+  expect(await testGetTokens(playerId)).toBe(23);
 
   await cleanUpDatabase();
 });
@@ -269,6 +302,8 @@ test("test `saveTurn` function - game over", async () => {
       extraTile,
       board,
     )).toBe(`${userName} played LET and beat you in Wordspot. Better luck next time!`);
+  expect(await testGetTokens(playerId)).toBe(0);
+  expect(await testGetWinner(gameId)).toBe(playerId);
 
   await cleanUpDatabase();
 });
