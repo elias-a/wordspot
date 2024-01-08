@@ -20,6 +20,7 @@ import { testSetPlayerTokens } from "~/tests/helpers/testSetPlayerTokens";
 import { testGetNumExtraTiles } from "~/tests/helpers/testGetNumExtraTiles";
 import { testGetTokens } from "~/tests/helpers/testGetTokens";
 import { testGetWinner } from "~/tests/helpers/testGetWinner";
+import { testCheckBoard } from "~/tests/helpers/testCheckBoard";
 
 test("check if move is valid", () => {
   // Valid word moving horizontally to the right.
@@ -217,6 +218,7 @@ test("test `saveTurn` function - valid move", async () => {
       board,
     )).toBe(`${userName} played LET and used 3 tokens. Your turn in Wordspot!`);
   expect(await testGetTokens(playerId)).toBe(23);
+  expect(await testCheckBoard(gameId, userId, clicked)).toBe(true);
 
   await cleanUpDatabase();
 });

@@ -649,7 +649,7 @@ export async function saveTurn(
     text: "SELECT * FROM end_turn($1, $2, $3, $4, $5)",
     values: [
         gameId,
-        formatPostgresArray(clicked),
+        clicked,
         sqlExtraTile ? formatPostgresObject(sqlExtraTile) : null,
         formatPostgresArray(sqlUpdatedTiles),
         formatPostgresArray(sqlNewTiles),
