@@ -75,6 +75,18 @@ type SqlResultExtraTile = {
   letter: string;
 };
 
+type SqlUserData = {
+  first_player: string;
+  winner: string | null;
+  my_id: string;
+  my_name: string;
+  my_tokens: number;
+  my_turn: boolean;
+  opponent_name: string;
+  opponent_tokens: number;
+  opponent_turn: boolean;
+};
+
 export type UserData = {
   playerId: string;
   firstPlayer: string;
@@ -87,8 +99,6 @@ export type UserData = {
   opponentTokens: number;
   opponentTurn: boolean;
 };
-
-type SqlUserData = Omit<UserData, "myTurn" | "opponentTurn"> & { myTurn: number; opponentTurn: number };
 
 export type GameData = {
   id: string;
@@ -788,15 +798,22 @@ export async function getGame(gameId: string, userId: string) {
     values: [gameId],
   }) as SqlResultBoard[];
 
-  const userData = await query({
+  const sqlUserData = await query({
     text: "SELECT * FROM get_game_players($1, $2)",
     values: [userId, gameId],
-  }) as SqlUserData[];
-
-  if (userData.length === 0) {
-    // TODO: Throw error?
-    return;
-  }
+  }) as [SqlUserData];
+  const userData: UserData = {
+    playerId: sqlUserData[0].my_id,
+    firstPlayer: sqlUserData[0].first_player,
+    winner: sqlUserData[0].winner,
+    myId: sqlUserData[0].my_id,
+    myName: sqlUserData[0].my_name,
+    myTokens: sqlUserData[0].my_tokens,
+    myTurn: sqlUserData[0].my_turn,
+    opponentName: sqlUserData[0].opponent_name,
+    opponentTokens: sqlUserData[0].opponent_tokens,
+    opponentTurn: sqlUserData[0].opponent_turn,
+  };
 
   const extraTiles = await query({
     text: "SELECT tile.id AS \"tileId\", letter.id AS \"letterId\", \
@@ -807,15 +824,9 @@ export async function getGame(gameId: string, userId: string) {
     values: [gameId, userId],
   }) as SqlResultExtraTile[];
 
-  const parsedUserData: UserData = {
-    ...userData[0],
-    myTurn: Boolean(userData[0].myTurn),
-    opponentTurn: Boolean(userData[0].opponentTurn),
-  };
-
   return {
     board: convertSqlResultsToBoard(tiles),
-    userData: parsedUserData,
+    userData,
     extraTiles: convertSqlResultsToExtraTiles(extraTiles),
   };
 }

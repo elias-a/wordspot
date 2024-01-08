@@ -14,6 +14,6 @@ export async function testStartGame() {
     gameId,
     userId: user.id,
     userName: user.userName,
-    playerId: userData.my_id,
+    playerId: userData.playerId,
   };
 }

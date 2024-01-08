@@ -128,13 +128,44 @@ test("check if move is valid", () => {
 
 test("test startGame function", async () => {
   await cleanUpDatabase();
+  await initializeDatabase();
 
   const user: UserAccount = {
-    id: import.meta.env.VITE_USER1,
-    userName: "test",
-    phone: "test",
+    id: import.meta.env.VITE_TEST_USER1_ID,
+    userName: import.meta.env.VITE_TEST_USER1_NAME,
+    phone: import.meta.env.VITE_TEST_USER1_PHONE,
   };
   expect(await startGame(user)).toBeTypeOf("string");
+
+  await cleanUpDatabase();
+});
+
+test("test getGame function", async () => {
+  await cleanUpDatabase();
+  await initializeDatabase();
+  const { gameId, userId, userName, playerId } = await testStartGame();
+  const { userData } = await getGame(gameId, userId);
+
+  expect(userData).toHaveProperty("playerId");
+  expect(userData["playerId"]).toBe(playerId);
+  expect(userData).toHaveProperty("firstPlayer");
+  expect(userData["firstPlayer"]).toBe(playerId);
+  expect(userData).toHaveProperty("winner");
+  expect(userData["winner"]).toBeNull();
+  expect(userData).toHaveProperty("myId");
+  expect(userData["myId"]).toBe(playerId);
+  expect(userData).toHaveProperty("myName");
+  expect(userData["myName"]).toBe(userName);
+  expect(userData).toHaveProperty("myTokens");
+  expect(userData["myTokens"]).toBe(26);
+  expect(userData).toHaveProperty("myTurn");
+  expect(userData["myTurn"]).toBe(true);
+  expect(userData).toHaveProperty("opponentName");
+  expect(userData["opponentName"]).toBeTypeOf("string");
+  expect(userData).toHaveProperty("opponentTokens");
+  expect(userData["opponentTokens"]).toBe(25);
+  expect(userData).toHaveProperty("opponentTurn");
+  expect(userData["opponentTurn"]).toBe(false);
 
   await cleanUpDatabase();
 });
