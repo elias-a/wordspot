@@ -154,7 +154,7 @@ export async function startGame(user: UserAccount) {
   const player2Id = players.find(player => player !== player1Id);
 
   if (!player2Id) {
-    throw new Error(`Unable to select opponent. Game was not created.`);
+    throw new Error("Unable to select opponent. Game was not created.");
   }
 
   const gameId = uuidv4();
@@ -270,7 +270,12 @@ function setUpBoard(gameId: string) {
   };
 }
 
-function checkNeighbors(row: number, column: number, board: Row[], extraTile: Tile) {
+function checkNeighbors(
+  row: number,
+  column: number,
+  board: Row[],
+  extraTile: Tile,
+) {
   for (let i = 0; i < board.length; i++) {
     for (let j = 0; j < board[i].tiles.length; j++) {
       if (
@@ -307,7 +312,11 @@ function getTileAtLocation(row: number, column: number, board: Row[]) {
   }
 }
 
-function getTileFromLetter(letterId: string, board: Row[], extraTile: ExtraTile | undefined) {
+function getTileFromLetter(
+  letterId: string,
+  board: Row[],
+  extraTile: ExtraTile | undefined,
+) {
   for (let i = 0; i < board.length; i++) {
     for (let j = 0; j < board[i].tiles.length; j++) {
       if (board[i].tiles[j].letters.find(letter => letter.id === letterId)) {
@@ -360,7 +369,11 @@ function computeDistance(coordinates: Coordinate[]) {
   return Math.abs(y1 !== y0 ? y1 - y0 : x1 - x0) + 1;
 };
 
-function getLetterPosition(row: number, column: number, index: number): Coordinate {
+function getLetterPosition(
+  row: number,
+  column: number,
+  index: number,
+): Coordinate {
   return {
     x: 2 * row + (index < 2 ? 0 : 1),
     y: 2 * column + index % 2,
@@ -391,7 +404,11 @@ export function isValidMove(word: WordLetter[]) {
 
 type Word = WordLetter & { letter: string };
 
-export async function checkWord(letters: string[], board: Row[], extraTile: Tile | undefined): Promise<string> {
+export async function checkWord(
+  letters: string[],
+  board: Row[],
+  extraTile: Tile | undefined,
+): Promise<string> {
   const wordPosition: Word[] = [];
   letters.forEach(letterId => {
     for (let i = 0; i < board.length; i++) {
@@ -409,7 +426,8 @@ export async function checkWord(letters: string[], board: Row[], extraTile: Tile
     }
 
     if (extraTile) {
-      const matchingLetter = extraTile.letters.find(letter => letter.id === letterId);
+      const matchingLetter = extraTile.letters
+        .find(letter => letter.id === letterId);
       if (matchingLetter) {
         wordPosition.push({
           tileRow: extraTile.row,
@@ -599,19 +617,13 @@ export async function saveTurn(
               rowIndex: i,
               columnIndex: j,
             });
-
-            /*
-            await client.query({
-              text: "UPDATE tile SET row_index=$1, column_index=$2, tile_type=$3, owner_id=$4 WHERE id=$5",
-              values: [i, j, "Tile", gameId, extraTile.id],
-            });
-            await client.query({
-              text: "DELETE FROM tile WHERE id=$1",
-              values: [tileAtLocation.id],
-            });
-            */
           } else {
-            if (tileAtLocation.type === "Empty" || tileAtLocation.type === "Placeholder") {
+            if (
+              tileAtLocation.type === "Empty" || 
+              tileAtLocation.type === "Placeholder"
+            ) {
+              // Need to check if the type of tile changed. Maybe the addition 
+              // of the extra tile changed this from Empty to Placeholder.
               const tileType = checkNeighbors(i, j, board, placedExtraTile)
                 ? "Empty" : "Placeholder";
 
@@ -621,18 +633,6 @@ export async function saveTurn(
                   tileType: tileType,
                 });
               }
-
-              // Need to check if the type of tile changed. Maybe the addition 
-              // of the extra tile changed this from Empty to Placeholder.
-              /*
-              await client.query({
-                text: "UPDATE tile SET tile_type=$1 WHERE id=$2",
-                values: [
-                  checkNeighbors(i, j, board, placedExtraTile) ? "Empty" : "Placeholder",
-                  tileAtLocation.id,
-                ],
-              });
-              */
             }
           }
         } else {
@@ -644,18 +644,6 @@ export async function saveTurn(
             rowIndex: i,
             columnIndex: j,
           });
-          /*
-          await client.query({
-            text: "INSERT INTO tile (id, row_index, column_index, tile_type, owner_id) VALUES ($1, $2, $3, $4, $5)",
-            values: [
-              uuidv4(),
-              i,
-              j,
-              checkNeighbors(i, j, board, placedExtraTile) ? "Empty" : "Placeholder",
-              gameId,
-            ],
-          });
-          */
         }
       }
     }
