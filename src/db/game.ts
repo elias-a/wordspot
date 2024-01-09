@@ -69,10 +69,12 @@ type SqlResultBoard = {
 };
 
 type SqlResultExtraTile = {
-  tileId: string;
-  letterId: string;
-  letterIndex: number;
+  tile_id: string;
+  letter_id: string;
+  letter_index: number;
   letter: string;
+  game_id: string;
+  user_id: string;
 };
 
 type SqlUserData = {
@@ -100,6 +102,17 @@ export type UserData = {
   opponentTurn: boolean;
 };
 
+type SqlGameData = {
+  id: string;
+  date_created: string;
+  first_player: string;
+  winner: string;
+  my_id: string;
+  my_name: string;
+  my_turn: string;
+  opponent_name: string;
+};
+
 export type GameData = {
   id: string;
   dateCreated: string;
@@ -112,28 +125,30 @@ export type GameData = {
 };
 
 export async function getGames(userId: string) {
-  const games = await query({
-    text: "SELECT game.id, to_char(game.date_created, 'MM/DD/YYYY') AS \"dateCreated\", \
-    CASE WHEN my.first_move THEN my.id ELSE opponent.id END AS \"firstPlayer\", \
-    Game.winner, my.id AS \"myId\", my.name AS \"myName\", \
-    my.turn AS \"myTurn\", opponent.name AS \"opponentName\" \
-    FROM (SELECT player.id AS id, game_id, user_account.user_name AS name, \
-          tokens, turn, first_move FROM player INNER JOIN user_account ON player.user_id=user_account.id \
-      WHERE user_id=$1) AS my INNER JOIN \
-      (SELECT player.id AS id, game_id, user_account.user_name AS name, \
-       tokens, turn, first_move FROM player \
-        INNER JOIN user_account on player.user_id=user_account.id \
-        WHERE user_id!=$2) AS opponent \
-        ON my.game_id=opponent.game_id INNER JOIN game ON my.game_id=game.id \
-        ORDER BY game.date_created DESC",
-    values: [userId, userId],
-  }) as GameData[];
+  const sqlGames = await query({
+    text: "SELECT * FROM get_games($1)",
+    values: [userId],
+  }) as SqlGameData[];
 
-  return games;
+  return sqlGames.map(game => {
+    return {
+      id: game.id,
+      dateCreated: game.date_created,
+      firstPlayer: game.first_player,
+      winner: game.winner,
+      myId: game.my_id,
+      myName: game.my_name,
+      myTurn: game.my_turn,
+      opponentName: game.opponent_name,
+    };
+  });
 }
 
 export async function startGame(user: UserAccount) {
-  const players: string[] = [import.meta.env.VITE_USER1, import.meta.env.VITE_USER2];
+  const players: string[] = [
+    import.meta.env.VITE_USER1,
+    import.meta.env.VITE_USER2,
+  ];
 
   const player1Id = user.id;
   const player2Id = players.find(player => player !== player1Id);
@@ -172,7 +187,7 @@ export async function startGame(user: UserAccount) {
 
   const { tiles, letters, tileLetterMap } = setUpBoard(gameId);
 
-  const createdGameId = await query({
+  const sqlGameId = await query({
     text: "SELECT create_game($1, $2, $3, $4, $5, $6)",
     values: [
         formatPostgresObject(game),
@@ -182,13 +197,14 @@ export async function startGame(user: UserAccount) {
         formatPostgresArrayOfArrays(letters),
         formatPostgresArrayOfArrays(tileLetterMap),
     ],
-  });
+    rowMode: "array",
+  }) as [string];
 
-  if (createdGameId.length !== 1) {
-    throw new Error(`"create_game" SQL function completed without errors, but ${createdGameId.length} IDs were returned, instead of 1 ID`);
+  try {
+    return sqlGameId[0][0];
+  } catch (err) {
+    throw new Error("Error starting game", { cause: err });
   }
-
-  return createdGameId[0].create_game;
 }
 
 function setUpBoard(gameId: string) {
@@ -763,27 +779,27 @@ function convertSqlResultsToExtraTiles(sqlExtraTiles: SqlResultExtraTile[]) {
 
   const extraTileIds = new Set<string>();
   sqlExtraTiles.forEach(t => {
-    extraTileIds.add(t.tileId);
+    extraTileIds.add(t.tile_id);
   });
 
   Array.from(extraTileIds).forEach(id => {
-    const sqlLetters = sqlExtraTiles.filter(t => t.tileId === id);
+    const sqlLetters = sqlExtraTiles.filter(t => t.tile_id === id);
     const letters: Letter[] = sqlLetters.map(l => {
       return {
-        id: l.letterId,
-        letterIndex: l.letterIndex,
+        id: l.letter_id,
+        letterIndex: l.letter_index,
         letter: l.letter,
         isUsed: false,
       };
     }).sort((a, b) => a.letterIndex - b.letterIndex);
     
-    const sqlExtraTile = sqlExtraTiles.find(t => t.tileId === id);
+    const sqlExtraTile = sqlExtraTiles.find(t => t.tile_id === id);
     if (!sqlExtraTile) {
       throw new Error(`Tile with id=${id} not found when searching for extra tile.`);
     }
 
     extraTiles.push({
-      id: sqlExtraTile.tileId,
+      id: sqlExtraTile.tile_id,
       letters: letters,
     });
   });
@@ -815,18 +831,14 @@ export async function getGame(gameId: string, userId: string) {
     opponentTurn: sqlUserData[0].opponent_turn,
   };
 
-  const extraTiles = await query({
-    text: "SELECT tile.id AS \"tileId\", letter.id AS \"letterId\", \
-      letter.letter_index AS \"letterIndex\", letter.letter FROM tile INNER JOIN player ON \
-      player.id=tile.owner_id LEFT JOIN tile_letter_map ON \
-      tile.id=tile_letter_map.tile_id LEFT JOIN letter ON tile_letter_map.letter_id=letter.id \
-      WHERE player.game_id=$1 AND player.user_id=$2",
+  const sqlExtraTiles = await query({
+    text: "SELECT * FROM get_player_extra_tiles WHERE game_id=$1 AND user_id=$2",
     values: [gameId, userId],
   }) as SqlResultExtraTile[];
 
   return {
     board: convertSqlResultsToBoard(tiles),
     userData,
-    extraTiles: convertSqlResultsToExtraTiles(extraTiles),
+    extraTiles: convertSqlResultsToExtraTiles(sqlExtraTiles),
   };
 }

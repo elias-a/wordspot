@@ -7,6 +7,7 @@
 \i get_game_players.sql;
 \i assign_extra_tile.sql;
 \i skip_turn.sql;
+\i get_games.sql;
 \i tests/set_letter_by_indices.sql;
 \i tests/get_tile_letters.sql;
 \i tests/set_letter_by_tile_id.sql;

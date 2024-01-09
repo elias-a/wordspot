@@ -3,11 +3,13 @@ import { query } from "~/db";
 import { type UserAccount } from "~/db/session";
 import {
   isValidMove,
+  getGames,
   startGame,
   getGame,
   saveTurn,
   type WordLetter,
   type PlacedExtraTile,
+  type GameData,
 } from "~/db/game";
 import { cleanUpDatabase } from "~/tests/helpers/cleanUpDatabase";
 import { initializeDatabase } from "~/tests/helpers/initializeDatabase";
@@ -139,6 +141,39 @@ test("test startGame function", async () => {
   expect(await startGame(user)).toBeTypeOf("string");
 
   await cleanUpDatabase();
+});
+
+test("test getGames function", async () => {
+  await cleanUpDatabase();
+  await initializeDatabase();
+
+  let userId: string = null;
+  for (let i = 0; i < 3; i++) {
+    userId = (await testStartGame()).userId;
+  }
+
+  const games = await getGames(userId);
+  expect(games).toHaveLength(3);
+  for (const game of games) {
+    expect(game).toHaveProperty("id");
+    expect(game).toHaveProperty("dateCreated");
+    expect(game).toHaveProperty("firstPlayer");
+    expect(game).toHaveProperty("winner");
+    expect(game).toHaveProperty("myId");
+    expect(game).toHaveProperty("myName");
+    expect(game).toHaveProperty("myTurn");
+    expect(game).toHaveProperty("opponentName");
+  }
+
+  await cleanUpDatabase();
+});
+
+test("test getGame function", async () => {
+  await cleanUpDatabase();
+  await initializeDatabase();
+  const { gameId, userId, userName, playerId } = await testStartGame();
+  const { userData } = await getGame(gameId, userId);
+
 });
 
 test("test getGame function", async () => {
