@@ -190,12 +190,12 @@ export async function startGame(user: UserAccount) {
   const sqlGameId = await query({
     text: "SELECT create_game($1, $2, $3, $4, $5, $6)",
     values: [
-        formatPostgresObject(game),
-        formatPostgresObject(player1),
-        formatPostgresObject(player2),
-        formatPostgresArrayOfArrays(tiles),
-        formatPostgresArrayOfArrays(letters),
-        formatPostgresArrayOfArrays(tileLetterMap),
+      formatPostgresObject(game),
+      formatPostgresObject(player1),
+      formatPostgresObject(player2),
+      formatPostgresArrayOfArrays(tiles),
+      formatPostgresArrayOfArrays(letters),
+      formatPostgresArrayOfArrays(tileLetterMap),
     ],
     rowMode: "array",
   }) as [string];
@@ -640,7 +640,7 @@ export async function saveTurn(
           sqlNewTiles.push({
             id: uuidv4(),
             tileType: checkNeighbors(i, j, board, placedExtraTile)
-                ? "Empty" : "Placeholder",
+              ? "Empty" : "Placeholder",
             rowIndex: i,
             columnIndex: j,
           });
