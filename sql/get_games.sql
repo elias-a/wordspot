@@ -6,7 +6,7 @@ DO $$ BEGIN
         winner VARCHAR(255),
         my_id VARCHAR(255),
         my_name VARCHAR(255),
-        my_turn VARCHAR(255),
+        my_turn BOOLEAN,
         opponent_name VARCHAR(255)
     );
 EXCEPTION

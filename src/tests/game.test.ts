@@ -156,13 +156,21 @@ test("test getGames function", async () => {
   expect(games).toHaveLength(3);
   for (const game of games) {
     expect(game).toHaveProperty("id");
+    expect(game["id"]).toBeDefined()
     expect(game).toHaveProperty("dateCreated");
+    expect(game["dateCreated"]).toBeDefined();
     expect(game).toHaveProperty("firstPlayer");
+    expect(game["firstPlayer"]).toBeDefined();
     expect(game).toHaveProperty("winner");
+    expect(game["winner"]).toBeNull()
     expect(game).toHaveProperty("myId");
+    expect(game["myId"]).toBeDefined();
     expect(game).toHaveProperty("myName");
+    expect(game["myName"]).toBeDefined();
     expect(game).toHaveProperty("myTurn");
+    expect(game["myTurn"]).toBe(true);
     expect(game).toHaveProperty("opponentName");
+    expect(game["opponentName"]).toBeDefined();
   }
 
   await cleanUpDatabase();

@@ -103,13 +103,13 @@ export type UserData = {
 };
 
 type SqlGameData = {
-  id: string;
+  game_id: string;
   date_created: string;
   first_player: string;
-  winner: string;
+  winner: string | null;
   my_id: string;
   my_name: string;
-  my_turn: string;
+  my_turn: boolean;
   opponent_name: string;
 };
 
@@ -117,7 +117,7 @@ export type GameData = {
   id: string;
   dateCreated: string;
   firstPlayer: string;
-  winner: string;
+  winner: string | null;
   myId: string;
   myName: string;
   myTurn: boolean;
@@ -132,7 +132,7 @@ export async function getGames(userId: string) {
 
   return sqlGames.map(game => {
     return {
-      id: game.id,
+      id: game.game_id,
       dateCreated: game.date_created,
       firstPlayer: game.first_player,
       winner: game.winner,
