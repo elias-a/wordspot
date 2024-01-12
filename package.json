@@ -1,5 +1,5 @@
 {
-  "name": "wordspot-solid",
+  "name": "wordspot",
   "scripts": {
     "dev": "solid-start dev",
     "build": "solid-start build",
