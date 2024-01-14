@@ -18,11 +18,11 @@ BEGIN;
     END;
     $$ LANGUAGE plpgsql;
 
-    CREATE TRIGGER delete_tile_on_game_drop
+    CREATE OR REPLACE TRIGGER delete_tile_on_game_drop
        AFTER DELETE ON game FOR EACH ROW
        EXECUTE FUNCTION tile_cascade();
 
-    CREATE TRIGGER delete_tile_on_player_drop
+    CREATE OR REPLACE TRIGGER delete_tile_on_player_drop
         AFTER DELETE ON player FOR EACH ROW
         EXECUTE FUNCTION tile_cascade();
 COMMIT;
